@@ -6,8 +6,10 @@ module V1
     format :json
 
     # Mount API endpoints
+    mount V1::Auth
     mount V1::Health
     mount V1::Users
+    mount V1::BankTemplates
     mount V1::Categories
     mount V1::Accounts
     mount V1::Statements

@@ -1,0 +1,1262 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "StmtIQ API",
+        "description": "Expense Management & Bank Statement Parser API",
+        "contact": {
+            "name": "StmtIQ Team"
+        },
+        "version": "0.0.1"
+    },
+    "tags": [
+        {
+            "name": "auth",
+            "description": "Operations about auths"
+        },
+        {
+            "name": "health",
+            "description": "Operations about healths"
+        },
+        {
+            "name": "users",
+            "description": "Operations about users"
+        },
+        {
+            "name": "bank_templates",
+            "description": "Operations about bank_templates"
+        },
+        {
+            "name": "categories",
+            "description": "Operations about categories"
+        },
+        {
+            "name": "accounts",
+            "description": "Operations about accounts"
+        },
+        {
+            "name": "statements",
+            "description": "Operations about statements"
+        },
+        {
+            "name": "transactions",
+            "description": "Operations about transactions"
+        }
+    ],
+    "paths": {
+        "/v1/auth/send_otp": {
+            "post": {
+                "description": "Send OTP to phone number",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1AuthSendOtp"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Send OTP to phone number"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ],
+                "operationId": "postV1AuthSendOtp"
+            }
+        },
+        "/v1/auth/verify_otp": {
+            "post": {
+                "description": "Verify OTP and login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1AuthVerifyOtp"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Verify OTP and login"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ],
+                "operationId": "postV1AuthVerifyOtp"
+            }
+        },
+        "/v1/auth/resend_otp": {
+            "post": {
+                "description": "Resend OTP",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1AuthResendOtp"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Resend OTP"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ],
+                "operationId": "postV1AuthResendOtp"
+            }
+        },
+        "/v1/auth/logout": {
+            "delete": {
+                "description": "Logout - invalidate session",
+                "responses": {
+                    "204": {
+                        "description": "Logout - invalidate session"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ],
+                "operationId": "deleteV1AuthLogout"
+            }
+        },
+        "/v1/auth/me": {
+            "get": {
+                "description": "Get current user profile",
+                "responses": {
+                    "200": {
+                        "description": "Get current user profile"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ],
+                "operationId": "getV1AuthMe"
+            },
+            "patch": {
+                "description": "Update user profile",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1AuthMe"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update user profile"
+                    }
+                },
+                "tags": [
+                    "auth"
+                ],
+                "operationId": "patchV1AuthMe"
+            }
+        },
+        "/v1/health": {
+            "get": {
+                "description": "Health check endpoint",
+                "responses": {
+                    "200": {
+                        "description": "Health check endpoint"
+                    }
+                },
+                "tags": [
+                    "health"
+                ],
+                "operationId": "getV1Health"
+            }
+        },
+        "/v1/users/me": {
+            "get": {
+                "description": "Get current user profile",
+                "responses": {
+                    "200": {
+                        "description": "Get current user profile"
+                    }
+                },
+                "tags": [
+                    "users"
+                ],
+                "operationId": "getV1UsersMe"
+            },
+            "patch": {
+                "description": "Update current user profile",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1UsersMe"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update current user profile"
+                    }
+                },
+                "tags": [
+                    "users"
+                ],
+                "operationId": "patchV1UsersMe"
+            }
+        },
+        "/v1/bank_templates": {
+            "get": {
+                "description": "List all available bank templates",
+                "responses": {
+                    "200": {
+                        "description": "List all available bank templates"
+                    }
+                },
+                "tags": [
+                    "bank_templates"
+                ],
+                "operationId": "getV1BankTemplates"
+            }
+        },
+        "/v1/bank_templates/{id}": {
+            "get": {
+                "description": "Get a specific bank template",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Template ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get a specific bank template"
+                    }
+                },
+                "tags": [
+                    "bank_templates"
+                ],
+                "operationId": "getV1BankTemplatesId"
+            }
+        },
+        "/v1/bank_templates/bank/{bank_code}": {
+            "get": {
+                "description": "Get templates for a specific bank",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "bank_code",
+                        "description": "Bank code (e.g., hdfc, icici, sbi)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get templates for a specific bank"
+                    }
+                },
+                "tags": [
+                    "bank_templates"
+                ],
+                "operationId": "getV1BankTemplatesBankBankCode"
+            }
+        },
+        "/v1/categories": {
+            "get": {
+                "description": "List all categories",
+                "responses": {
+                    "200": {
+                        "description": "List all categories"
+                    }
+                },
+                "tags": [
+                    "categories"
+                ],
+                "operationId": "getV1Categories"
+            },
+            "post": {
+                "description": "Create a custom category",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Categories"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create a custom category"
+                    }
+                },
+                "tags": [
+                    "categories"
+                ],
+                "operationId": "postV1Categories"
+            }
+        },
+        "/v1/categories/{id}": {
+            "get": {
+                "description": "Get a single category",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get a single category"
+                    }
+                },
+                "tags": [
+                    "categories"
+                ],
+                "operationId": "getV1CategoriesId"
+            },
+            "patch": {
+                "description": "Update a category",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1CategoriesId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update a category"
+                    }
+                },
+                "tags": [
+                    "categories"
+                ],
+                "operationId": "patchV1CategoriesId"
+            },
+            "delete": {
+                "description": "Delete a custom category",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a custom category"
+                    }
+                },
+                "tags": [
+                    "categories"
+                ],
+                "operationId": "deleteV1CategoriesId"
+            }
+        },
+        "/v1/accounts": {
+            "get": {
+                "description": "List all accounts",
+                "responses": {
+                    "200": {
+                        "description": "List all accounts"
+                    }
+                },
+                "tags": [
+                    "accounts"
+                ],
+                "operationId": "getV1Accounts"
+            },
+            "post": {
+                "description": "Create an account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Accounts"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create an account"
+                    }
+                },
+                "tags": [
+                    "accounts"
+                ],
+                "operationId": "postV1Accounts"
+            }
+        },
+        "/v1/accounts/{id}": {
+            "get": {
+                "description": "Get a single account",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get a single account"
+                    }
+                },
+                "tags": [
+                    "accounts"
+                ],
+                "operationId": "getV1AccountsId"
+            },
+            "patch": {
+                "description": "Update an account",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1AccountsId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update an account"
+                    }
+                },
+                "tags": [
+                    "accounts"
+                ],
+                "operationId": "patchV1AccountsId"
+            },
+            "delete": {
+                "description": "Delete an account",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete an account"
+                    }
+                },
+                "tags": [
+                    "accounts"
+                ],
+                "operationId": "deleteV1AccountsId"
+            }
+        },
+        "/v1/accounts/{id}/summary": {
+            "get": {
+                "description": "Get account summary",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get account summary"
+                    }
+                },
+                "tags": [
+                    "accounts"
+                ],
+                "operationId": "getV1AccountsIdSummary"
+            }
+        },
+        "/v1/statements": {
+            "get": {
+                "description": "List all statements",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "processing",
+                                "parsed",
+                                "failed"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all statements"
+                    }
+                },
+                "tags": [
+                    "statements"
+                ],
+                "operationId": "getV1Statements"
+            },
+            "post": {
+                "description": "Upload a new statement",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Statements"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upload a new statement"
+                    }
+                },
+                "tags": [
+                    "statements"
+                ],
+                "operationId": "postV1Statements"
+            }
+        },
+        "/v1/statements/{id}": {
+            "get": {
+                "description": "Get a single statement",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get a single statement"
+                    }
+                },
+                "tags": [
+                    "statements"
+                ],
+                "operationId": "getV1StatementsId"
+            },
+            "delete": {
+                "description": "Delete a statement",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a statement"
+                    }
+                },
+                "tags": [
+                    "statements"
+                ],
+                "operationId": "deleteV1StatementsId"
+            }
+        },
+        "/v1/statements/{id}/reparse": {
+            "post": {
+                "description": "Re-parse a failed statement",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1StatementsIdReparse"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Re-parse a failed statement"
+                    }
+                },
+                "tags": [
+                    "statements"
+                ],
+                "operationId": "postV1StatementsIdReparse"
+            }
+        },
+        "/v1/statements/{id}/summary": {
+            "get": {
+                "description": "Get statement summary",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get statement summary"
+                    }
+                },
+                "tags": [
+                    "statements"
+                ],
+                "operationId": "getV1StatementsIdSummary"
+            }
+        },
+        "/v1/transactions": {
+            "get": {
+                "description": "List all transactions",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "category_id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "account_id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "statement_id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "transaction_type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "debit",
+                                "credit"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "uncategorized",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all transactions"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "getV1Transactions"
+            }
+        },
+        "/v1/transactions/{id}": {
+            "get": {
+                "description": "Get a single transaction",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get a single transaction"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "getV1TransactionsId"
+            },
+            "patch": {
+                "description": "Update a transaction (category, description, etc.)",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1TransactionsId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update a transaction (category, description, etc.)"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "patchV1TransactionsId"
+            }
+        },
+        "/v1/transactions/bulk": {
+            "patch": {
+                "description": "Bulk update transactions",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1TransactionsBulk"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bulk update transactions"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "patchV1TransactionsBulk"
+            }
+        },
+        "/v1/transactions/stats": {
+            "get": {
+                "description": "Get transaction statistics",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "start_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "account_id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get transaction statistics"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "getV1TransactionsStats"
+            }
+        },
+        "/v1/transactions/categorize": {
+            "post": {
+                "description": "Categorize uncategorized transactions with AI",
+                "responses": {
+                    "201": {
+                        "description": "Categorize uncategorized transactions with AI"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "postV1TransactionsCategorize"
+            }
+        }
+    },
+    "servers": [
+        {
+            "url": "//localhost/api"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "postV1AuthSendOtp": {
+                "type": "object",
+                "properties": {
+                    "phone_number": {
+                        "type": "string",
+                        "description": "Phone number (10 digits)"
+                    }
+                },
+                "required": [
+                    "phone_number"
+                ],
+                "description": "Send OTP to phone number"
+            },
+            "postV1AuthVerifyOtp": {
+                "type": "object",
+                "properties": {
+                    "phone_number": {
+                        "type": "string",
+                        "description": "Phone number"
+                    },
+                    "otp": {
+                        "type": "string",
+                        "description": "OTP code"
+                    }
+                },
+                "required": [
+                    "phone_number",
+                    "otp"
+                ],
+                "description": "Verify OTP and login"
+            },
+            "postV1AuthResendOtp": {
+                "type": "object",
+                "properties": {
+                    "phone_number": {
+                        "type": "string",
+                        "description": "Phone number"
+                    },
+                    "via": {
+                        "type": "string",
+                        "description": "Delivery method",
+                        "enum": [
+                            "sms",
+                            "voice"
+                        ],
+                        "default": "sms"
+                    }
+                },
+                "required": [
+                    "phone_number"
+                ],
+                "description": "Resend OTP"
+            },
+            "patchV1AuthMe": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name"
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email address"
+                    }
+                },
+                "description": "Update user profile"
+            },
+            "patchV1UsersMe": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "User name"
+                    },
+                    "settings": {
+                        "type": "object",
+                        "description": "User settings"
+                    }
+                },
+                "description": "Update current user profile"
+            },
+            "postV1Categories": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "color": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "description": "Create a custom category"
+            },
+            "patchV1CategoriesId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "color": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "description": "Update a category"
+            },
+            "postV1Accounts": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "bank_name": {
+                        "type": "string"
+                    },
+                    "account_number_last4": {
+                        "type": "string"
+                    },
+                    "account_type": {
+                        "type": "string",
+                        "enum": [
+                            "savings",
+                            "current",
+                            "credit_card",
+                            "loan"
+                        ]
+                    },
+                    "currency": {
+                        "type": "string",
+                        "enum": [
+                            "INR",
+                            "USD",
+                            "EUR",
+                            "GBP"
+                        ],
+                        "default": "INR"
+                    }
+                },
+                "required": [
+                    "name",
+                    "bank_name"
+                ],
+                "description": "Create an account"
+            },
+            "patchV1AccountsId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "bank_name": {
+                        "type": "string"
+                    },
+                    "account_number_last4": {
+                        "type": "string"
+                    },
+                    "account_type": {
+                        "type": "string",
+                        "enum": [
+                            "savings",
+                            "current",
+                            "credit_card",
+                            "loan"
+                        ]
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                },
+                "description": "Update an account"
+            },
+            "postV1Statements": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "description": "Bank statement file (CSV, Excel, or PDF)",
+                        "format": "binary"
+                    },
+                    "template_id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Bank template ID for parsing"
+                    },
+                    "account_id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Associated bank account"
+                    }
+                },
+                "required": [
+                    "file",
+                    "template_id"
+                ],
+                "description": "Upload a new statement"
+            },
+            "postV1StatementsIdReparse": {
+                "type": "object",
+                "properties": {
+                    "template_id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Use a different template for re-parsing"
+                    }
+                },
+                "description": "Re-parse a failed statement"
+            },
+            "patchV1TransactionsId": {
+                "type": "object",
+                "properties": {
+                    "category_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "is_reviewed": {
+                        "type": "boolean"
+                    }
+                },
+                "description": "Update a transaction (category, description, etc.)"
+            },
+            "patchV1TransactionsBulk": {
+                "type": "object",
+                "properties": {
+                    "transaction_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    "category_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "is_reviewed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "transaction_ids"
+                ],
+                "description": "Bulk update transactions"
+            }
+        }
+    }
+}

@@ -23,9 +23,8 @@ gem "grape-entity", "~> 1.0"
 gem "rack-cors"
 
 # ============================================
-# Authentication & Authorization
+# Authorization
 # ============================================
-gem "jwt"
 gem "pundit", "~> 2.3"
 
 # ============================================

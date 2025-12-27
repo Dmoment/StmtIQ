@@ -33,6 +33,7 @@ module V1
       desc 'Upload a new statement'
       params do
         requires :file, type: File, desc: 'Bank statement file (CSV, Excel, or PDF)'
+        requires :template_id, type: Integer, desc: 'Bank template ID for parsing'
         optional :account_id, type: Integer, desc: 'Associated bank account'
       end
       post do
@@ -40,18 +41,25 @@ module V1
 
         uploaded_file = params[:file]
 
+        # Find the bank template
+        template = BankTemplate.find(params[:template_id])
+
         # Determine file type
         file_name = uploaded_file[:filename]
         file_type = File.extname(file_name).delete('.').downcase
 
-        unless StatementParser::SUPPORTED_FORMATS.include?(file_type)
-          error!({ error: "Unsupported file format. Supported: #{StatementParser::SUPPORTED_FORMATS.join(', ')}" }, 422)
+        # Validate file type matches template
+        unless file_type == template.file_format
+          error!({
+            error: "File format mismatch. Expected #{template.file_format.upcase} for #{template.display_name}"
+          }, 422)
         end
 
         statement = current_user.statements.create!(
           file_name: file_name,
           file_type: file_type,
           account_id: params[:account_id],
+          bank_template_id: template.id,
           status: 'pending'
         )
 
@@ -84,11 +92,18 @@ module V1
       desc 'Re-parse a failed statement'
       params do
         requires :id, type: Integer
+        optional :template_id, type: Integer, desc: 'Use a different template for re-parsing'
       end
       post ':id/reparse' do
         require_authentication!
 
         statement = current_user.statements.find(params[:id])
+
+        # Update template if provided
+        if params[:template_id]
+          template = BankTemplate.find(params[:template_id])
+          statement.bank_template_id = template.id
+        end
 
         # Clear existing transactions
         statement.transactions.destroy_all

@@ -4,6 +4,7 @@ class Statement < ApplicationRecord
   # Associations
   belongs_to :user
   belongs_to :account, optional: true
+  belongs_to :bank_template, optional: true
   has_many :transactions, dependent: :destroy
   has_one_attached :file
 

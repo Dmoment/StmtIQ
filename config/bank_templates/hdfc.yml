@@ -1,0 +1,121 @@
+# HDFC Bank Statement Templates
+# Each template defines column mappings and parser configurations for different account types
+
+bank_name: "HDFC Bank"
+bank_code: "hdfc"
+logo: "/images/banks/hdfc.png"
+
+templates:
+  # ============================================
+  # SAVINGS ACCOUNT
+  # ============================================
+  - account_type: "savings"
+    file_format: "csv"
+    description: "HDFC Savings Account statement (CSV export from NetBanking)"
+    display_order: 1
+    parser_class: "BankParsers::HdfcParser"
+    
+    column_mappings:
+      date: "Date"
+      narration: "Narration"
+      reference: "Chq./Ref.No."
+      value_date: "Value Dt"
+      withdrawal: "Withdrawal Amt."
+      deposit: "Deposit Amt."
+      balance: "Closing Balance"
+    
+    parser_config:
+      date_formats:
+        - "%d/%m/%y"
+        - "%d/%m/%Y"
+      header_indicators:
+        - "Date"
+        - "Narration"
+        - "Closing Balance"
+      skip_patterns:
+        - "opening balance"
+        - "closing balance"
+      encoding: "UTF-8"
+
+  - account_type: "savings"
+    file_format: "xls"
+    description: "HDFC Savings Account statement (XLS export from NetBanking)"
+    display_order: 2
+    parser_class: "BankParsers::HdfcParser"
+    
+    column_mappings:
+      date: "Date"
+      narration: "Narration"
+      reference: "Chq./Ref.No."
+      value_date: "Value Dt"
+      withdrawal: "Withdrawal Amt."
+      deposit: "Deposit Amt."
+      balance: "Closing Balance"
+    
+    parser_config:
+      date_formats:
+        - "%d/%m/%y"
+        - "%d/%m/%Y"
+      header_indicators:
+        - "Date"
+        - "Narration"
+      skip_patterns:
+        - "opening balance"
+        - "closing balance"
+
+  # ============================================
+  # CURRENT ACCOUNT
+  # ============================================
+  - account_type: "current"
+    file_format: "csv"
+    description: "HDFC Current Account statement"
+    display_order: 3
+    parser_class: "BankParsers::HdfcParser"
+    
+    column_mappings:
+      date: "Date"
+      narration: "Narration"
+      reference: "Chq./Ref.No."
+      value_date: "Value Dt"
+      withdrawal: "Withdrawal Amt."
+      deposit: "Deposit Amt."
+      balance: "Closing Balance"
+    
+    parser_config:
+      date_formats:
+        - "%d/%m/%y"
+        - "%d/%m/%Y"
+      header_indicators:
+        - "Date"
+        - "Narration"
+      skip_patterns:
+        - "opening balance"
+        - "closing balance"
+
+  # ============================================
+  # CREDIT CARD
+  # ============================================
+  - account_type: "credit_card"
+    file_format: "csv"
+    description: "HDFC Credit Card statement"
+    display_order: 4
+    parser_class: "BankParsers::HdfcParser"
+    
+    column_mappings:
+      date: "Date"
+      narration: "Description"
+      amount: "Amount (INR)"
+      reference: "Reference No."
+    
+    parser_config:
+      date_formats:
+        - "%d/%m/%Y"
+      credit_indicator: "CR"
+      header_indicators:
+        - "Date"
+        - "Description"
+        - "Amount"
+      skip_patterns:
+        - "opening balance"
+        - "total"
+

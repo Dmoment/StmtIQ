@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_27_070051) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_27_130925) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -55,6 +55,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_27_070051) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "bank_templates", force: :cascade do |t|
+    t.string "bank_name", null: false
+    t.string "bank_code", null: false
+    t.string "account_type", null: false
+    t.string "file_format", null: false
+    t.string "logo_url"
+    t.text "description"
+    t.jsonb "column_mappings", default: {}
+    t.jsonb "parser_config", default: {}
+    t.boolean "is_active", default: true
+    t.integer "display_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bank_code", "account_type", "file_format"], name: "idx_bank_templates_unique", unique: true
+    t.index ["is_active"], name: "index_bank_templates_on_is_active"
+  end
+
   create_table "categories", force: :cascade do |t|
     t.string "name"
     t.string "slug"
@@ -78,7 +95,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_27_070051) do
     t.jsonb "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "bank_template_id"
     t.index ["account_id"], name: "index_statements_on_account_id"
+    t.index ["bank_template_id"], name: "index_statements_on_bank_template_id"
     t.index ["user_id"], name: "index_statements_on_user_id"
   end
 
@@ -108,21 +127,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_27_070051) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "auth0_id"
     t.string "email"
     t.string "name"
     t.string "avatar_url"
     t.jsonb "settings"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["auth0_id"], name: "index_users_on_auth0_id", unique: true
-    t.index ["email"], name: "index_users_on_email", unique: true
+    t.string "phone_number"
+    t.boolean "phone_verified", default: false
+    t.string "otp_code"
+    t.datetime "otp_expires_at"
+    t.string "session_token"
+    t.datetime "session_expires_at"
+    t.datetime "last_login_at"
+    t.index ["email"], name: "index_users_on_email", unique: true, where: "(email IS NOT NULL)"
+    t.index ["phone_number"], name: "index_users_on_phone_number", unique: true
+    t.index ["session_token"], name: "index_users_on_session_token", unique: true
   end
 
   add_foreign_key "accounts", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "statements", "accounts"
+  add_foreign_key "statements", "bank_templates"
   add_foreign_key "statements", "users"
   add_foreign_key "transactions", "accounts"
   add_foreign_key "transactions", "categories"

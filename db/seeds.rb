@@ -10,12 +10,18 @@ puts "Creating system categories..."
 Category.seed_system_categories!
 puts "Created #{Category.count} categories"
 
+# Create bank templates from YAML config files
+puts "Creating bank templates from config files..."
+template_count = BankTemplate.seed_templates!
+puts "Created/Updated #{template_count} bank templates (Total: #{BankTemplate.count})"
+
 # Create a demo user for development
 if Rails.env.development?
   puts "Creating demo user..."
-  demo_user = User.find_or_create_by!(auth0_id: 'dev_demo_user') do |user|
+  demo_user = User.find_or_create_by!(phone_number: '9999999999') do |user|
     user.email = 'demo@stmtiq.local'
     user.name = 'Demo User'
+    user.phone_verified = true
   end
 
   # Create sample accounts

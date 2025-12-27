@@ -28,99 +28,28 @@ class BaseAPI < Grape::API
   end
 
   helpers do
-    # Get current user - auto-creates dev user in development
+    # Get current user - always returns dev user (auth disabled)
     def current_user
-      @current_user ||= authenticate_user!
-    end
-
-    def authenticate_user!
-      # In development, auto-create and return a dev user (no auth required)
-      if Rails.env.development?
-        return find_or_create_dev_user
-      end
-
-      # In production, require proper authentication
-      token = extract_token
-      return nil unless token
-
-      payload = decode_token(token)
-      return nil unless payload
-
-      find_or_create_user(payload)
-    rescue StandardError => e
-      Rails.logger.error("Authentication error: #{e.message}")
-      nil
+      @current_user ||= find_or_create_dev_user
     end
 
     def authenticated?
-      current_user.present?
+      true # Auth disabled for now
     end
 
     def require_authentication!
-      # Skip auth check in development
-      return if Rails.env.development?
-
-      error!({ error: 'Unauthorized' }, 401) unless authenticated?
+      # Auth disabled - always allow
+      true
     end
 
     private
 
     def find_or_create_dev_user
-      User.find_or_create_by!(auth0_id: 'dev_user') do |user|
-        user.email = 'dev@stmtiq.local'
+      User.find_or_create_by!(phone_number: '9999999999') do |user|
         user.name = 'Dev User'
-      end
-    end
-
-    def extract_token
-      auth_header = headers['Authorization']
-      return nil unless auth_header
-
-      match = auth_header.match(/^Bearer (.+)$/)
-      match&.[](1)
-    end
-
-    def decode_token(token)
-      # For development, allow a simple token format
-      if Rails.env.development? && token.start_with?('dev_')
-        return { 'sub' => token, 'email' => 'dev@example.com', 'name' => 'Dev User' }
-      end
-
-      # Production: Verify Auth0 JWT
-      JWT.decode(
-        token,
-        nil,
-        true,
-        {
-          algorithm: 'RS256',
-          iss: "https://#{ENV['AUTH0_DOMAIN']}/",
-          aud: ENV['AUTH0_AUDIENCE'],
-          verify_iss: true,
-          verify_aud: true,
-          jwks: jwks_loader
-        }
-      ).first
-    end
-
-    def jwks_loader
-      ->(options) {
-        @jwks ||= fetch_jwks
-        @jwks = fetch_jwks if options[:invalidate]
-        @jwks
-      }
-    end
-
-    def fetch_jwks
-      jwks_uri = URI("https://#{ENV['AUTH0_DOMAIN']}/.well-known/jwks.json")
-      response = Net::HTTP.get(jwks_uri)
-      JSON.parse(response)
-    end
-
-    def find_or_create_user(payload)
-      User.find_or_create_by!(auth0_id: payload['sub']) do |user|
-        user.email = payload['email']
-        user.name = payload['name'] || payload['nickname']
-        user.avatar_url = payload['picture']
+        user.phone_verified = true
+        user.session_token = 'dev_session_token'
+        user.session_expires_at = 1.year.from_now
       end
     end
   end
