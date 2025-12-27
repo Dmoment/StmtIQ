@@ -77,6 +77,7 @@ module V1
 
         transaction = current_user.transactions.find(params[:id])
         transaction.update!(declared(params, include_missing: false).except(:id))
+        transaction.reload
 
         present transaction, with: V1::Entities::Transaction
       end

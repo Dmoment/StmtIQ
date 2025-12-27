@@ -52,6 +52,7 @@ export interface BankTemplate {
 export interface Category {
   id: number;
   name: string;
+  slug: string;
   icon: string | null;
   color: string | null;
   description: string | null;
@@ -128,11 +129,15 @@ export interface Transaction {
   balance: string | null;
   raw_description: string | null;
   is_reviewed: boolean;
+  confidence: string | null;
+  ai_explanation: string | null;
   category_id: number | null;
+  ai_category_id: number | null;
   account_id: number | null;
   statement_id: number | null;
   user_id: number;
   category?: Category;
+  ai_category?: Category;
   created_at: string;
   updated_at: string;
 }

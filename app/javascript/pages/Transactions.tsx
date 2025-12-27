@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
@@ -19,34 +19,13 @@ import {
   ArrowRightLeft,
   Wallet,
   Gamepad2,
-  RefreshCw
+  RefreshCw,
+  Edit2,
+  Tag
 } from 'lucide-react';
 import { clsx } from 'clsx';
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  icon: string;
-  color: string;
-}
-
-interface Transaction {
-  id: number;
-  transaction_date: string;
-  description: string;
-  original_description: string;
-  amount: string;
-  transaction_type: 'debit' | 'credit';
-  balance: string | null;
-  reference: string | null;
-  confidence: string | null;
-  ai_explanation: string | null;
-  is_reviewed: boolean;
-  category?: Category;
-  ai_category?: Category;
-  signed_amount: string;
-}
+import { CategoryPicker } from '../components/CategoryPicker';
+import type { Transaction } from '../types/api';
 
 const categoryIcons: Record<string, React.ElementType> = {
   shopping: ShoppingBag,
@@ -65,7 +44,8 @@ const categoryIcons: Record<string, React.ElementType> = {
   other: HelpCircle,
 };
 
-const categoryColors: Record<string, string> = {
+// Fallback gradient colors for system categories (used when category.color is not set)
+const categoryGradients: Record<string, string> = {
   shopping: 'from-pink-500 to-rose-500',
   food: 'from-orange-500 to-amber-500',
   transport: 'from-blue-500 to-cyan-500',
@@ -88,6 +68,11 @@ export function Transactions() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  // Category picker state
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -108,12 +93,27 @@ export function Transactions() {
     fetchTransactions();
   }, []);
 
+  const handleCategoryClick = (tx: Transaction, event: React.MouseEvent) => {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    setPickerPosition({
+      top: Math.min(rect.bottom + 8, window.innerHeight - 400),
+      left: Math.min(rect.left, window.innerWidth - 320),
+    });
+    setSelectedTransaction(tx);
+    setPickerOpen(true);
+  };
+
+  const handleCategoryUpdate = (updatedTx: Transaction) => {
+    setTransactions(prev => 
+      prev.map(tx => tx.id === updatedTx.id ? updatedTx : tx)
+    );
+  };
+
   const filteredTransactions = transactions.filter(tx => {
     const category = tx.category || tx.ai_category;
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      if (!tx.description.toLowerCase().includes(query) && 
-          !tx.original_description.toLowerCase().includes(query)) {
+      if (!tx.description.toLowerCase().includes(query)) {
         return false;
       }
     }
@@ -137,6 +137,12 @@ export function Transactions() {
       currency: 'INR',
       maximumFractionDigits: 0
     }).format(amount);
+  };
+
+  // Get icon for a category
+  const getCategoryIcon = (slug: string | undefined) => {
+    if (!slug) return HelpCircle;
+    return categoryIcons[slug] || Tag;
   };
 
   if (loading) {
@@ -289,10 +295,14 @@ export function Transactions() {
             {filteredTransactions.map((tx) => {
               const category = tx.category || tx.ai_category;
               const categorySlug = category?.slug || 'other';
-              const Icon = categoryIcons[categorySlug] || HelpCircle;
-              const color = categoryColors[categorySlug] || categoryColors.other;
+              const categoryColor = category?.color;
+              const Icon = getCategoryIcon(categorySlug);
               const confidence = tx.confidence ? parseFloat(tx.confidence) : null;
               const amount = parseFloat(tx.amount);
+              
+              // Use category.color if available, otherwise fall back to gradient
+              const hasCustomColor = !!categoryColor;
+              const gradientClass = categoryGradients[categorySlug] || categoryGradients.other;
               
               return (
                 <div key={tx.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-800/50 transition-colors">
@@ -308,18 +318,43 @@ export function Transactions() {
                   </div>
                   <div className="col-span-12 sm:col-span-5">
                     <p className="font-medium truncate">{tx.description}</p>
-                    <p className="text-sm text-slate-500 truncate">{tx.original_description}</p>
+                    {tx.raw_description && tx.raw_description !== tx.description && (
+                      <p className="text-sm text-slate-500 truncate">{tx.raw_description}</p>
+                    )}
                   </div>
                   <div className="col-span-6 sm:col-span-2">
-                    <div className="inline-flex items-center gap-2">
-                      <div className={clsx(
-                        "w-6 h-6 rounded-md bg-gradient-to-br flex items-center justify-center",
-                        color
-                      )}>
-                        <Icon className="w-3.5 h-3.5 text-white" />
-                      </div>
-                      <span className="text-sm capitalize text-slate-300">{category?.name || 'Other'}</span>
-                    </div>
+                    {/* Clickable Category Badge */}
+                    <button
+                      onClick={(e) => handleCategoryClick(tx, e)}
+                      className="group inline-flex items-center gap-2 hover:bg-slate-700/50 rounded-lg p-1 -m-1 transition-colors"
+                    >
+                      {/* Category Icon with color */}
+                      {hasCustomColor ? (
+                        <div 
+                          className="w-6 h-6 rounded-md flex items-center justify-center"
+                          style={{ backgroundColor: `${categoryColor}20` }}
+                        >
+                          <Icon 
+                            className="w-3.5 h-3.5" 
+                            style={{ color: categoryColor }} 
+                          />
+                        </div>
+                      ) : (
+                        <div className={clsx(
+                          "w-6 h-6 rounded-md bg-gradient-to-br flex items-center justify-center",
+                          gradientClass
+                        )}>
+                          <Icon className="w-3.5 h-3.5 text-white" />
+                        </div>
+                      )}
+                      <span 
+                        className="text-sm capitalize group-hover:text-slate-100"
+                        style={hasCustomColor ? { color: categoryColor } : { color: '#cbd5e1' }}
+                      >
+                        {category?.name || 'Other'}
+                      </span>
+                      <Edit2 className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
                   </div>
                   <div className={clsx(
                     "hidden sm:block col-span-2 text-right font-medium",
@@ -344,6 +379,20 @@ export function Transactions() {
             })}
           </div>
         </div>
+      )}
+
+      {/* Category Picker Popup */}
+      {selectedTransaction && (
+        <CategoryPicker
+          transaction={selectedTransaction}
+          isOpen={pickerOpen}
+          onClose={() => {
+            setPickerOpen(false);
+            setSelectedTransaction(null);
+          }}
+          onSuccess={handleCategoryUpdate}
+          anchorPosition={pickerPosition}
+        />
       )}
     </div>
   );
