@@ -1,0 +1,3 @@
+web: bin/rails server
+js: bun run watch
+css: bun run watch:css
