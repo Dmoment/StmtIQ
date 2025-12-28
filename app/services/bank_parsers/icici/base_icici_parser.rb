@@ -123,21 +123,36 @@ module BankParsers
       def find_icici_header_row(sheet)
         indicators = header_indicators
 
-        (0..20).each do |row_idx|
+        (1..30).each do |row_idx|
           row = sheet.row(row_idx)
           next unless row
 
           row_text = row.compact.map(&:to_s).join(' ').downcase
-          if indicators.any? { |ind| row_text.include?(ind.downcase) }
+
+          # Check if row contains at least 2 header indicators (more reliable)
+          matches = indicators.count { |ind| row_text.include?(ind.downcase) }
+
+          # Also check for common header patterns
+          has_date_header = row_text.include?('date') || row_text.include?('value date')
+          has_amount_header = row_text.include?('amount') || row_text.include?('withdrawal') || row_text.include?('deposit')
+
+          if matches >= 2 || (has_date_header && has_amount_header)
+            Rails.logger.info("#{self.class.name}: Found header row at index #{row_idx}")
             return row_idx
           end
         end
 
-        0 # Default to first row
+        1 # Default to second row (row 0 is often title/logo)
       end
 
       def header_indicators
-        config_value(:header_indicators) || ['Transaction ID', 'Value Date']
+        config_value(:header_indicators) || [
+          'Transaction ID',
+          'Value Date',
+          'S No.',
+          'Transaction Remarks',
+          'Withdrawal Amount'
+        ]
       end
 
       def skip_patterns
@@ -145,7 +160,12 @@ module BankParsers
           'opening balance',
           'closing balance',
           'statement summary',
-          'total'
+          'total',
+          'transactions list',
+          'account number',
+          'statement period',
+          'search',
+          'advanced search'
         ]
       end
 
@@ -233,12 +253,22 @@ module BankParsers
       def get_mapped_value(row, key)
         # Try to get value using column mapping, with fallbacks
         column_name = mapping_value(key)
-        return row[column_name] if column_name && row[column_name].present?
+        if column_name
+          # Try exact match first
+          return row[column_name] if row[column_name].present?
+          # Try case-insensitive match
+          matched = row.keys.find { |k| k&.downcase&.gsub(/\s+/, ' ') == column_name.downcase.gsub(/\s+/, ' ') }
+          return row[matched] if matched && row[matched].present?
+        end
 
-        # Try common variations
+        # Try common variations (case-insensitive)
         fallbacks = column_fallbacks(key)
         fallbacks.each do |col|
+          # Exact match
           return row[col] if row[col].present?
+          # Case-insensitive match with normalized whitespace
+          matched = row.keys.find { |k| k&.downcase&.gsub(/\s+/, ' ') == col.downcase.gsub(/\s+/, ' ') }
+          return row[matched] if matched && row[matched].present?
         end
 
         nil
@@ -247,21 +277,23 @@ module BankParsers
       def column_fallbacks(key)
         case key.to_sym
         when :date
-          ['Value Date', 'Transaction Date', 'Date', 'Txn Date']
+          ['Value Date', 'Transaction Date', 'Date', 'Txn Date', 'Posting Date', 'Tran Date']
         when :narration, :description
-          ['Transaction Remarks', 'Description', 'Narration', 'Particulars', 'Details']
+          ['Transaction Remarks', 'Description', 'Narration', 'Particulars', 'Details', 'Remarks', 'Transaction Details']
         when :reference
-          ['Transaction ID', 'Reference', 'Ref No', 'Reference Number', 'Txn ID']
+          ['Cheque Number', 'Chq No', 'Transaction ID', 'Reference', 'Ref No', 'Reference Number', 'Txn ID', 'Chq./Ref.No.']
         when :amount
-          ['Transaction Amount(INR)', 'Transaction Amount', 'Amount', 'Amount (INR)']
+          ['Transaction Amount(INR)', 'Transaction Amount (INR)', 'Transaction Amount', 'Amount', 'Amount (INR)', 'Amount(INR)']
         when :withdrawal
-          ['Withdrawal Amount (INR)', 'Withdrawal Amount', 'Withdrawal', 'Debit', 'Dr']
+          # Try exact matches first (with and without spaces)
+          ['Withdrawal Amount(INR)', 'Withdrawal Amount (INR)', 'Withdrawal', 'Withdrawal Amount', 'Debit', 'Dr', 'Debit Amount', 'Debit(INR)']
         when :deposit
-          ['Deposit Amount (INR)', 'Deposit Amount', 'Deposit', 'Credit', 'Cr']
+          # Try exact matches first (with and without spaces)
+          ['Deposit Amount(INR)', 'Deposit Amount (INR)', 'Deposit', 'Deposit Amount', 'Credit', 'Cr', 'Credit Amount', 'Credit(INR)']
         when :balance
-          ['Balance (INR)', 'Available Balance(INR)', 'Balance', 'Closing Balance']
+          ['Balance(INR)', 'Balance (INR)', 'Available Balance(INR)', 'Balance', 'Closing Balance', 'Running Balance', 'Available Balance']
         when :cr_dr
-          ['Cr/Dr', 'CR/DR', 'Type', 'Dr/Cr']
+          ['Cr/Dr', 'CR/DR', 'Type', 'Dr/Cr', 'Transaction Type']
         else
           []
         end
@@ -310,7 +342,7 @@ module BankParsers
       end
 
       def normalize_headers(row)
-        row.map { |h| h&.to_s&.strip }
+        row.map { |h| h&.to_s&.strip&.gsub(/\s+/, ' ') }
       end
 
       def log_parse_error(context, line_idx, error)

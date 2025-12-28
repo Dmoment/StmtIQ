@@ -37,3 +37,10 @@
 !/app/assets/builds/.keep
 
 /node_modules
+
+# Test statement files (may contain PII)
+spec/fixtures/statements/**/*.xls
+spec/fixtures/statements/**/*.xlsx
+spec/fixtures/statements/**/*.csv
+spec/fixtures/statements/**/*.pdf
+!spec/fixtures/statements/**/README.md

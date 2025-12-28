@@ -10,6 +10,41 @@ templates:
   # SAVINGS ACCOUNT
   # ============================================
   - account_type: "savings"
+    file_format: "xlsx"
+    description: "ICICI Savings Account statement (XLSX - Detailed Statement)"
+    display_order: 9
+    parser_class: "BankParsers::Icici::SavingsParser"
+    
+    column_mappings:
+      date: "Value Date"
+      transaction_date: "Transaction Date"
+      narration: "Transaction Remarks"
+      reference: "Cheque Number"
+      withdrawal: "Withdrawal Amount(INR)"
+      deposit: "Deposit Amount(INR)"
+      balance: "Balance(INR)"
+    
+    parser_config:
+      date_formats:
+        - "%d/%m/%Y"
+        - "%d-%m-%Y"
+        - "%d-%b-%Y"
+      header_indicators:
+        - "S No."
+        - "Value Date"
+        - "Transaction Remarks"
+        - "Withdrawal Amount"
+      skip_patterns:
+        - "opening balance"
+        - "closing balance"
+        - "statement summary"
+        - "total"
+        - "transactions list"
+        - "account number"
+        - "search"
+      encoding: "UTF-8"
+
+  - account_type: "savings"
     file_format: "xls"
     description: "ICICI Savings Account statement (XLS from Internet Banking)"
     display_order: 10
@@ -19,25 +54,27 @@ templates:
       date: "Value Date"
       transaction_date: "Transaction Date"
       narration: "Transaction Remarks"
-      reference: "Transaction ID"
-      withdrawal: "Withdrawal Amount (INR)"
-      deposit: "Deposit Amount (INR)"
-      balance: "Balance (INR)"
+      reference: "Cheque Number"
+      withdrawal: "Withdrawal Amount(INR)"
+      deposit: "Deposit Amount(INR)"
+      balance: "Balance(INR)"
     
     parser_config:
       date_formats:
-        - "%d-%m-%Y"
         - "%d/%m/%Y"
+        - "%d-%m-%Y"
         - "%d-%b-%Y"
       header_indicators:
-        - "Transaction ID"
+        - "S No."
         - "Value Date"
         - "Transaction Remarks"
+        - "Withdrawal Amount"
       skip_patterns:
         - "opening balance"
         - "closing balance"
         - "statement summary"
         - "total"
+        - "transactions list"
       encoding: "UTF-8"
 
   - account_type: "savings"
@@ -50,21 +87,23 @@ templates:
       date: "Value Date"
       transaction_date: "Transaction Date"
       narration: "Transaction Remarks"
-      reference: "Transaction ID"
-      withdrawal: "Withdrawal Amount (INR)"
-      deposit: "Deposit Amount (INR)"
-      balance: "Balance (INR)"
+      reference: "Cheque Number"
+      withdrawal: "Withdrawal Amount(INR)"
+      deposit: "Deposit Amount(INR)"
+      balance: "Balance(INR)"
     
     parser_config:
       date_formats:
-        - "%d-%m-%Y"
         - "%d/%m/%Y"
+        - "%d-%m-%Y"
       header_indicators:
-        - "Transaction ID"
+        - "S No."
         - "Value Date"
+        - "Transaction Remarks"
       skip_patterns:
         - "opening balance"
         - "closing balance"
+        - "transactions list"
       encoding: "UTF-8"
 
   # ============================================

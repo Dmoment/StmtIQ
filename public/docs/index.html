@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StmtIQ Documentation</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --border: #334155;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    
+    .logo-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    .nav-section {
+      margin-bottom: 24px;
+    }
+    
+    .nav-section h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    
+    .nav-link {
+      display: block;
+      padding: 8px 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 4px;
+      transition: all 0.2s;
+    }
+    
+    .nav-link:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .nav-link.active {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .nav-link .badge {
+      font-size: 10px;
+      background: var(--accent);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+    
+    .nav-link.active .badge {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    /* Main content */
+    .main {
+      flex: 1;
+      margin-left: 280px;
+      padding: 48px 64px;
+      max-width: 900px;
+    }
+    
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    
+    .breadcrumb a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    
+    /* Markdown styles */
+    .content h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .content h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+    
+    .content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+    
+    .content p {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .content ul, .content ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+      color: var(--text-secondary);
+    }
+    
+    .content li {
+      margin-bottom: 8px;
+    }
+    
+    .content code {
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    
+    .content pre {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+    
+    .content pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+    
+    .content th, .content td {
+      border: 1px solid var(--border);
+      padding: 12px;
+      text-align: left;
+    }
+    
+    .content th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+    }
+    
+    .content td {
+      color: var(--text-secondary);
+    }
+    
+    .content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    
+    .content a:hover {
+      text-decoration: underline;
+    }
+    
+    .content blockquote {
+      border-left: 4px solid var(--accent);
+      padding-left: 16px;
+      margin: 16px 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    
+    /* Status badges */
+    .status-accepted {
+      display: inline-block;
+      background: #10b98120;
+      color: #10b981;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .status-proposed {
+      display: inline-block;
+      background: #f59e0b20;
+      color: #f59e0b;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .status-deprecated {
+      display: inline-block;
+      background: #ef444420;
+      color: #ef4444;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    /* Loading state */
+    .loading {
+      text-align: center;
+      padding: 64px;
+      color: var(--text-secondary);
+    }
+    
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 12px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 0;
+      margin-bottom: 16px;
+    }
+    
+    .back-link:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">📊 StmtIQ</div>
+      <div class="logo-subtitle">Documentation</div>
+      
+      <nav>
+        <div class="nav-section">
+          <h3>Quick Links</h3>
+          <a href="/" class="nav-link">← Back to App</a>
+          <a href="/swagger-ui/" class="nav-link">API Docs (Swagger)</a>
+        </div>
+        
+        <div class="nav-section">
+          <h3>Architecture Decisions</h3>
+          <a href="#readme" class="nav-link active" data-doc="readme">Overview</a>
+          <a href="#001" class="nav-link" data-doc="001">
+            ADR-001: Grape API
+            <span class="badge">Accepted</span>
+          </a>
+          <a href="#002" class="nav-link" data-doc="002">
+            ADR-002: Parser Architecture
+            <span class="badge">Accepted</span>
+          </a>
+          <a href="#003" class="nav-link" data-doc="003">
+            ADR-003: AI Categorization
+            <span class="badge">Accepted</span>
+          </a>
+          <a href="#004" class="nav-link" data-doc="004">
+            ADR-004: OpenAPI Types
+            <span class="badge">Accepted</span>
+          </a>
+          <a href="#005" class="nav-link" data-doc="005">
+            ADR-005: React Query
+            <span class="badge">Accepted</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+    
+    <main class="main">
+      <div class="breadcrumb">
+        <a href="/">StmtIQ</a> / <a href="/docs/">Documentation</a> / <span id="breadcrumb-title">ADRs</span>
+      </div>
+      
+      <div id="content" class="content">
+        <div class="loading">Loading documentation</div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // ADR file mapping
+    const docs = {
+      'readme': { file: 'adr/README.md', title: 'Architecture Decision Records' },
+      '001': { file: 'adr/001-grape-api-framework.md', title: 'ADR-001: Grape API Framework' },
+      '002': { file: 'adr/002-bank-parser-architecture.md', title: 'ADR-002: Bank Parser Architecture' },
+      '003': { file: 'adr/003-ai-categorization-strategy.md', title: 'ADR-003: AI Categorization Strategy' },
+      '004': { file: 'adr/004-openapi-type-generation.md', title: 'ADR-004: OpenAPI Type Generation' },
+      '005': { file: 'adr/005-react-query-state-management.md', title: 'ADR-005: React Query State Management' },
+    };
+    
+    // Configure marked
+    marked.setOptions({
+      highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          return hljs.highlight(code, { language: lang }).value;
+        }
+        return hljs.highlightAuto(code).value;
+      },
+      breaks: true,
+      gfm: true
+    });
+    
+    // Load document
+    async function loadDoc(docId) {
+      const doc = docs[docId];
+      if (!doc) return;
+      
+      const contentEl = document.getElementById('content');
+      const breadcrumbEl = document.getElementById('breadcrumb-title');
+      
+      contentEl.innerHTML = '<div class="loading">Loading documentation</div>';
+      
+      try {
+        // Fetch from docs folder (which is in project root, not public)
+        // We need to serve it via a route or copy to public
+        const response = await fetch(`/docs/${doc.file}`);
+        if (!response.ok) throw new Error('Not found');
+        
+        const markdown = await response.text();
+        contentEl.innerHTML = marked.parse(markdown);
+        breadcrumbEl.textContent = doc.title;
+        
+        // Update active nav
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('active');
+          if (link.dataset.doc === docId) {
+            link.classList.add('active');
+          }
+        });
+        
+        // Add status badges
+        contentEl.innerHTML = contentEl.innerHTML
+          .replace(/Accepted/g, '<span class="status-accepted">Accepted</span>')
+          .replace(/Proposed/g, '<span class="status-proposed">Proposed</span>')
+          .replace(/Deprecated/g, '<span class="status-deprecated">Deprecated</span>');
+          
+      } catch (error) {
+        contentEl.innerHTML = `
+          <h1>Document Not Found</h1>
+          <p>The requested document could not be loaded.</p>
+          <p>Make sure the docs are being served correctly.</p>
+        `;
+      }
+    }
+    
+    // Handle navigation
+    document.querySelectorAll('.nav-link[data-doc]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const docId = e.currentTarget.dataset.doc;
+        window.location.hash = docId;
+        loadDoc(docId);
+      });
+    });
+    
+    // Load initial doc from hash or default to readme
+    const initialDoc = window.location.hash.slice(1) || 'readme';
+    loadDoc(initialDoc);
+    
+    // Handle hash changes
+    window.addEventListener('hashchange', () => {
+      const docId = window.location.hash.slice(1) || 'readme';
+      loadDoc(docId);
+    });
+  </script>
+</body>
+</html>
+
