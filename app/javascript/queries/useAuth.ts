@@ -1,16 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, getAuthHeaders } from "../lib/api";
+import { AuthService } from "../types/generated/services.gen";
 import type { User, OtpResponse, AuthResponse } from "../types/api";
-import type { components } from "../types/generated/api";
+import type { PostV1AuthSendOtpData, PostV1AuthVerifyOtpData, PostV1AuthResendOtpData, PatchV1AuthMeData } from "../types/generated/types.gen";
 import { authKeys } from "./keys";
-
-// ============================================
-// Types
-// ============================================
-type SendOtpData = components["schemas"]["postV1AuthSendOtp"];
-type VerifyOtpData = components["schemas"]["postV1AuthVerifyOtp"];
-type ResendOtpData = components["schemas"]["postV1AuthResendOtp"];
-type UpdateProfileData = components["schemas"]["patchV1AuthMe"];
 
 // ============================================
 // Queries
@@ -18,16 +10,14 @@ type UpdateProfileData = components["schemas"]["patchV1AuthMe"];
 
 /**
  * Get current user profile
+ * Uses auto-generated AuthService
  */
 export const useCurrentUser = (enabled = true) => {
   return useQuery({
     queryKey: authKeys.me(),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/auth/me", {
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to fetch user profile");
-      return data as unknown as User;
+      const response = await AuthService.getV1AuthMe();
+      return response as unknown as User;
     },
     enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -40,14 +30,14 @@ export const useCurrentUser = (enabled = true) => {
 
 /**
  * Send OTP to phone number
+ * Uses auto-generated AuthService
  */
 export const useSendOtp = () => {
-  return useMutation<OtpResponse, Error, SendOtpData>({
+  return useMutation<OtpResponse, Error, PostV1AuthSendOtpData["requestBody"]>({
     mutationFn: async (data) => {
-      const { data: response, error } = await api.POST("/v1/auth/send_otp", {
-        body: data,
+      const response = await AuthService.postV1AuthSendOtp({
+        requestBody: data,
       });
-      if (error) throw new Error("Failed to send OTP");
       return response as unknown as OtpResponse;
     },
   });
@@ -55,16 +45,16 @@ export const useSendOtp = () => {
 
 /**
  * Verify OTP and login
+ * Uses auto-generated AuthService
  */
 export const useVerifyOtp = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<AuthResponse, Error, VerifyOtpData>({
+  return useMutation<AuthResponse, Error, PostV1AuthVerifyOtpData["requestBody"]>({
     mutationFn: async (data) => {
-      const { data: response, error } = await api.POST("/v1/auth/verify_otp", {
-        body: data,
+      const response = await AuthService.postV1AuthVerifyOtp({
+        requestBody: data,
       });
-      if (error) throw new Error("Invalid OTP");
       return response as unknown as AuthResponse;
     },
     onSuccess: (data) => {
@@ -76,14 +66,14 @@ export const useVerifyOtp = () => {
 
 /**
  * Resend OTP
+ * Uses auto-generated AuthService
  */
 export const useResendOtp = () => {
-  return useMutation<OtpResponse, Error, ResendOtpData>({
+  return useMutation<OtpResponse, Error, PostV1AuthResendOtpData["requestBody"]>({
     mutationFn: async (data) => {
-      const { data: response, error } = await api.POST("/v1/auth/resend_otp", {
-        body: data,
+      const response = await AuthService.postV1AuthResendOtp({
+        requestBody: data,
       });
-      if (error) throw new Error("Failed to resend OTP");
       return response as unknown as OtpResponse;
     },
   });
@@ -91,15 +81,14 @@ export const useResendOtp = () => {
 
 /**
  * Logout - invalidate session
+ * Uses auto-generated AuthService
  */
 export const useLogout = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, void>({
     mutationFn: async () => {
-      await api.DELETE("/v1/auth/logout", {
-        headers: getAuthHeaders(),
-      });
+      await AuthService.deleteV1AuthLogout();
     },
     onSuccess: () => {
       // Clear all cached data
@@ -110,17 +99,16 @@ export const useLogout = () => {
 
 /**
  * Update user profile
+ * Uses auto-generated AuthService
  */
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<User, Error, UpdateProfileData>({
+  return useMutation<User, Error, PatchV1AuthMeData["requestBody"]>({
     mutationFn: async (data) => {
-      const { data: response, error } = await api.PATCH("/v1/auth/me", {
-        body: data,
-        headers: getAuthHeaders(),
+      const response = await AuthService.patchV1AuthMe({
+        requestBody: data,
       });
-      if (error) throw new Error("Failed to update profile");
       return response as unknown as User;
     },
     onSuccess: (updatedUser) => {
@@ -128,4 +116,3 @@ export const useUpdateProfile = () => {
     },
   });
 };
-

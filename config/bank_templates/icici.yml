@@ -181,60 +181,69 @@ templates:
   # CREDIT CARD
   # ============================================
   - account_type: "credit_card"
-    file_format: "xls"
-    description: "ICICI Credit Card statement (XLS)"
+    file_format: "csv"
+    description: "ICICI Credit Card statement (CSV from iMobile/Net Banking)"
     display_order: 14
     parser_class: "BankParsers::Icici::CreditCardParser"
     
+    # Columns: Date | Sr.No. | Transaction Details | Reward Point Header | Intl.Amount | Amount(in Rs) | BillingAmountSign
     column_mappings:
-      date: "Transaction Date"
-      posting_date: "Posting Date"
+      date: "Date"
       narration: "Transaction Details"
-      amount: "Amount"
-      reference: "Reference Number"
-      reward_points: "Reward Points"
+      reference: "Sr.No."
+      amount: "Amount(in Rs)"
+      cr_dr: "BillingAmountSign"
+      international_amount: "Intl.Amount"
+      reward_points: "Reward Point Header"
     
     parser_config:
       date_formats:
         - "%d/%m/%Y"
         - "%d-%m-%Y"
-        - "%d %b %Y"
       header_indicators:
-        - "Transaction Date"
+        - "Sr.No."
         - "Transaction Details"
-        - "Amount"
-      credit_suffix: "CR"
+        - "Amount(in Rs)"
+        - "BillingAmountSign"
+      credit_indicators:
+        - "cr"
       skip_patterns:
-        - "opening balance"
-        - "closing balance"
-        - "payment received"
+        - "transaction details:"
+        - "accountno"
+        - "customer name"
+        - "address"
         - "total"
-        - "minimum amount due"
       encoding: "UTF-8"
 
   - account_type: "credit_card"
-    file_format: "csv"
-    description: "ICICI Credit Card statement (CSV)"
+    file_format: "xls"
+    description: "ICICI Credit Card statement (XLS)"
     display_order: 15
     parser_class: "BankParsers::Icici::CreditCardParser"
     
     column_mappings:
-      date: "Transaction Date"
-      posting_date: "Posting Date"
+      date: "Date"
       narration: "Transaction Details"
-      amount: "Amount"
-      reference: "Reference Number"
+      reference: "Sr.No."
+      amount: "Amount(in Rs)"
+      cr_dr: "BillingAmountSign"
+      international_amount: "Intl.Amount"
+      reward_points: "Reward Point Header"
     
     parser_config:
       date_formats:
         - "%d/%m/%Y"
         - "%d-%m-%Y"
       header_indicators:
-        - "Transaction Date"
-        - "Amount"
-      credit_suffix: "CR"
+        - "Sr.No."
+        - "Transaction Details"
+        - "Amount(in Rs)"
+      credit_indicators:
+        - "cr"
       skip_patterns:
-        - "opening balance"
-        - "payment received"
+        - "transaction details:"
+        - "accountno"
+        - "customer name"
+        - "address"
       encoding: "UTF-8"
 

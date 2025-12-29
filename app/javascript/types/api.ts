@@ -1,11 +1,11 @@
 /**
  * Manual API response types
  * These complement the auto-generated types from OpenAPI
- * Run `bun run generate:api-types` to regenerate api.d.ts
+ * Run `bun run generate:api` to regenerate types
  */
 
 // Re-export generated types
-export type { paths, components, operations } from "./generated/api";
+export * from "./generated/types.gen";
 
 // ============================================
 // User & Auth Types
@@ -105,15 +105,28 @@ export interface Statement {
 }
 
 export interface StatementSummary {
-  statement: Statement;
-  total_credits: string;
-  total_debits: string;
-  net: string;
+  id: number;
+  status: string;
   transaction_count: number;
-  date_range: {
+  account_type: string;
+  // Regular account fields
+  total_credits?: string;
+  total_debits?: string;
+  net?: string;
+  date_range?: {
     start: string | null;
     end: string | null;
   };
+  // Credit card specific fields
+  total_spent?: string;
+  payments_made?: string;
+  outstanding_balance?: string;
+  amount_due?: string;
+  statement_period?: {
+    start: string | null;
+    end: string | null;
+  };
+  categories: Record<number, number>;
 }
 
 // ============================================

@@ -64,6 +64,38 @@ class Statement < ApplicationRecord
     transactions.where(transaction_type: 'credit').sum(:amount)
   end
 
+  def credit_card?
+    bank_template&.account_type == 'credit_card'
+  end
+
+  # Credit card specific calculations
+  def total_spent
+    return 0 unless credit_card?
+    total_debits
+  end
+
+  def payments_made
+    return 0 unless credit_card?
+    total_credits
+  end
+
+  def outstanding_balance
+    return 0 unless credit_card?
+    [total_debits - total_credits, 0].max
+  end
+
+  def amount_due
+    outstanding_balance
+  end
+
+  def statement_period
+    return nil unless transactions.any?
+    {
+      start: transactions.minimum(:transaction_date),
+      end: transactions.maximum(:transaction_date)
+    }
+  end
+
   private
 
   def set_defaults

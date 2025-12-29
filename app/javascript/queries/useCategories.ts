@@ -1,14 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, getAuthHeaders } from "../lib/api";
+import { CategoriesService } from "../types/generated/services.gen";
 import type { Category } from "../types/api";
-import type { components } from "../types/generated/api";
+import type { PostV1CategoriesData, PatchV1CategoriesIdData } from "../types/generated/types.gen";
 import { categoryKeys } from "./keys";
-
-// ============================================
-// Types
-// ============================================
-type CreateCategoryData = components["schemas"]["postV1Categories"];
-type UpdateCategoryData = components["schemas"]["patchV1CategoriesId"];
 
 // ============================================
 // Queries
@@ -16,16 +10,14 @@ type UpdateCategoryData = components["schemas"]["patchV1CategoriesId"];
 
 /**
  * List all categories
+ * Uses auto-generated CategoriesService
  */
 export const useCategories = () => {
   return useQuery({
     queryKey: categoryKeys.lists(),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/categories", {
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to fetch categories");
-      return data as unknown as Category[];
+      const response = await CategoriesService.getV1Categories();
+      return response as unknown as Category[];
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -33,17 +25,14 @@ export const useCategories = () => {
 
 /**
  * Get a single category
+ * Uses auto-generated CategoriesService
  */
 export const useCategory = (id: number, enabled = true) => {
   return useQuery({
     queryKey: categoryKeys.detail(id),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/categories/{id}", {
-        params: { path: { id } },
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to fetch category");
-      return data as unknown as Category;
+      const response = await CategoriesService.getV1CategoriesId({ id });
+      return response as unknown as Category;
     },
     enabled: enabled && id > 0,
   });
@@ -55,17 +44,16 @@ export const useCategory = (id: number, enabled = true) => {
 
 /**
  * Create a new category
+ * Uses auto-generated CategoriesService
  */
 export const useCreateCategory = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<Category, Error, CreateCategoryData>({
+  return useMutation<Category, Error, PostV1CategoriesData["requestBody"]>({
     mutationFn: async (data) => {
-      const { data: response, error } = await api.POST("/v1/categories", {
-        body: data,
-        headers: getAuthHeaders(),
+      const response = await CategoriesService.postV1Categories({
+        requestBody: data,
       });
-      if (error) throw new Error("Failed to create category");
       return response as unknown as Category;
     },
     onSuccess: (newCategory) => {
@@ -77,18 +65,17 @@ export const useCreateCategory = () => {
 
 /**
  * Update a category
+ * Uses auto-generated CategoriesService
  */
 export const useUpdateCategory = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<Category, Error, { id: number; data: UpdateCategoryData }>({
+  return useMutation<Category, Error, { id: number; data: PatchV1CategoriesIdData["requestBody"] }>({
     mutationFn: async ({ id, data }) => {
-      const { data: response, error } = await api.PATCH("/v1/categories/{id}", {
-        params: { path: { id } },
-        body: data,
-        headers: getAuthHeaders(),
+      const response = await CategoriesService.patchV1CategoriesId({
+        id,
+        requestBody: data,
       });
-      if (error) throw new Error("Failed to update category");
       return response as unknown as Category;
     },
     onSuccess: (updatedCategory) => {
@@ -103,17 +90,14 @@ export const useUpdateCategory = () => {
 
 /**
  * Delete a category
+ * Uses auto-generated CategoriesService
  */
 export const useDeleteCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, number>({
     mutationFn: async (id) => {
-      const { error } = await api.DELETE("/v1/categories/{id}", {
-        params: { path: { id } },
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to delete category");
+      await CategoriesService.deleteV1CategoriesId({ id });
     },
     onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: categoryKeys.all });
@@ -121,4 +105,3 @@ export const useDeleteCategory = () => {
     },
   });
 };
-

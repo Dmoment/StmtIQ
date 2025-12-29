@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, getAuthHeaders } from "../lib/api";
+import { TransactionsService } from "../types/generated/services.gen";
 import type { Transaction, TransactionStats } from "../types/api";
-import type { components } from "../types/generated/api";
+import type { PatchV1TransactionsIdData, PatchV1TransactionsBulkData } from "../types/generated/types.gen";
 import { transactionKeys } from "./keys";
 
 // ============================================
@@ -26,26 +26,31 @@ interface StatsFilters {
   account_id?: number;
 }
 
-type UpdateTransactionData = components["schemas"]["patchV1TransactionsId"];
-type BulkUpdateData = components["schemas"]["patchV1TransactionsBulk"];
-
 // ============================================
 // Queries
 // ============================================
 
 /**
  * List all transactions
+ * Uses auto-generated TransactionsService
  */
 export const useTransactions = (filters?: TransactionFilters) => {
   return useQuery({
     queryKey: transactionKeys.list(filters),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/transactions", {
-        params: { query: filters },
-        headers: getAuthHeaders(),
+      const response = await TransactionsService.getV1Transactions({
+        page: filters?.page,
+        perPage: filters?.per_page,
+        categoryId: filters?.category_id,
+        accountId: filters?.account_id,
+        statementId: filters?.statement_id,
+        transactionType: filters?.transaction_type,
+        startDate: filters?.start_date,
+        endDate: filters?.end_date,
+        search: filters?.search,
+        uncategorized: filters?.uncategorized,
       });
-      if (error) throw new Error("Failed to fetch transactions");
-      return data as unknown as Transaction[];
+      return response as unknown as Transaction[];
     },
     staleTime: 1 * 60 * 1000, // 1 minute
   });
@@ -53,17 +58,14 @@ export const useTransactions = (filters?: TransactionFilters) => {
 
 /**
  * Get a single transaction
+ * Uses auto-generated TransactionsService
  */
 export const useTransaction = (id: number, enabled = true) => {
   return useQuery({
     queryKey: transactionKeys.detail(id),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/transactions/{id}", {
-        params: { path: { id } },
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to fetch transaction");
-      return data as unknown as Transaction;
+      const response = await TransactionsService.getV1TransactionsId({ id });
+      return response as unknown as Transaction;
     },
     enabled: enabled && id > 0,
   });
@@ -71,17 +73,18 @@ export const useTransaction = (id: number, enabled = true) => {
 
 /**
  * Get transaction statistics
+ * Uses auto-generated TransactionsService
  */
 export const useTransactionStats = (filters?: StatsFilters) => {
   return useQuery({
     queryKey: transactionKeys.stats(filters),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/transactions/stats", {
-        params: { query: filters },
-        headers: getAuthHeaders(),
+      const response = await TransactionsService.getV1TransactionsStats({
+        startDate: filters?.start_date,
+        endDate: filters?.end_date,
+        accountId: filters?.account_id,
       });
-      if (error) throw new Error("Failed to fetch transaction stats");
-      return data as unknown as TransactionStats;
+      return response as unknown as TransactionStats;
     },
     staleTime: 1 * 60 * 1000,
   });
@@ -93,6 +96,7 @@ export const useTransactionStats = (filters?: StatsFilters) => {
 
 /**
  * Update a transaction
+ * Uses auto-generated TransactionsService
  */
 export const useUpdateTransaction = () => {
   const queryClient = useQueryClient();
@@ -100,18 +104,13 @@ export const useUpdateTransaction = () => {
   return useMutation<
     Transaction,
     Error,
-    { id: number; data: UpdateTransactionData }
+    { id: number; data: PatchV1TransactionsIdData["requestBody"] }
   >({
     mutationFn: async ({ id, data }) => {
-      const { data: response, error } = await api.PATCH(
-        "/v1/transactions/{id}",
-        {
-          params: { path: { id } },
-          body: data,
-          headers: getAuthHeaders(),
-        }
-      );
-      if (error) throw new Error("Failed to update transaction");
+      const response = await TransactionsService.patchV1TransactionsId({
+        id,
+        requestBody: data,
+      });
       return response as unknown as Transaction;
     },
     onSuccess: (updatedTransaction) => {
@@ -127,20 +126,16 @@ export const useUpdateTransaction = () => {
 
 /**
  * Bulk update transactions
+ * Uses auto-generated TransactionsService
  */
 export const useBulkUpdateTransactions = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<{ updated_count: number }, Error, BulkUpdateData>({
+  return useMutation<{ updated_count: number }, Error, PatchV1TransactionsBulkData["requestBody"]>({
     mutationFn: async (data) => {
-      const { data: response, error } = await api.PATCH(
-        "/v1/transactions/bulk",
-        {
-          body: data,
-          headers: getAuthHeaders(),
-        }
-      );
-      if (error) throw new Error("Failed to bulk update transactions");
+      const response = await TransactionsService.patchV1TransactionsBulk({
+        requestBody: data,
+      });
       return response as unknown as { updated_count: number };
     },
     onSuccess: () => {
@@ -151,6 +146,7 @@ export const useBulkUpdateTransactions = () => {
 
 /**
  * Categorize uncategorized transactions with AI
+ * Uses auto-generated TransactionsService
  */
 export const useCategorizeTransactions = () => {
   const queryClient = useQueryClient();
@@ -161,11 +157,8 @@ export const useCategorizeTransactions = () => {
     void
   >({
     mutationFn: async () => {
-      const { data, error } = await api.POST("/v1/transactions/categorize", {
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to start categorization");
-      return data as unknown as {
+      const response = await TransactionsService.postV1TransactionsCategorize();
+      return response as unknown as {
         message: string;
         categorized_count: number;
         job_id?: string;
@@ -178,4 +171,3 @@ export const useCategorizeTransactions = () => {
     },
   });
 };
-

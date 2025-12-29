@@ -7,9 +7,10 @@
     "watch": "esbuild app/javascript/application.tsx --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets --loader:.tsx=tsx --loader:.ts=ts --target=es2020 --watch=forever",
     "watch:css": "tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --watch",
     "typecheck": "tsc --noEmit",
-    "generate:api-types": "rails api:generate_spec && bun run convert:openapi && bunx openapi-typescript ./public/api-spec-v3.json -o ./app/javascript/types/generated/api.d.ts",
-    "generate:api-types:remote": "bunx swagger2openapi http://localhost:3000/api/v1/swagger_doc.json -o ./public/api-spec-v3.json && bunx openapi-typescript ./public/api-spec-v3.json -o ./app/javascript/types/generated/api.d.ts",
-    "convert:openapi": "bunx swagger2openapi ./public/api-spec-generated.json -o ./public/api-spec-v3.json"
+    "generate:api": "rails api:generate_spec && bun run convert:openapi && PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" bunx @hey-api/openapi-ts@0.45.0 --input ./public/api-spec-v3.json --output ./app/javascript/types/generated --client fetch && node scripts/patch-openapi-config.js",
+    "generate:api:remote": "bunx swagger2openapi http://localhost:3000/api/v1/swagger_doc.json -o ./public/api-spec-v3.json && PATH=\"/opt/homebrew/opt/node@20/bin:$PATH\" bunx @hey-api/openapi-ts@0.45.0 --input ./public/api-spec-v3.json --output ./app/javascript/types/generated --client fetch && node scripts/patch-openapi-config.js",
+    "convert:openapi": "bunx swagger2openapi ./public/api-spec-generated.json -o ./public/api-spec-v3.json",
+    "watch:api": "chokidar 'app/api/**/*.rb' 'config/bank_templates/**/*.yml' -c 'bun run generate:api'"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.12",
@@ -28,7 +29,7 @@
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "openapi-typescript": "^7.6.0",
+    "chokidar-cli": "^3.0.0",
     "swagger2openapi": "^7.0.8",
     "typescript": "^5.9.3"
   }

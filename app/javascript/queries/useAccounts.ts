@@ -1,14 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, getAuthHeaders } from "../lib/api";
+import { AccountsService } from "../types/generated/services.gen";
 import type { Account, AccountSummary } from "../types/api";
-import type { components } from "../types/generated/api";
+import type { PostV1AccountsData, PatchV1AccountsIdData } from "../types/generated/types.gen";
 import { accountKeys } from "./keys";
-
-// ============================================
-// Types
-// ============================================
-type CreateAccountData = components["schemas"]["postV1Accounts"];
-type UpdateAccountData = components["schemas"]["patchV1AccountsId"];
 
 // ============================================
 // Queries
@@ -16,16 +10,14 @@ type UpdateAccountData = components["schemas"]["patchV1AccountsId"];
 
 /**
  * List all accounts
+ * Uses auto-generated AccountsService
  */
 export const useAccounts = () => {
   return useQuery({
     queryKey: accountKeys.lists(),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/accounts", {
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to fetch accounts");
-      return data as unknown as Account[];
+      const response = await AccountsService.getV1Accounts();
+      return response as unknown as Account[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -33,17 +25,14 @@ export const useAccounts = () => {
 
 /**
  * Get a single account
+ * Uses auto-generated AccountsService
  */
 export const useAccount = (id: number, enabled = true) => {
   return useQuery({
     queryKey: accountKeys.detail(id),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/accounts/{id}", {
-        params: { path: { id } },
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to fetch account");
-      return data as unknown as Account;
+      const response = await AccountsService.getV1AccountsId({ id });
+      return response as unknown as Account;
     },
     enabled: enabled && id > 0,
   });
@@ -51,6 +40,7 @@ export const useAccount = (id: number, enabled = true) => {
 
 /**
  * Get account summary with transaction stats
+ * Uses auto-generated AccountsService
  */
 export const useAccountSummary = (
   id: number,
@@ -60,15 +50,12 @@ export const useAccountSummary = (
   return useQuery({
     queryKey: accountKeys.summary(id, filters),
     queryFn: async () => {
-      const { data, error } = await api.GET("/v1/accounts/{id}/summary", {
-        params: {
-          path: { id },
-          query: filters,
-        },
-        headers: getAuthHeaders(),
+      const response = await AccountsService.getV1AccountsIdSummary({
+        id,
+        startDate: filters?.start_date,
+        endDate: filters?.end_date,
       });
-      if (error) throw new Error("Failed to fetch account summary");
-      return data as unknown as AccountSummary;
+      return response as unknown as AccountSummary;
     },
     enabled: enabled && id > 0,
   });
@@ -80,17 +67,16 @@ export const useAccountSummary = (
 
 /**
  * Create a new account
+ * Uses auto-generated AccountsService
  */
 export const useCreateAccount = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<Account, Error, CreateAccountData>({
+  return useMutation<Account, Error, PostV1AccountsData["requestBody"]>({
     mutationFn: async (data) => {
-      const { data: response, error } = await api.POST("/v1/accounts", {
-        body: data,
-        headers: getAuthHeaders(),
+      const response = await AccountsService.postV1Accounts({
+        requestBody: data,
       });
-      if (error) throw new Error("Failed to create account");
       return response as unknown as Account;
     },
     onSuccess: (newAccount) => {
@@ -102,18 +88,17 @@ export const useCreateAccount = () => {
 
 /**
  * Update an account
+ * Uses auto-generated AccountsService
  */
 export const useUpdateAccount = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<Account, Error, { id: number; data: UpdateAccountData }>({
+  return useMutation<Account, Error, { id: number; data: PatchV1AccountsIdData["requestBody"] }>({
     mutationFn: async ({ id, data }) => {
-      const { data: response, error } = await api.PATCH("/v1/accounts/{id}", {
-        params: { path: { id } },
-        body: data,
-        headers: getAuthHeaders(),
+      const response = await AccountsService.patchV1AccountsId({
+        id,
+        requestBody: data,
       });
-      if (error) throw new Error("Failed to update account");
       return response as unknown as Account;
     },
     onSuccess: (updatedAccount) => {
@@ -128,17 +113,14 @@ export const useUpdateAccount = () => {
 
 /**
  * Delete an account
+ * Uses auto-generated AccountsService
  */
 export const useDeleteAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, number>({
     mutationFn: async (id) => {
-      const { error } = await api.DELETE("/v1/accounts/{id}", {
-        params: { path: { id } },
-        headers: getAuthHeaders(),
-      });
-      if (error) throw new Error("Failed to delete account");
+      await AccountsService.deleteV1AccountsId({ id });
     },
     onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: accountKeys.all });
@@ -146,4 +128,3 @@ export const useDeleteAccount = () => {
     },
   });
 };
-

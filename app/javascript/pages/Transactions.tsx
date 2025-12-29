@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { 
   Search, 
   Filter, 
@@ -25,6 +26,8 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CategoryPicker } from '../components/CategoryPicker';
+import { useTransactions } from '../queries/useTransactions';
+import { statementSummaryQueryOptions } from '../queries/statements';
 import type { Transaction } from '../types/api';
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -63,9 +66,6 @@ const categoryGradients: Record<string, string> = {
 };
 
 export function Transactions() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
@@ -74,24 +74,35 @@ export function Transactions() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
-  const fetchTransactions = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/v1/transactions?per_page=100');
-      if (!response.ok) throw new Error('Failed to fetch transactions');
-      const data = await response.json();
-      setTransactions(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load transactions');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query hooks
+  const { data: transactions = [], isLoading: loading, error: queryError, refetch } = useTransactions({ per_page: 100 });
+  
+  // Get unique statement IDs from transactions
+  const statementIds = useMemo(() => {
+    return [...new Set(transactions
+      .map((tx) => tx.statement_id)
+      .filter((id): id is number => id !== null)
+    )];
+  }, [transactions]);
 
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
+  // Fetch statement summaries for each unique statement ID using useQueries
+  // Uses statementSummaryQueryOptions for cache consistency with useStatementSummary hook
+  const statementQueries = useQueries({
+    queries: statementIds.map((id) => statementSummaryQueryOptions(id)),
+  });
+
+  // Extract statement account types from summaries
+  const statementAccountTypes = useMemo(() => {
+    const typeMap = new Map<number, string>();
+    statementQueries.forEach((query, index) => {
+      if (query.data) {
+        typeMap.set(statementIds[index], query.data.account_type || 'unknown');
+      }
+    });
+    return typeMap;
+  }, [statementQueries, statementIds]);
+
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load transactions') : null;
 
   const handleCategoryClick = (tx: Transaction, event: React.MouseEvent) => {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -103,10 +114,10 @@ export function Transactions() {
     setPickerOpen(true);
   };
 
-  const handleCategoryUpdate = (updatedTx: Transaction) => {
-    setTransactions(prev => 
-      prev.map(tx => tx.id === updatedTx.id ? updatedTx : tx)
-    );
+  const handleCategoryUpdate = () => {
+    // Transaction will be updated via React Query cache invalidation
+    // No need to manually update state
+    refetch();
   };
 
   const filteredTransactions = transactions.filter(tx => {
@@ -130,6 +141,23 @@ export function Transactions() {
   const totalCredits = filteredTransactions
     .filter(tx => tx.transaction_type === 'credit')
     .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+
+  // Check if we're viewing credit card transactions
+  const creditCardStatementIds = Array.from(statementAccountTypes.entries())
+    .filter(([, accountType]) => accountType === 'credit_card')
+    .map(([id]) => id);
+  
+  const creditCardTransactions = filteredTransactions.filter(tx => 
+    tx.statement_id && creditCardStatementIds.includes(tx.statement_id)
+  );
+  
+  const isCreditCardView = creditCardTransactions.length > 0 && 
+    creditCardTransactions.length === filteredTransactions.length;
+  
+  // Credit card specific calculations
+  const totalSpent = isCreditCardView ? totalDebits : 0;
+  const paymentsMade = isCreditCardView ? totalCredits : 0;
+  const outstandingBalance = isCreditCardView ? Math.max(totalDebits - totalCredits, 0) : 0;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -169,7 +197,7 @@ export function Transactions() {
         
         <div className="flex items-center gap-3">
           <button 
-            onClick={fetchTransactions}
+            onClick={() => refetch()}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
@@ -184,24 +212,50 @@ export function Transactions() {
 
       {/* Summary Cards */}
       {transactions.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-            <p className="text-sm text-slate-400 mb-1">Total Debits</p>
-            <p className="text-2xl font-bold text-rose-400">{formatCurrency(totalDebits)}</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-            <p className="text-sm text-slate-400 mb-1">Total Credits</p>
-            <p className="text-2xl font-bold text-emerald-400">{formatCurrency(totalCredits)}</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-            <p className="text-sm text-slate-400 mb-1">Net Flow</p>
-            <p className={clsx(
-              "text-2xl font-bold",
-              totalCredits - totalDebits >= 0 ? "text-emerald-400" : "text-rose-400"
-            )}>
-              {formatCurrency(totalCredits - totalDebits)}
-            </p>
-          </div>
+        <div className={clsx(
+          "grid gap-4",
+          isCreditCardView ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"
+        )}>
+          {isCreditCardView ? (
+            <>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                <p className="text-sm text-slate-400 mb-1">Total Spent</p>
+                <p className="text-2xl font-bold text-rose-400">{formatCurrency(totalSpent)}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                <p className="text-sm text-slate-400 mb-1">Payments Made</p>
+                <p className="text-2xl font-bold text-emerald-400">{formatCurrency(paymentsMade)}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                <p className="text-sm text-slate-400 mb-1">Outstanding Balance</p>
+                <p className="text-2xl font-bold text-amber-400">{formatCurrency(outstandingBalance)}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                <p className="text-sm text-slate-400 mb-1">Amount Due</p>
+                <p className="text-2xl font-bold text-violet-400">{formatCurrency(outstandingBalance)}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                <p className="text-sm text-slate-400 mb-1">Total Debits</p>
+                <p className="text-2xl font-bold text-rose-400">{formatCurrency(totalDebits)}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                <p className="text-sm text-slate-400 mb-1">Total Credits</p>
+                <p className="text-2xl font-bold text-emerald-400">{formatCurrency(totalCredits)}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                <p className="text-sm text-slate-400 mb-1">Net Flow</p>
+                <p className={clsx(
+                  "text-2xl font-bold",
+                  totalCredits - totalDebits >= 0 ? "text-emerald-400" : "text-rose-400"
+                )}>
+                  {formatCurrency(totalCredits - totalDebits)}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       )}
 

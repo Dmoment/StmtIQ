@@ -728,7 +728,17 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Get statement summary"
+                        "description": "Get statement summary",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/V1_Entities_StatementSummary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Statement not found"
                     }
                 },
                 "tags": [
@@ -1217,6 +1227,61 @@
                     }
                 },
                 "description": "Re-parse a failed statement"
+            },
+            "V1_Entities_StatementSummary": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "transaction_count": {
+                        "type": "string"
+                    },
+                    "account_type": {
+                        "type": "string"
+                    },
+                    "total_spent": {
+                        "type": "string"
+                    },
+                    "payments_made": {
+                        "type": "string"
+                    },
+                    "outstanding_balance": {
+                        "type": "string"
+                    },
+                    "amount_due": {
+                        "type": "string"
+                    },
+                    "statement_period": {
+                        "type": "string"
+                    },
+                    "total_debits": {
+                        "type": "string"
+                    },
+                    "total_credits": {
+                        "type": "string"
+                    },
+                    "net": {
+                        "type": "string"
+                    },
+                    "date_range": {
+                        "type": "string"
+                    },
+                    "categories": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "status",
+                    "transaction_count",
+                    "account_type",
+                    "categories"
+                ],
+                "description": "V1_Entities_StatementSummary model"
             },
             "patchV1TransactionsId": {
                 "type": "object",

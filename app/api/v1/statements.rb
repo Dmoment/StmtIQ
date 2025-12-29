@@ -115,27 +115,18 @@ module V1
         present statement, with: V1::Entities::Statement
       end
 
-      desc 'Get statement summary'
+      desc 'Get statement summary', {
+        success: V1::Entities::StatementSummary,
+        failure: [{ code: 404, message: 'Statement not found' }]
+      }
       params do
         requires :id, type: Integer
       end
       get ':id/summary' do
         require_authentication!
 
-        statement = current_user.statements.find(params[:id])
-
-        {
-          id: statement.id,
-          status: statement.status,
-          transaction_count: statement.transaction_count,
-          total_debits: statement.total_debits,
-          total_credits: statement.total_credits,
-          categories: statement.transactions.group(:category_id).count,
-          date_range: {
-            start: statement.transactions.minimum(:transaction_date),
-            end: statement.transactions.maximum(:transaction_date)
-          }
-        }
+        statement = current_user.statements.includes(:bank_template, :transactions).find(params[:id])
+        present statement, with: V1::Entities::StatementSummary
       end
     end
   end

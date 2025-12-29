@@ -51,7 +51,7 @@ export {
   useUploadStatement,
   useDeleteStatement,
   useReparseStatement,
-} from "./useStatements";
+} from "./statements";
 
 // Transaction hooks
 export {

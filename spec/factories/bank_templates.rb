@@ -79,5 +79,57 @@ FactoryBot.define do
         }
       end
     end
+
+    trait :credit_card_csv do
+      account_type { "credit_card" }
+      file_format { "csv" }
+      description { "ICICI Credit Card statement (CSV)" }
+      column_mappings do
+        {
+          "date" => "Date",
+          "narration" => "Transaction Details",
+          "reference" => "Sr.No.",
+          "amount" => "Amount(in Rs)",
+          "cr_dr" => "BillingAmountSign",
+          "international_amount" => "Intl.Amount",
+          "reward_points" => "Reward Point Header"
+        }
+      end
+      parser_config do
+        {
+          "date_formats" => ["%d/%m/%Y", "%d-%m-%Y"],
+          "header_indicators" => ["Sr.No.", "Transaction Details", "Amount(in Rs)", "BillingAmountSign"],
+          "credit_indicators" => ["cr"],
+          "skip_patterns" => ["transaction details:", "accountno", "customer name", "address"],
+          "parser_class" => "BankParsers::Icici::CreditCardParser"
+        }
+      end
+    end
+
+    trait :credit_card_xls do
+      account_type { "credit_card" }
+      file_format { "xls" }
+      description { "ICICI Credit Card statement (XLS)" }
+      column_mappings do
+        {
+          "date" => "Date",
+          "narration" => "Transaction Details",
+          "reference" => "Sr.No.",
+          "amount" => "Amount(in Rs)",
+          "cr_dr" => "BillingAmountSign",
+          "international_amount" => "Intl.Amount",
+          "reward_points" => "Reward Point Header"
+        }
+      end
+      parser_config do
+        {
+          "date_formats" => ["%d/%m/%Y", "%d-%m-%Y"],
+          "header_indicators" => ["Sr.No.", "Transaction Details", "Amount(in Rs)"],
+          "credit_indicators" => ["cr"],
+          "skip_patterns" => ["transaction details:", "accountno", "customer name"],
+          "parser_class" => "BankParsers::Icici::CreditCardParser"
+        }
+      end
+    end
   end
 end
