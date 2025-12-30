@@ -173,18 +173,18 @@ export const $postV1Statements = {
     properties: {
         file: {
             type: 'string',
-            description: 'Bank statement file (CSV, Excel, or PDF)',
+            description: 'Bank statement file',
             format: 'binary'
         },
         template_id: {
             type: 'integer',
             format: 'int32',
-            description: 'Bank template ID for parsing'
+            description: 'Bank template ID'
         },
         account_id: {
             type: 'integer',
             format: 'int32',
-            description: 'Associated bank account'
+            description: 'Associated account'
         }
     },
     required: ['file', 'template_id'],
@@ -196,61 +196,10 @@ export const $postV1StatementsIdReparse = {
     properties: {
         template_id: {
             type: 'integer',
-            format: 'int32',
-            description: 'Use a different template for re-parsing'
+            format: 'int32'
         }
     },
     description: 'Re-parse a failed statement'
-} as const;
-
-export const $V1_Entities_StatementSummary = {
-    type: 'object',
-    properties: {
-        id: {
-            type: 'string'
-        },
-        status: {
-            type: 'string'
-        },
-        transaction_count: {
-            type: 'string'
-        },
-        account_type: {
-            type: 'string'
-        },
-        total_spent: {
-            type: 'string'
-        },
-        payments_made: {
-            type: 'string'
-        },
-        outstanding_balance: {
-            type: 'string'
-        },
-        amount_due: {
-            type: 'string'
-        },
-        statement_period: {
-            type: 'string'
-        },
-        total_debits: {
-            type: 'string'
-        },
-        total_credits: {
-            type: 'string'
-        },
-        net: {
-            type: 'string'
-        },
-        date_range: {
-            type: 'string'
-        },
-        categories: {
-            type: 'string'
-        }
-    },
-    required: ['id', 'status', 'transaction_count', 'account_type', 'categories'],
-    description: 'V1_Entities_StatementSummary model'
 } as const;
 
 export const $patchV1TransactionsId = {
@@ -267,7 +216,7 @@ export const $patchV1TransactionsId = {
             type: 'boolean'
         }
     },
-    description: 'Update a transaction (category, description, etc.)'
+    description: 'Update a transaction'
 } as const;
 
 export const $patchV1TransactionsBulk = {

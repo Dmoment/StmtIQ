@@ -22,7 +22,10 @@ import {
   Gamepad2,
   RefreshCw,
   Edit2,
-  Tag
+  Tag,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CategoryPicker } from '../components/CategoryPicker';
@@ -68,6 +71,8 @@ const categoryGradients: Record<string, string> = {
 export function Transactions() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
   
   // Category picker state
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -75,7 +80,10 @@ export function Transactions() {
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
   // Use React Query hooks
-  const { data: transactions = [], isLoading: loading, error: queryError, refetch } = useTransactions({ per_page: 100 });
+  const { data: transactions = [], isLoading: loading, error: queryError, refetch } = useTransactions({ 
+    page: currentPage, 
+    per_page: perPage 
+  });
   
   // Get unique statement IDs from transactions
   const statementIds = useMemo(() => {
@@ -431,6 +439,72 @@ export function Transactions() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {!loading && transactions.length > 0 && (
+        <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-400">
+              Showing {((currentPage - 1) * perPage) + 1} - {((currentPage - 1) * perPage) + transactions.length} transactions
+            </span>
+            
+            {/* Per Page Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500">Per page:</span>
+              <select
+                value={perPage}
+                onChange={(e) => {
+                  setPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="bg-slate-800/50 border border-slate-700/50 rounded-lg px-2 py-1 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* First Page */}
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/50 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="First page"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+            
+            {/* Previous Page */}
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/50 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Previous page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            
+            {/* Page Number */}
+            <span className="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800/30 rounded-lg border border-slate-700/30">
+              Page {currentPage}
+            </span>
+            
+            {/* Next Page */}
+            <button
+              onClick={() => setCurrentPage(p => p + 1)}
+              disabled={transactions.length < perPage}
+              className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/50 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Next page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

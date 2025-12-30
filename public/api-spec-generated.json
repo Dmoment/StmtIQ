@@ -334,13 +334,31 @@
     },
     "/v1/categories": {
       "get": {
-        "description": "List all categories",
+        "description": "List all categories with filtering and pagination",
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "type": "integer",
+            "format": "int32",
+            "default": 50,
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
-            "description": "List all categories"
+            "description": "List all categories with filtering and pagination"
           }
         },
         "tags": [
@@ -464,13 +482,31 @@
     },
     "/v1/accounts": {
       "get": {
-        "description": "List all accounts",
+        "description": "List all accounts with filtering and pagination",
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "type": "integer",
+            "format": "int32",
+            "default": 25,
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
-            "description": "List all accounts"
+            "description": "List all accounts with filtering and pagination"
           }
         },
         "tags": [
@@ -605,20 +641,6 @@
             "type": "integer",
             "format": "int32",
             "required": true
-          },
-          {
-            "in": "query",
-            "name": "start_date",
-            "type": "string",
-            "format": "date",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "end_date",
-            "type": "string",
-            "format": "date",
-            "required": false
           }
         ],
         "responses": {
@@ -634,7 +656,7 @@
     },
     "/v1/statements": {
       "get": {
-        "description": "List all statements",
+        "description": "List all statements with filtering and pagination",
         "produces": [
           "application/json"
         ],
@@ -654,23 +676,11 @@
             "format": "int32",
             "default": 20,
             "required": false
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "type": "string",
-            "enum": [
-              "pending",
-              "processing",
-              "parsed",
-              "failed"
-            ],
-            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "List all statements"
+            "description": "List all statements with filtering and pagination"
           }
         },
         "tags": [
@@ -811,13 +821,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Get statement summary",
-            "schema": {
-              "$ref": "#/definitions/V1_Entities_StatementSummary"
-            }
-          },
-          "404": {
-            "description": "Statement not found"
+            "description": "Get statement summary"
           }
         },
         "tags": [
@@ -828,7 +832,7 @@
     },
     "/v1/transactions": {
       "get": {
-        "description": "List all transactions",
+        "description": "List all transactions with filtering and pagination",
         "produces": [
           "application/json"
         ],
@@ -848,68 +852,11 @@
             "format": "int32",
             "default": 50,
             "required": false
-          },
-          {
-            "in": "query",
-            "name": "category_id",
-            "type": "integer",
-            "format": "int32",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "account_id",
-            "type": "integer",
-            "format": "int32",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "statement_id",
-            "type": "integer",
-            "format": "int32",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "transaction_type",
-            "type": "string",
-            "enum": [
-              "debit",
-              "credit"
-            ],
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "start_date",
-            "type": "string",
-            "format": "date",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "end_date",
-            "type": "string",
-            "format": "date",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "search",
-            "type": "string",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "uncategorized",
-            "type": "boolean",
-            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "List all transactions"
+            "description": "List all transactions with filtering and pagination"
           }
         },
         "tags": [
@@ -944,7 +891,7 @@
         "operationId": "getV1TransactionsId"
       },
       "patch": {
-        "description": "Update a transaction (category, description, etc.)",
+        "description": "Update a transaction",
         "produces": [
           "application/json"
         ],
@@ -970,7 +917,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Update a transaction (category, description, etc.)"
+            "description": "Update a transaction"
           }
         },
         "tags": [
@@ -1014,29 +961,6 @@
         "description": "Get transaction statistics",
         "produces": [
           "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "start_date",
-            "type": "string",
-            "format": "date",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "end_date",
-            "type": "string",
-            "format": "date",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "account_id",
-            "type": "integer",
-            "format": "int32",
-            "required": false
-          }
         ],
         "responses": {
           "200": {
@@ -1265,17 +1189,17 @@
       "properties": {
         "file": {
           "type": "file",
-          "description": "Bank statement file (CSV, Excel, or PDF)"
+          "description": "Bank statement file"
         },
         "template_id": {
           "type": "integer",
           "format": "int32",
-          "description": "Bank template ID for parsing"
+          "description": "Bank template ID"
         },
         "account_id": {
           "type": "integer",
           "format": "int32",
-          "description": "Associated bank account"
+          "description": "Associated account"
         }
       },
       "required": [
@@ -1289,66 +1213,10 @@
       "properties": {
         "template_id": {
           "type": "integer",
-          "format": "int32",
-          "description": "Use a different template for re-parsing"
+          "format": "int32"
         }
       },
       "description": "Re-parse a failed statement"
-    },
-    "V1_Entities_StatementSummary": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        },
-        "transaction_count": {
-          "type": "string"
-        },
-        "account_type": {
-          "type": "string"
-        },
-        "total_spent": {
-          "type": "string"
-        },
-        "payments_made": {
-          "type": "string"
-        },
-        "outstanding_balance": {
-          "type": "string"
-        },
-        "amount_due": {
-          "type": "string"
-        },
-        "statement_period": {
-          "type": "string"
-        },
-        "total_debits": {
-          "type": "string"
-        },
-        "total_credits": {
-          "type": "string"
-        },
-        "net": {
-          "type": "string"
-        },
-        "date_range": {
-          "type": "string"
-        },
-        "categories": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "status",
-        "transaction_count",
-        "account_type",
-        "categories"
-      ],
-      "description": "V1_Entities_StatementSummary model"
     },
     "patchV1TransactionsId": {
       "type": "object",
@@ -1364,7 +1232,7 @@
           "type": "boolean"
         }
       },
-      "description": "Update a transaction (category, description, etc.)"
+      "description": "Update a transaction"
     },
     "patchV1TransactionsBulk": {
       "type": "object",

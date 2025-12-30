@@ -5,18 +5,30 @@ import type { PostV1AccountsData, PatchV1AccountsIdData } from "../types/generat
 import { accountKeys } from "./keys";
 
 // ============================================
+// Types
+// ============================================
+interface AccountFilters {
+  page?: number;
+  per_page?: number;
+  q?: Record<string, unknown>;
+}
+
+// ============================================
 // Queries
 // ============================================
 
 /**
- * List all accounts
+ * List all accounts with Ransack filtering
  * Uses auto-generated AccountsService
  */
-export const useAccounts = () => {
+export const useAccounts = (filters?: AccountFilters) => {
   return useQuery({
     queryKey: accountKeys.lists(),
     queryFn: async () => {
-      const response = await AccountsService.getV1Accounts();
+      const response = await AccountsService.getV1Accounts({
+        page: filters?.page,
+        perPage: filters?.per_page,
+      });
       return response as unknown as Account[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -39,22 +51,14 @@ export const useAccount = (id: number, enabled = true) => {
 };
 
 /**
- * Get account summary with transaction stats
+ * Get account summary
  * Uses auto-generated AccountsService
  */
-export const useAccountSummary = (
-  id: number,
-  filters?: { start_date?: string; end_date?: string },
-  enabled = true
-) => {
+export const useAccountSummary = (id: number, enabled = true) => {
   return useQuery({
-    queryKey: accountKeys.summary(id, filters),
+    queryKey: accountKeys.summary(id),
     queryFn: async () => {
-      const response = await AccountsService.getV1AccountsIdSummary({
-        id,
-        startDate: filters?.start_date,
-        endDate: filters?.end_date,
-      });
+      const response = await AccountsService.getV1AccountsIdSummary({ id });
       return response as unknown as AccountSummary;
     },
     enabled: enabled && id > 0,

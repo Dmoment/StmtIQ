@@ -7,23 +7,16 @@ import { transactionKeys } from "./keys";
 // ============================================
 // Types
 // ============================================
-interface TransactionFilters {
+export interface TransactionFilters {
   page?: number;
   per_page?: number;
-  category_id?: number;
-  account_id?: number;
-  statement_id?: number;
-  transaction_type?: "debit" | "credit";
-  start_date?: string;
-  end_date?: string;
-  search?: string;
-  uncategorized?: boolean;
+  // Ransack query params
+  q?: Record<string, unknown>;
 }
 
-interface StatsFilters {
-  start_date?: string;
-  end_date?: string;
-  account_id?: number;
+export interface StatsFilters {
+  // Ransack query params
+  q?: Record<string, unknown>;
 }
 
 // ============================================
@@ -31,8 +24,13 @@ interface StatsFilters {
 // ============================================
 
 /**
- * List all transactions
+ * List all transactions with Ransack filtering and Kaminari pagination
  * Uses auto-generated TransactionsService
+ * 
+ * Example filters:
+ * - { q: { category_id_eq: 1 } }
+ * - { q: { description_cont: 'amazon', transaction_type_eq: 'debit' } }
+ * - { q: { transaction_date_gteq: '2025-01-01', s: 'amount desc' } }
  */
 export const useTransactions = (filters?: TransactionFilters) => {
   return useQuery({
@@ -41,14 +39,6 @@ export const useTransactions = (filters?: TransactionFilters) => {
       const response = await TransactionsService.getV1Transactions({
         page: filters?.page,
         perPage: filters?.per_page,
-        categoryId: filters?.category_id,
-        accountId: filters?.account_id,
-        statementId: filters?.statement_id,
-        transactionType: filters?.transaction_type,
-        startDate: filters?.start_date,
-        endDate: filters?.end_date,
-        search: filters?.search,
-        uncategorized: filters?.uncategorized,
       });
       return response as unknown as Transaction[];
     },
@@ -72,18 +62,14 @@ export const useTransaction = (id: number, enabled = true) => {
 };
 
 /**
- * Get transaction statistics
+ * Get transaction statistics with Ransack filtering
  * Uses auto-generated TransactionsService
  */
-export const useTransactionStats = (filters?: StatsFilters) => {
+export const useTransactionStats = () => {
   return useQuery({
-    queryKey: transactionKeys.stats(filters),
+    queryKey: transactionKeys.stats(),
     queryFn: async () => {
-      const response = await TransactionsService.getV1TransactionsStats({
-        startDate: filters?.start_date,
-        endDate: filters?.end_date,
-        accountId: filters?.account_id,
-      });
+      const response = await TransactionsService.getV1TransactionsStats();
       return response as unknown as TransactionStats;
     },
     staleTime: 1 * 60 * 1000,
@@ -165,8 +151,6 @@ export const useCategorizeTransactions = () => {
       };
     },
     onSuccess: () => {
-      // Invalidate transactions after categorization starts
-      // The actual updates will happen asynchronously
       queryClient.invalidateQueries({ queryKey: transactionKeys.all });
     },
   });

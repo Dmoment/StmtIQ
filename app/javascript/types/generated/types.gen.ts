@@ -125,15 +125,15 @@ export type patchV1AccountsId = {
  */
 export type postV1Statements = {
     /**
-     * Bank statement file (CSV, Excel, or PDF)
+     * Bank statement file
      */
     file: (Blob | File);
     /**
-     * Bank template ID for parsing
+     * Bank template ID
      */
     template_id: number;
     /**
-     * Associated bank account
+     * Associated account
      */
     account_id?: number;
 };
@@ -142,34 +142,11 @@ export type postV1Statements = {
  * Re-parse a failed statement
  */
 export type postV1StatementsIdReparse = {
-    /**
-     * Use a different template for re-parsing
-     */
     template_id?: number;
 };
 
 /**
- * V1_Entities_StatementSummary model
- */
-export type V1_Entities_StatementSummary = {
-    id: string;
-    status: string;
-    transaction_count: string;
-    account_type: string;
-    total_spent?: string;
-    payments_made?: string;
-    outstanding_balance?: string;
-    amount_due?: string;
-    statement_period?: string;
-    total_debits?: string;
-    total_credits?: string;
-    net?: string;
-    date_range?: string;
-    categories: string;
-};
-
-/**
- * Update a transaction (category, description, etc.)
+ * Update a transaction
  */
 export type patchV1TransactionsId = {
     category_id?: number;
@@ -244,6 +221,11 @@ export type GetV1BankTemplatesBankBankCodeData = {
 
 export type GetV1BankTemplatesBankBankCodeResponse = unknown;
 
+export type GetV1CategoriesData = {
+    page?: number;
+    perPage?: number;
+};
+
 export type GetV1CategoriesResponse = unknown;
 
 export type PostV1CategoriesData = {
@@ -270,6 +252,11 @@ export type DeleteV1CategoriesIdData = {
 };
 
 export type DeleteV1CategoriesIdResponse = void;
+
+export type GetV1AccountsData = {
+    page?: number;
+    perPage?: number;
+};
 
 export type GetV1AccountsResponse = unknown;
 
@@ -299,9 +286,7 @@ export type DeleteV1AccountsIdData = {
 export type DeleteV1AccountsIdResponse = void;
 
 export type GetV1AccountsIdSummaryData = {
-    endDate?: string;
     id: number;
-    startDate?: string;
 };
 
 export type GetV1AccountsIdSummaryResponse = unknown;
@@ -309,7 +294,6 @@ export type GetV1AccountsIdSummaryResponse = unknown;
 export type GetV1StatementsData = {
     page?: number;
     perPage?: number;
-    status?: 'pending' | 'processing' | 'parsed' | 'failed';
 };
 
 export type GetV1StatementsResponse = unknown;
@@ -343,19 +327,11 @@ export type GetV1StatementsIdSummaryData = {
     id: number;
 };
 
-export type GetV1StatementsIdSummaryResponse = V1_Entities_StatementSummary;
+export type GetV1StatementsIdSummaryResponse = unknown;
 
 export type GetV1TransactionsData = {
-    accountId?: number;
-    categoryId?: number;
-    endDate?: string;
     page?: number;
     perPage?: number;
-    search?: string;
-    startDate?: string;
-    statementId?: number;
-    transactionType?: 'debit' | 'credit';
-    uncategorized?: boolean;
 };
 
 export type GetV1TransactionsResponse = unknown;
@@ -378,12 +354,6 @@ export type PatchV1TransactionsBulkData = {
 };
 
 export type PatchV1TransactionsBulkResponse = unknown;
-
-export type GetV1TransactionsStatsData = {
-    accountId?: number;
-    endDate?: string;
-    startDate?: string;
-};
 
 export type GetV1TransactionsStatsResponse = unknown;
 
@@ -535,9 +505,13 @@ export type $OpenApiTs = {
     };
     '/v1/categories': {
         get: {
+            req: {
+                page?: number;
+                perPage?: number;
+            };
             res: {
                 /**
-                 * List all categories
+                 * List all categories with filtering and pagination
                  */
                 200: unknown;
             };
@@ -592,9 +566,13 @@ export type $OpenApiTs = {
     };
     '/v1/accounts': {
         get: {
+            req: {
+                page?: number;
+                perPage?: number;
+            };
             res: {
                 /**
-                 * List all accounts
+                 * List all accounts with filtering and pagination
                  */
                 200: unknown;
             };
@@ -650,9 +628,7 @@ export type $OpenApiTs = {
     '/v1/accounts/{id}/summary': {
         get: {
             req: {
-                endDate?: string;
                 id: number;
-                startDate?: string;
             };
             res: {
                 /**
@@ -667,11 +643,10 @@ export type $OpenApiTs = {
             req: {
                 page?: number;
                 perPage?: number;
-                status?: 'pending' | 'processing' | 'parsed' | 'failed';
             };
             res: {
                 /**
-                 * List all statements
+                 * List all statements with filtering and pagination
                  */
                 200: unknown;
             };
@@ -735,31 +710,19 @@ export type $OpenApiTs = {
                 /**
                  * Get statement summary
                  */
-                200: V1_Entities_StatementSummary;
-                /**
-                 * Statement not found
-                 */
-                404: unknown;
+                200: unknown;
             };
         };
     };
     '/v1/transactions': {
         get: {
             req: {
-                accountId?: number;
-                categoryId?: number;
-                endDate?: string;
                 page?: number;
                 perPage?: number;
-                search?: string;
-                startDate?: string;
-                statementId?: number;
-                transactionType?: 'debit' | 'credit';
-                uncategorized?: boolean;
             };
             res: {
                 /**
-                 * List all transactions
+                 * List all transactions with filtering and pagination
                  */
                 200: unknown;
             };
@@ -784,7 +747,7 @@ export type $OpenApiTs = {
             };
             res: {
                 /**
-                 * Update a transaction (category, description, etc.)
+                 * Update a transaction
                  */
                 200: unknown;
             };
@@ -805,11 +768,6 @@ export type $OpenApiTs = {
     };
     '/v1/transactions/stats': {
         get: {
-            req: {
-                accountId?: number;
-                endDate?: string;
-                startDate?: string;
-            };
             res: {
                 /**
                  * Get transaction statistics

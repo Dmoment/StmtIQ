@@ -14,6 +14,25 @@ class Account < ApplicationRecord
   # Callbacks
   before_validation :set_defaults
 
+  self.whitelisted_ransackable_attributes = %w[
+    name
+    bank_name
+    account_number_last4
+    account_type
+    currency
+    is_active
+  ]
+
+  self.whitelisted_ransackable_associations = %w[
+    user
+    statements
+    transactions
+  ]
+
+  self.whitelisted_ransackable_scopes = %w[
+    active
+  ]
+
   # Scopes
   scope :active, -> { where(is_active: true) }
 

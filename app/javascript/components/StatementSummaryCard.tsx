@@ -1,8 +1,6 @@
 import { CreditCard, TrendingDown, TrendingUp, Calendar, AlertCircle } from 'lucide-react';
 import { clsx } from 'clsx';
-import type { V1_Entities_StatementSummary } from '../types/generated/types.gen';
-
-type StatementSummary = V1_Entities_StatementSummary;
+import type { StatementSummary } from '../types/api';
 
 interface StatementSummaryCardProps {
   summary: StatementSummary;

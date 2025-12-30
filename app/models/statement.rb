@@ -16,6 +16,32 @@ class Statement < ApplicationRecord
   # Callbacks
   before_validation :set_defaults
 
+  # Ransack configuration
+  self.whitelisted_ransackable_attributes = %w[
+    file_name
+    file_type
+    status
+    account_id
+    bank_template_id
+    parsed_at
+    error_message
+  ]
+
+  self.whitelisted_ransackable_associations = %w[
+    user
+    account
+    bank_template
+    transactions
+  ]
+
+  self.whitelisted_ransackable_scopes = %w[
+    pending
+    processing
+    parsed
+    failed
+    recent
+  ]
+
   # Scopes
   scope :pending, -> { where(status: 'pending') }
   scope :processing, -> { where(status: 'processing') }

@@ -16,6 +16,29 @@ class Category < ApplicationRecord
   # Callbacks
   before_validation :generate_slug
 
+  # Ransack configuration
+  self.whitelisted_ransackable_attributes = %w[
+    name
+    slug
+    icon
+    color
+    description
+    is_system
+    parent_id
+  ]
+
+  self.whitelisted_ransackable_associations = %w[
+    parent
+    children
+    transactions
+  ]
+
+  self.whitelisted_ransackable_scopes = %w[
+    system
+    custom
+    root
+  ]
+
   # Scopes
   scope :system, -> { where(is_system: true) }
   scope :custom, -> { where(is_system: [false, nil]) }

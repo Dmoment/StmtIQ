@@ -3,12 +3,24 @@
 module V1
   class Accounts < Grape::API
     resource :accounts do
-      desc 'List all accounts'
+      desc 'List all accounts with filtering and pagination'
+      params do
+        optional :page, type: Integer, default: 1
+        optional :per_page, type: Integer, default: 25
+        optional :q, type: Hash, desc: 'Ransack query params'
+      end
       get do
-        require_authentication!
+        authenticate!
 
-        accounts = current_user.accounts.active
-        present accounts, with: V1::Entities::Account
+        accounts = current_user.accounts
+
+        if params[:q].present?
+          accounts = accounts.ransack(params[:q]).result(distinct: true)
+        end
+
+        paginate_collection(accounts) do |account|
+          V1::Entities::Account.represent(account)
+        end
       end
 
       desc 'Get a single account'
@@ -16,7 +28,7 @@ module V1
         requires :id, type: Integer
       end
       get ':id' do
-        require_authentication!
+        authenticate!
 
         account = current_user.accounts.find(params[:id])
         present account, with: V1::Entities::Account, full: true
@@ -31,7 +43,7 @@ module V1
         optional :currency, type: String, values: Account::CURRENCIES, default: 'INR'
       end
       post do
-        require_authentication!
+        authenticate!
 
         account = current_user.accounts.create!(declared(params))
         present account, with: V1::Entities::Account
@@ -47,7 +59,7 @@ module V1
         optional :is_active, type: Boolean
       end
       patch ':id' do
-        require_authentication!
+        authenticate!
 
         account = current_user.accounts.find(params[:id])
         account.update!(declared(params, include_missing: false).except(:id))
@@ -60,7 +72,7 @@ module V1
         requires :id, type: Integer
       end
       delete ':id' do
-        require_authentication!
+        authenticate!
 
         account = current_user.accounts.find(params[:id])
         account.destroy!
@@ -71,17 +83,16 @@ module V1
       desc 'Get account summary'
       params do
         requires :id, type: Integer
-        optional :start_date, type: Date
-        optional :end_date, type: Date
+        optional :q, type: Hash, desc: 'Ransack query params for transactions'
       end
       get ':id/summary' do
-        require_authentication!
+        authenticate!
 
         account = current_user.accounts.find(params[:id])
         transactions = account.transactions
 
-        if params[:start_date] && params[:end_date]
-          transactions = transactions.by_date_range(params[:start_date], params[:end_date])
+        if params[:q].present?
+          transactions = transactions.ransack(params[:q]).result(distinct: true)
         end
 
         {

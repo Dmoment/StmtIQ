@@ -18,6 +18,40 @@ class Transaction < ApplicationRecord
   before_validation :set_defaults
   before_save :normalize_description
 
+  # Ransack configuration
+  self.whitelisted_ransackable_attributes = %w[
+    transaction_date
+    description
+    original_description
+    amount
+    transaction_type
+    balance
+    reference_number
+    category_id
+    account_id
+    statement_id
+    is_reviewed
+    confidence
+  ]
+
+  self.whitelisted_ransackable_associations = %w[
+    category
+    account
+    statement
+    user
+  ]
+
+  self.whitelisted_ransackable_scopes = %w[
+    debits
+    credits
+    reviewed
+    unreviewed
+    uncategorized
+    categorized
+    recent
+    by_date_range
+  ]
+
   # Scopes
   scope :debits, -> { where(transaction_type: 'debit') }
   scope :credits, -> { where(transaction_type: 'credit') }

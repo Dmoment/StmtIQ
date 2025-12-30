@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { StatementsService } from "../../types/generated/services.gen";
-import type { V1_Entities_StatementSummary } from "../../types/generated/types.gen";
+import type { StatementSummary } from "../../types/api";
 import { statementKeys } from "../keys";
 
 /**
@@ -11,7 +11,7 @@ export const statementSummaryQueryOptions = (id: number) => ({
   queryKey: statementKeys.summary(id),
   queryFn: async () => {
     const response = await StatementsService.getV1StatementsIdSummary({ id });
-    return response as V1_Entities_StatementSummary;
+    return response as unknown as StatementSummary;
   },
   enabled: id > 0,
   staleTime: 30 * 1000, // 30 seconds

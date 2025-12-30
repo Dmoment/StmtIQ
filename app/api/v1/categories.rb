@@ -3,10 +3,24 @@
 module V1
   class Categories < Grape::API
     resource :categories do
-      desc 'List all categories'
+      desc 'List all categories with filtering and pagination'
+      params do
+        optional :page, type: Integer, default: 1
+        optional :per_page, type: Integer, default: 50
+        optional :q, type: Hash, desc: 'Ransack query params'
+      end
       get do
-        categories = Category.root.includes(:children)
-        present categories, with: V1::Entities::Category
+        categories = Category.includes(:children)
+
+        if params[:q].present?
+          categories = categories.ransack(params[:q]).result(distinct: true)
+        else
+          categories = categories.root
+        end
+
+        paginate_collection(categories) do |category|
+          V1::Entities::Category.represent(category)
+        end
       end
 
       desc 'Get a single category'
@@ -27,7 +41,7 @@ module V1
         optional :parent_id, type: Integer
       end
       post do
-        require_authentication!
+        authenticate!
 
         category = Category.create!(
           name: params[:name],
@@ -51,7 +65,7 @@ module V1
         optional :description, type: String
       end
       patch ':id' do
-        require_authentication!
+        authenticate!
 
         category = Category.find(params[:id])
 
@@ -68,7 +82,7 @@ module V1
         requires :id, type: Integer
       end
       delete ':id' do
-        require_authentication!
+        authenticate!
 
         category = Category.find(params[:id])
 

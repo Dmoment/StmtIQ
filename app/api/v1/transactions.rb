@@ -3,55 +3,24 @@
 module V1
   class Transactions < Grape::API
     resource :transactions do
-      desc 'List all transactions'
+      desc 'List all transactions with filtering and pagination'
       params do
         optional :page, type: Integer, default: 1
         optional :per_page, type: Integer, default: 50
-        optional :category_id, type: Integer
-        optional :account_id, type: Integer
-        optional :statement_id, type: Integer
-        optional :transaction_type, type: String, values: %w[debit credit]
-        optional :start_date, type: Date
-        optional :end_date, type: Date
-        optional :search, type: String
-        optional :uncategorized, type: Boolean
+        optional :q, type: Hash, desc: 'Ransack query params'
       end
       get do
-        require_authentication!
+        authenticate!
 
-        transactions = current_user.transactions.recent
+        transactions = current_user.transactions.includes(:category, :account).recent
 
-        if params[:category_id]
-          transactions = transactions.where(category_id: params[:category_id])
+        if params[:q].present?
+          transactions = transactions.ransack(params[:q]).result(distinct: true)
         end
 
-        if params[:account_id]
-          transactions = transactions.where(account_id: params[:account_id])
+        paginate_collection(transactions) do |transaction|
+          V1::Entities::Transaction.represent(transaction)
         end
-
-        if params[:statement_id]
-          transactions = transactions.where(statement_id: params[:statement_id])
-        end
-
-        if params[:transaction_type]
-          transactions = transactions.where(transaction_type: params[:transaction_type])
-        end
-
-        if params[:start_date] && params[:end_date]
-          transactions = transactions.by_date_range(params[:start_date], params[:end_date])
-        end
-
-        if params[:search].present?
-          transactions = transactions.where('description ILIKE ?', "%#{params[:search]}%")
-        end
-
-        if params[:uncategorized]
-          transactions = transactions.uncategorized
-        end
-
-        transactions = transactions.page(params[:page]).per(params[:per_page])
-
-        present transactions, with: V1::Entities::Transaction
       end
 
       desc 'Get a single transaction'
@@ -59,13 +28,13 @@ module V1
         requires :id, type: Integer
       end
       get ':id' do
-        require_authentication!
+        authenticate!
 
         transaction = current_user.transactions.find(params[:id])
         present transaction, with: V1::Entities::Transaction, full: true
       end
 
-      desc 'Update a transaction (category, description, etc.)'
+      desc 'Update a transaction'
       params do
         requires :id, type: Integer
         optional :category_id, type: Integer
@@ -73,7 +42,7 @@ module V1
         optional :is_reviewed, type: Boolean
       end
       patch ':id' do
-        require_authentication!
+        authenticate!
 
         transaction = current_user.transactions.find(params[:id])
         transaction.update!(declared(params, include_missing: false).except(:id))
@@ -89,7 +58,7 @@ module V1
         optional :is_reviewed, type: Boolean
       end
       patch :bulk do
-        require_authentication!
+        authenticate!
 
         transactions = current_user.transactions.where(id: params[:transaction_ids])
         update_params = declared(params, include_missing: false).except(:transaction_ids)
@@ -101,21 +70,15 @@ module V1
 
       desc 'Get transaction statistics'
       params do
-        optional :start_date, type: Date
-        optional :end_date, type: Date
-        optional :account_id, type: Integer
+        optional :q, type: Hash, desc: 'Ransack query params'
       end
       get :stats do
-        require_authentication!
+        authenticate!
 
         transactions = current_user.transactions
 
-        if params[:account_id]
-          transactions = transactions.where(account_id: params[:account_id])
-        end
-
-        if params[:start_date] && params[:end_date]
-          transactions = transactions.by_date_range(params[:start_date], params[:end_date])
+        if params[:q].present?
+          transactions = transactions.ransack(params[:q]).result(distinct: true)
         end
 
         debits = transactions.debits
@@ -137,7 +100,7 @@ module V1
 
       desc 'Categorize uncategorized transactions with AI'
       post :categorize do
-        require_authentication!
+        authenticate!
 
         transactions = current_user.transactions.uncategorized.limit(100)
 
@@ -145,7 +108,6 @@ module V1
           return { message: 'No uncategorized transactions found' }
         end
 
-        # Queue categorization job
         AICategorizeJob.perform_later(transactions.pluck(:id))
 
         { queued: transactions.count, message: 'Categorization started' }

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsData, GetV1TransactionsStatsResponse, PostV1TransactionsCategorizeResponse } from './types.gen';
+import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsResponse, PostV1TransactionsCategorizeResponse } from './types.gen';
 
 export class AuthService {
     /**
@@ -193,14 +193,21 @@ export class BankTemplatesService {
 
 export class CategoriesService {
     /**
-     * List all categories
-     * @returns unknown List all categories
+     * List all categories with filtering and pagination
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @returns unknown List all categories with filtering and pagination
      * @throws ApiError
      */
-    public static getV1Categories(): CancelablePromise<GetV1CategoriesResponse> {
+    public static getV1Categories(data: GetV1CategoriesData = {}): CancelablePromise<GetV1CategoriesResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/v1/categories'
+            url: '/v1/categories',
+            query: {
+                page: data.page,
+                per_page: data.perPage
+            }
         });
     }
     
@@ -278,14 +285,21 @@ export class CategoriesService {
 
 export class AccountsService {
     /**
-     * List all accounts
-     * @returns unknown List all accounts
+     * List all accounts with filtering and pagination
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @returns unknown List all accounts with filtering and pagination
      * @throws ApiError
      */
-    public static getV1Accounts(): CancelablePromise<GetV1AccountsResponse> {
+    public static getV1Accounts(data: GetV1AccountsData = {}): CancelablePromise<GetV1AccountsResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/v1/accounts'
+            url: '/v1/accounts',
+            query: {
+                page: data.page,
+                per_page: data.perPage
+            }
         });
     }
     
@@ -363,8 +377,6 @@ export class AccountsService {
      * Get account summary
      * @param data The data for the request.
      * @param data.id
-     * @param data.startDate
-     * @param data.endDate
      * @returns unknown Get account summary
      * @throws ApiError
      */
@@ -374,10 +386,6 @@ export class AccountsService {
             url: '/v1/accounts/{id}/summary',
             path: {
                 id: data.id
-            },
-            query: {
-                start_date: data.startDate,
-                end_date: data.endDate
             }
         });
     }
@@ -386,12 +394,11 @@ export class AccountsService {
 
 export class StatementsService {
     /**
-     * List all statements
+     * List all statements with filtering and pagination
      * @param data The data for the request.
      * @param data.page
      * @param data.perPage
-     * @param data.status
-     * @returns unknown List all statements
+     * @returns unknown List all statements with filtering and pagination
      * @throws ApiError
      */
     public static getV1Statements(data: GetV1StatementsData = {}): CancelablePromise<GetV1StatementsResponse> {
@@ -400,8 +407,7 @@ export class StatementsService {
             url: '/v1/statements',
             query: {
                 page: data.page,
-                per_page: data.perPage,
-                status: data.status
+                per_page: data.perPage
             }
         });
     }
@@ -480,7 +486,7 @@ export class StatementsService {
      * Get statement summary
      * @param data The data for the request.
      * @param data.id
-     * @returns V1_Entities_StatementSummary Get statement summary
+     * @returns unknown Get statement summary
      * @throws ApiError
      */
     public static getV1StatementsIdSummary(data: GetV1StatementsIdSummaryData): CancelablePromise<GetV1StatementsIdSummaryResponse> {
@@ -489,9 +495,6 @@ export class StatementsService {
             url: '/v1/statements/{id}/summary',
             path: {
                 id: data.id
-            },
-            errors: {
-                404: 'Statement not found'
             }
         });
     }
@@ -500,19 +503,11 @@ export class StatementsService {
 
 export class TransactionsService {
     /**
-     * List all transactions
+     * List all transactions with filtering and pagination
      * @param data The data for the request.
      * @param data.page
      * @param data.perPage
-     * @param data.categoryId
-     * @param data.accountId
-     * @param data.statementId
-     * @param data.transactionType
-     * @param data.startDate
-     * @param data.endDate
-     * @param data.search
-     * @param data.uncategorized
-     * @returns unknown List all transactions
+     * @returns unknown List all transactions with filtering and pagination
      * @throws ApiError
      */
     public static getV1Transactions(data: GetV1TransactionsData = {}): CancelablePromise<GetV1TransactionsResponse> {
@@ -521,15 +516,7 @@ export class TransactionsService {
             url: '/v1/transactions',
             query: {
                 page: data.page,
-                per_page: data.perPage,
-                category_id: data.categoryId,
-                account_id: data.accountId,
-                statement_id: data.statementId,
-                transaction_type: data.transactionType,
-                start_date: data.startDate,
-                end_date: data.endDate,
-                search: data.search,
-                uncategorized: data.uncategorized
+                per_page: data.perPage
             }
         });
     }
@@ -552,11 +539,11 @@ export class TransactionsService {
     }
     
     /**
-     * Update a transaction (category, description, etc.)
+     * Update a transaction
      * @param data The data for the request.
      * @param data.id
      * @param data.requestBody
-     * @returns unknown Update a transaction (category, description, etc.)
+     * @returns unknown Update a transaction
      * @throws ApiError
      */
     public static patchV1TransactionsId(data: PatchV1TransactionsIdData): CancelablePromise<PatchV1TransactionsIdResponse> {
@@ -589,22 +576,13 @@ export class TransactionsService {
     
     /**
      * Get transaction statistics
-     * @param data The data for the request.
-     * @param data.startDate
-     * @param data.endDate
-     * @param data.accountId
      * @returns unknown Get transaction statistics
      * @throws ApiError
      */
-    public static getV1TransactionsStats(data: GetV1TransactionsStatsData = {}): CancelablePromise<GetV1TransactionsStatsResponse> {
+    public static getV1TransactionsStats(): CancelablePromise<GetV1TransactionsStatsResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/v1/transactions/stats',
-            query: {
-                start_date: data.startDate,
-                end_date: data.endDate,
-                account_id: data.accountId
-            }
+            url: '/v1/transactions/stats'
         });
     }
     
