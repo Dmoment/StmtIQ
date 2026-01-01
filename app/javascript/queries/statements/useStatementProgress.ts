@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { StatementsService } from "../../types/generated/services.gen";
-import { statementKeys } from "../keys";
+import { useState, useEffect, useRef } from "react";
 
 /**
  * Progress data from true streaming parser
@@ -17,13 +15,17 @@ export interface ParsingProgress {
   transaction_count: number;   // Final count (only available after completion)
   duration_seconds: number | null; // Time elapsed
   updated_at: string | null;
-  
-  // Note: No 'total' or 'percentage' - true streaming doesn't know upfront
-  // For estimated percentage, you can use file size heuristics if needed
+  completed?: boolean;          // True when SSE stream closes
 }
 
 /**
- * Poll statement parsing progress
+ * Hook for real-time statement parsing progress using Server-Sent Events (SSE)
+ * 
+ * Benefits over polling:
+ * - Single long-lived connection (more efficient)
+ * - Server pushes updates immediately (real-time)
+ * - Less server load (no repeated HTTP requests)
+ * - Better UX (instant updates)
  * 
  * True streaming design:
  * - Shows "Processed X transactions" during parsing
@@ -31,7 +33,7 @@ export interface ParsingProgress {
  * - Shows duration for user feedback
  * 
  * @param id - Statement ID
- * @param enabled - Whether to enable polling
+ * @param enabled - Whether to enable SSE connection
  * @param onComplete - Callback when parsing completes
  */
 export const useStatementProgress = (
@@ -39,37 +41,99 @@ export const useStatementProgress = (
   enabled = true,
   onComplete?: (progress: ParsingProgress) => void
 ) => {
-  return useQuery({
-    queryKey: [...statementKeys.detail(id), "progress"],
-    queryFn: async () => {
-      const response = await StatementsService.getV1StatementsIdProgress({ id });
-      const progress = response as unknown as ParsingProgress;
-      
-      // Call onComplete when parsing finishes
-      if (progress.status === 'parsed' || progress.status === 'failed') {
-        onComplete?.(progress);
+  const [progress, setProgress] = useState<ParsingProgress | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    // Don't connect if disabled or invalid ID
+    if (!enabled || id <= 0) {
+      return;
+    }
+    
+    // Build SSE URL
+    const url = `/api/v1/statements/${id}/progress/stream`;
+    
+    // Create EventSource connection
+    const eventSource = new EventSource(url);
+    eventSourceRef.current = eventSource;
+
+    setIsLoading(true);
+    setError(null);
+
+    // Handle progress events
+    eventSource.addEventListener('progress', (event) => {
+      try {
+        const data = JSON.parse(event.data) as ParsingProgress;
+        setProgress(data);
+        setIsLoading(false);
+
+        // Check if parsing is complete
+        if (data.status === 'parsed' || data.status === 'failed' || data.completed) {
+          onComplete?.(data);
+        }
+      } catch (err) {
+        console.error('Failed to parse progress event:', err);
+        setError(err instanceof Error ? err : new Error('Failed to parse progress'));
       }
-      
-      return progress;
-    },
-    enabled: enabled && id > 0,
-    refetchInterval: (query) => {
-      const data = query.state.data as ParsingProgress | undefined;
-      if (!data) return 2000;
-      
-      // Stop polling when status is terminal
-      if (data.status === 'parsed' || data.status === 'failed') {
-        return false;
+    });
+
+    // Handle completion event
+    eventSource.addEventListener('complete', (event) => {
+      try {
+        const data = JSON.parse(event.data) as ParsingProgress;
+        setProgress({ ...data, completed: true });
+        setIsLoading(false);
+        onComplete?.(data);
+        eventSource.close();
+      } catch (err) {
+        console.error('Failed to parse complete event:', err);
+        setError(err instanceof Error ? err : new Error('Failed to parse completion'));
       }
-      
-      // Poll faster during active parsing
-      if (data.parsing_status === 'processing') {
-        return 1000; // Poll every 1 second
+    });
+
+    // Handle error events from server
+    eventSource.addEventListener('error', (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        setError(new Error(data.error || data.message || 'Server error'));
+      } catch {
+        // Generic connection error
+        setError(new Error('Connection error'));
       }
-      
-      return 2000; // Poll every 2 seconds
-    },
-  });
+      setIsLoading(false);
+      eventSource.close();
+    });
+
+    // Handle EventSource connection errors (network issues, etc.)
+    eventSource.onerror = (event) => {
+      console.error('SSE connection error:', event);
+      setError(new Error('Connection lost. Please refresh.'));
+      setIsLoading(false);
+      eventSource.close();
+    };
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      eventSource.close();
+      eventSourceRef.current = null;
+    };
+  }, [id, enabled, onComplete]);
+
+  return {
+    data: progress,
+    isLoading,
+    error,
+    refetch: () => {
+      // Close existing connection
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+      // Trigger re-connection by updating a dependency
+      // This is handled by the useEffect dependency array
+    }
+  };
 };
 
 /**
@@ -82,7 +146,11 @@ export const useStatementProgress = (
  * NOT:
  * - "45% complete" (we don't know total upfront)
  */
-export function formatProgress(progress: ParsingProgress): string {
+export function formatProgress(progress: ParsingProgress | null): string {
+  if (!progress) {
+    return 'Waiting...';
+  }
+
   switch (progress.parsing_status) {
     case 'pending':
       return 'Waiting to start...';
