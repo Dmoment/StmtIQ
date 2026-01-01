@@ -25,7 +25,9 @@ import {
   Tag,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft
+  ChevronsLeft,
+  ChevronsRight,
+  TrendingDown
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CategoryPicker } from '../components/CategoryPicker';
@@ -50,22 +52,22 @@ const categoryIcons: Record<string, React.ElementType> = {
   other: HelpCircle,
 };
 
-// Fallback gradient colors for system categories (used when category.color is not set)
-const categoryGradients: Record<string, string> = {
-  shopping: 'from-pink-500 to-rose-500',
-  food: 'from-orange-500 to-amber-500',
-  transport: 'from-blue-500 to-cyan-500',
-  housing: 'from-violet-500 to-purple-500',
-  utilities: 'from-emerald-500 to-teal-500',
-  business: 'from-slate-500 to-zinc-500',
-  health: 'from-red-500 to-pink-500',
-  entertainment: 'from-indigo-500 to-purple-500',
-  transfer: 'from-sky-500 to-cyan-500',
-  salary: 'from-green-500 to-emerald-500',
-  investment: 'from-purple-500 to-fuchsia-500',
-  emi: 'from-amber-500 to-yellow-500',
-  tax: 'from-zinc-500 to-slate-500',
-  other: 'from-gray-500 to-slate-500',
+// Muted, professional category colors
+const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
+  shopping: { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200' },
+  food: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  transport: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  housing: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+  utilities: { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' },
+  business: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
+  health: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+  entertainment: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
+  transfer: { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
+  salary: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  investment: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200' },
+  emi: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+  tax: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
+  other: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
 };
 
 export function Transactions() {
@@ -74,18 +76,15 @@ export function Transactions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
   
-  // Category picker state
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
-  // Use React Query hooks
   const { data: transactions = [], isLoading: loading, error: queryError, refetch } = useTransactions({ 
     page: currentPage, 
     per_page: perPage 
   });
   
-  // Get unique statement IDs from transactions
   const statementIds = useMemo(() => {
     return [...new Set(transactions
       .map((tx) => tx.statement_id)
@@ -93,13 +92,10 @@ export function Transactions() {
     )];
   }, [transactions]);
 
-  // Fetch statement summaries for each unique statement ID using useQueries
-  // Uses statementSummaryQueryOptions for cache consistency with useStatementSummary hook
   const statementQueries = useQueries({
     queries: statementIds.map((id) => statementSummaryQueryOptions(id)),
   });
 
-  // Extract statement account types from summaries
   const statementAccountTypes = useMemo(() => {
     const typeMap = new Map<number, string>();
     statementQueries.forEach((query, index) => {
@@ -123,8 +119,6 @@ export function Transactions() {
   };
 
   const handleCategoryUpdate = () => {
-    // Transaction will be updated via React Query cache invalidation
-    // No need to manually update state
     refetch();
   };
 
@@ -150,7 +144,6 @@ export function Transactions() {
     .filter(tx => tx.transaction_type === 'credit')
     .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
 
-  // Check if we're viewing credit card transactions
   const creditCardStatementIds = Array.from(statementAccountTypes.entries())
     .filter(([, accountType]) => accountType === 'credit_card')
     .map(([id]) => id);
@@ -162,7 +155,6 @@ export function Transactions() {
   const isCreditCardView = creditCardTransactions.length > 0 && 
     creditCardTransactions.length === filteredTransactions.length;
   
-  // Credit card specific calculations
   const totalSpent = isCreditCardView ? totalDebits : 0;
   const paymentsMade = isCreditCardView ? totalCredits : 0;
   const outstandingBalance = isCreditCardView ? Math.max(totalDebits - totalCredits, 0) : 0;
@@ -175,7 +167,6 @@ export function Transactions() {
     }).format(amount);
   };
 
-  // Get icon for a category
   const getCategoryIcon = (slug: string | undefined) => {
     if (!slug) return HelpCircle;
     return categoryIcons[slug] || Tag;
@@ -184,7 +175,7 @@ export function Transactions() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center gap-3 text-slate-400">
+        <div className="flex items-center gap-3 text-slate-500">
           <Loader2 className="w-6 h-6 animate-spin" />
           <span>Loading transactions...</span>
         </div>
@@ -193,12 +184,12 @@ export function Transactions() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Transactions</h1>
+          <p className="text-slate-600 text-sm">
             {transactions.length} transactions loaded
           </p>
         </div>
@@ -206,19 +197,19 @@ export function Transactions() {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => refetch()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
           >
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors">
+          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
             <Download className="w-4 h-4" />
-            Export CSV
+            <span className="hidden sm:inline">Export CSV</span>
           </button>
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary Cards - Professional muted design */}
       {transactions.length > 0 && (
         <div className={clsx(
           "grid gap-4",
@@ -226,38 +217,59 @@ export function Transactions() {
         )}>
           {isCreditCardView ? (
             <>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-sm text-slate-400 mb-1">Total Spent</p>
-                <p className="text-2xl font-bold text-rose-400">{formatCurrency(totalSpent)}</p>
+              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingDown className="w-4 h-4 text-red-700" />
+                  <p className="text-sm font-medium text-slate-600">Total Spent</p>
+                </div>
+                <p className="text-2xl font-bold text-red-700">{formatCurrency(totalSpent)}</p>
               </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-sm text-slate-400 mb-1">Payments Made</p>
-                <p className="text-2xl font-bold text-emerald-400">{formatCurrency(paymentsMade)}</p>
+              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-700" />
+                  <p className="text-sm font-medium text-slate-600">Payments Made</p>
+                </div>
+                <p className="text-2xl font-bold text-emerald-700">{formatCurrency(paymentsMade)}</p>
               </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-sm text-slate-400 mb-1">Outstanding Balance</p>
-                <p className="text-2xl font-bold text-amber-400">{formatCurrency(outstandingBalance)}</p>
+              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard className="w-4 h-4 text-amber-700" />
+                  <p className="text-sm font-medium text-slate-600">Outstanding Balance</p>
+                </div>
+                <p className="text-2xl font-bold text-amber-700">{formatCurrency(outstandingBalance)}</p>
               </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-sm text-slate-400 mb-1">Amount Due</p>
-                <p className="text-2xl font-bold text-violet-400">{formatCurrency(outstandingBalance)}</p>
+              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Wallet className="w-4 h-4 text-slate-700" />
+                  <p className="text-sm font-medium text-slate-600">Amount Due</p>
+                </div>
+                <p className="text-2xl font-bold text-slate-900">{formatCurrency(outstandingBalance)}</p>
               </div>
             </>
           ) : (
             <>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-sm text-slate-400 mb-1">Total Debits</p>
-                <p className="text-2xl font-bold text-rose-400">{formatCurrency(totalDebits)}</p>
+              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingDown className="w-4 h-4 text-red-700" />
+                  <p className="text-sm font-medium text-slate-600">Total Debits</p>
+                </div>
+                <p className="text-2xl font-bold text-red-700">{formatCurrency(totalDebits)}</p>
               </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-sm text-slate-400 mb-1">Total Credits</p>
-                <p className="text-2xl font-bold text-emerald-400">{formatCurrency(totalCredits)}</p>
+              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-700" />
+                  <p className="text-sm font-medium text-slate-600">Total Credits</p>
+                </div>
+                <p className="text-2xl font-bold text-emerald-700">{formatCurrency(totalCredits)}</p>
               </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <p className="text-sm text-slate-400 mb-1">Net Flow</p>
+              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <ArrowRightLeft className="w-4 h-4 text-slate-700" />
+                  <p className="text-sm font-medium text-slate-600">Net Flow</p>
+                </div>
                 <p className={clsx(
                   "text-2xl font-bold",
-                  totalCredits - totalDebits >= 0 ? "text-emerald-400" : "text-rose-400"
+                  totalCredits - totalDebits >= 0 ? "text-emerald-700" : "text-red-700"
                 )}>
                   {formatCurrency(totalCredits - totalDebits)}
                 </p>
@@ -270,13 +282,13 @@ export function Transactions() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
             placeholder="Search transactions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-300 shadow-sm"
           />
         </div>
         
@@ -284,10 +296,10 @@ export function Transactions() {
           <button
             onClick={() => setSelectedCategory(null)}
             className={clsx(
-              "px-4 py-2 rounded-lg whitespace-nowrap transition-colors",
+              "px-4 py-2 rounded-lg whitespace-nowrap transition-colors border text-sm font-medium",
               !selectedCategory 
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                : "bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700"
+                ? "bg-slate-800 text-white border-slate-800" 
+                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
             )}
           >
             All
@@ -297,10 +309,10 @@ export function Transactions() {
               key={cat}
               onClick={() => setSelectedCategory(cat === selectedCategory ? null : cat)}
               className={clsx(
-                "px-4 py-2 rounded-lg capitalize whitespace-nowrap transition-colors",
+                "px-4 py-2 rounded-lg capitalize whitespace-nowrap transition-colors border text-sm font-medium",
                 cat === selectedCategory 
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                  : "bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700"
+                  ? "bg-slate-800 text-white border-slate-800" 
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
               )}
             >
               {cat}
@@ -311,21 +323,21 @@ export function Transactions() {
 
       {/* Error State */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400">
+        <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
           {error}
         </div>
       )}
 
       {/* Transactions Table/List */}
       {filteredTransactions.length === 0 ? (
-        <div className="rounded-2xl bg-slate-900 border border-slate-800 p-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-6">
-            <Filter className="w-8 h-8 text-slate-500" />
+        <div className="rounded-lg bg-white border border-slate-200 p-12 text-center shadow-sm">
+          <div className="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-6">
+            <Filter className="w-8 h-8 text-slate-600" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">
             {transactions.length === 0 ? 'No transactions yet' : 'No matching transactions'}
           </h3>
-          <p className="text-slate-400 max-w-md mx-auto">
+          <p className="text-slate-600 max-w-md mx-auto">
             {transactions.length === 0 
               ? 'Upload a bank statement to see your transactions here.'
               : 'Try adjusting your search or filter criteria.'}
@@ -333,17 +345,17 @@ export function Transactions() {
           {transactions.length === 0 && (
             <a 
               href="/upload"
-              className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-900 font-semibold hover:from-emerald-400 hover:to-cyan-400 transition-all"
+              className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-lg bg-slate-800 text-white font-semibold hover:bg-slate-700 transition-colors shadow-sm"
             >
               Upload Statement
             </a>
           )}
         </div>
       ) : (
-        <div className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+        <div className="rounded-lg bg-white border border-slate-200 overflow-hidden shadow-sm">
           {/* Table Header */}
-          <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b border-slate-800 text-sm font-medium text-slate-400">
-            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-slate-200">
+          <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b border-slate-200 text-sm font-semibold text-slate-600 bg-slate-50">
+            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-slate-900">
               Date <ArrowUpDown className="w-4 h-4" />
             </div>
             <div className="col-span-5">Description</div>
@@ -353,7 +365,7 @@ export function Transactions() {
           </div>
 
           {/* Table Body */}
-          <div className="divide-y divide-slate-800">
+          <div className="divide-y divide-slate-200">
             {filteredTransactions.map((tx) => {
               const category = tx.category || tx.ai_category;
               const categorySlug = category?.slug || 'other';
@@ -362,14 +374,13 @@ export function Transactions() {
               const confidence = tx.confidence ? parseFloat(tx.confidence) : null;
               const amount = parseFloat(tx.amount);
               
-              // Use category.color if available, otherwise fall back to gradient
               const hasCustomColor = !!categoryColor;
-              const gradientClass = categoryGradients[categorySlug] || categoryGradients.other;
+              const colorScheme = categoryColors[categorySlug] || categoryColors.other;
               
               return (
-                <div key={tx.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-800/50 transition-colors">
-                  <div className="col-span-12 sm:col-span-2 text-sm text-slate-400">
-                    <span className="sm:hidden font-medium text-slate-200 mr-2">
+                <div key={tx.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-50 transition-colors">
+                  <div className="col-span-12 sm:col-span-2 text-sm text-slate-600">
+                    <span className="sm:hidden font-medium text-slate-900 mr-2">
                       {tx.transaction_type === 'credit' ? '+' : '-'}₹{amount.toLocaleString('en-IN')}
                     </span>
                     {new Date(tx.transaction_date).toLocaleDateString('en-IN', { 
@@ -379,18 +390,16 @@ export function Transactions() {
                     })}
                   </div>
                   <div className="col-span-12 sm:col-span-5">
-                    <p className="font-medium truncate">{tx.description}</p>
+                    <p className="font-medium text-slate-900 truncate">{tx.description}</p>
                     {tx.raw_description && tx.raw_description !== tx.description && (
                       <p className="text-sm text-slate-500 truncate">{tx.raw_description}</p>
                     )}
                   </div>
                   <div className="col-span-6 sm:col-span-2">
-                    {/* Clickable Category Badge */}
                     <button
                       onClick={(e) => handleCategoryClick(tx, e)}
-                      className="group inline-flex items-center gap-2 hover:bg-slate-700/50 rounded-lg p-1 -m-1 transition-colors"
+                      className="group inline-flex items-center gap-2 hover:bg-slate-100 rounded-lg p-1 -m-1 transition-colors"
                     >
-                      {/* Category Icon with color */}
                       {hasCustomColor ? (
                         <div 
                           className="w-6 h-6 rounded-md flex items-center justify-center"
@@ -403,34 +412,36 @@ export function Transactions() {
                         </div>
                       ) : (
                         <div className={clsx(
-                          "w-6 h-6 rounded-md bg-gradient-to-br flex items-center justify-center",
-                          gradientClass
+                          "w-6 h-6 rounded-md flex items-center justify-center",
+                          colorScheme.bg
                         )}>
-                          <Icon className="w-3.5 h-3.5 text-white" />
+                          <Icon 
+                            className={clsx("w-3.5 h-3.5", colorScheme.text)} 
+                          />
                         </div>
                       )}
                       <span 
-                        className="text-sm capitalize group-hover:text-slate-100"
-                        style={hasCustomColor ? { color: categoryColor } : { color: '#cbd5e1' }}
+                        className="text-sm capitalize group-hover:text-slate-900"
+                        style={hasCustomColor ? { color: categoryColor } : {}}
                       >
                         {category?.name || 'Other'}
                       </span>
-                      <Edit2 className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
                   </div>
                   <div className={clsx(
-                    "hidden sm:block col-span-2 text-right font-medium",
-                    tx.transaction_type === 'credit' ? 'text-emerald-400' : 'text-slate-100'
+                    "hidden sm:block col-span-2 text-right font-semibold",
+                    tx.transaction_type === 'credit' ? 'text-emerald-700' : 'text-slate-900'
                   )}>
                     {tx.transaction_type === 'credit' ? '+' : '-'}₹{amount.toLocaleString('en-IN')}
                   </div>
                   <div className="col-span-6 sm:col-span-1 text-right">
                     {confidence !== null && (
                       <span className={clsx(
-                        "text-xs px-2 py-1 rounded-full",
-                        confidence > 0.8 ? "bg-emerald-500/20 text-emerald-400" :
-                        confidence > 0.5 ? "bg-amber-500/20 text-amber-400" :
-                        "bg-rose-500/20 text-rose-400"
+                        "text-xs px-2 py-1 rounded-full font-medium",
+                        confidence > 0.8 ? "bg-emerald-100 text-emerald-700" :
+                        confidence > 0.5 ? "bg-amber-100 text-amber-700" :
+                        "bg-red-100 text-red-700"
                       )}>
                         {Math.round(confidence * 100)}%
                       </span>
@@ -447,20 +458,19 @@ export function Transactions() {
       {!loading && transactions.length > 0 && (
         <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-400">
+            <span className="text-sm text-slate-600">
               Showing {((currentPage - 1) * perPage) + 1} - {((currentPage - 1) * perPage) + transactions.length} transactions
             </span>
             
-            {/* Per Page Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-500">Per page:</span>
+              <span className="text-sm text-slate-600">Per page:</span>
               <select
                 value={perPage}
                 onChange={(e) => {
                   setPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="bg-slate-800/50 border border-slate-700/50 rounded-lg px-2 py-1 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+                className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-300 shadow-sm"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -471,39 +481,47 @@ export function Transactions() {
           </div>
           
           <div className="flex items-center gap-2">
-            {/* First Page */}
             <button
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/50 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
               title="First page"
             >
               <ChevronsLeft className="w-4 h-4" />
             </button>
             
-            {/* Previous Page */}
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/50 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
               title="Previous page"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             
-            {/* Page Number */}
-            <span className="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800/30 rounded-lg border border-slate-700/30">
+            <span className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-50 rounded-lg border border-slate-200">
               Page {currentPage}
             </span>
             
-            {/* Next Page */}
             <button
               onClick={() => setCurrentPage(p => p + 1)}
               disabled={transactions.length < perPage}
-              className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-slate-700/50 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
               title="Next page"
             >
               <ChevronRight className="w-4 h-4" />
+            </button>
+            
+            <button
+              onClick={() => {
+                // Calculate last page - would need total count from API
+                setCurrentPage(p => p + 10); // Placeholder
+              }}
+              disabled={transactions.length < perPage}
+              className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              title="Last page"
+            >
+              <ChevronsRight className="w-4 h-4" />
             </button>
           </div>
         </div>

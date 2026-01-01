@@ -365,11 +365,11 @@ export function Upload() {
   const allStepsComplete = step1Complete && step2Complete && step3Complete;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Upload Statement</h1>
-        <p className="text-slate-400 mt-1">
+        <h1 className="text-2xl font-bold text-slate-900 mb-1">Upload Statement</h1>
+        <p className="text-slate-600 text-sm">
           Select your bank, account type, and file format to upload
         </p>
       </div>
@@ -380,22 +380,22 @@ export function Upload() {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className={clsx(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-              step1Complete ? "bg-emerald-500 text-white" : "bg-slate-700 text-slate-400"
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
+              step1Complete ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-500"
             )}>
               {step1Complete ? <CheckCircle2 className="w-4 h-4" /> : "1"}
             </span>
-            <label className="text-sm font-medium text-slate-300">Select Bank</label>
+            <label className={clsx("text-sm font-medium", step1Complete ? "text-slate-900" : "text-slate-600")}>Select Bank</label>
           </div>
           
           <div className="relative">
             <button
               onClick={() => setShowBankDropdown(!showBankDropdown)}
               className={clsx(
-                "w-full flex items-center justify-between gap-3 p-4 rounded-xl border transition-colors text-left",
+                "w-full flex items-center justify-between gap-3 p-4 rounded-lg border transition-colors text-left bg-white shadow-sm",
                 step1Complete 
-                  ? "bg-slate-800/50 border-emerald-500/50" 
-                  : "bg-slate-900 border-slate-700 hover:border-slate-600"
+                  ? "border-slate-800" 
+                  : "border-slate-200 hover:border-slate-300"
               )}
             >
               {selectedBank ? (
@@ -419,16 +419,16 @@ export function Upload() {
                   <span className="font-medium">{selectedBank.bank_name}</span>
                 </div>
               ) : (
-                <span className="text-slate-400">Choose your bank...</span>
+                <span className="text-slate-500">Choose your bank...</span>
               )}
               <ChevronDown className={clsx(
-                "w-5 h-5 text-slate-400 transition-transform",
+                "w-5 h-5 text-slate-500 transition-transform",
                 showBankDropdown && "rotate-180"
               )} />
             </button>
 
             {showBankDropdown && (
-              <div className="absolute z-20 mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl shadow-xl max-h-80 overflow-y-auto">
+              <div className="absolute z-20 mt-2 w-full bg-white border border-slate-200 rounded-lg shadow-xl max-h-80 overflow-y-auto">
                 {loadingTemplates ? (
                   <div className="p-4 text-center text-slate-400">
                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
@@ -439,8 +439,8 @@ export function Upload() {
                       key={bank.bank_code}
                       onClick={() => selectBank(bank)}
                       className={clsx(
-                        "w-full flex items-center gap-3 p-3 hover:bg-slate-800 transition-colors",
-                        selectedBank?.bank_code === bank.bank_code && "bg-slate-800"
+                        "w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors",
+                        selectedBank?.bank_code === bank.bank_code && "bg-slate-50"
                       )}
                     >
                       {bank.logo_url ? (
@@ -472,12 +472,12 @@ export function Upload() {
         <div className={clsx("space-y-3 transition-opacity", !step1Complete && "opacity-50 pointer-events-none")}>
           <div className="flex items-center gap-2">
             <span className={clsx(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-              step2Complete ? "bg-emerald-500 text-white" : "bg-slate-700 text-slate-400"
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
+              step2Complete ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-500"
             )}>
               {step2Complete ? <CheckCircle2 className="w-4 h-4" /> : "2"}
             </span>
-            <label className="text-sm font-medium text-slate-300">Select Account Type</label>
+            <label className={clsx("text-sm font-medium", step2Complete ? "text-slate-900" : "text-slate-600")}>Select Account Type</label>
           </div>
           
           <div className="flex flex-wrap gap-3">
@@ -491,19 +491,15 @@ export function Upload() {
                   key={type}
                   onClick={() => selectAccountType(type)}
                   className={clsx(
-                    "flex items-center gap-2 px-4 py-3 rounded-xl border transition-all",
+                    "flex items-center gap-2 px-4 py-3 rounded-lg border transition-all bg-white shadow-sm",
                     isSelected 
-                      ? `bg-${config.color}-500/20 border-${config.color}-500 text-${config.color}-300`
-                      : "bg-slate-900 border-slate-700 hover:border-slate-600 text-slate-300"
+                      ? "border-slate-800 bg-slate-50 text-slate-900"
+                      : "border-slate-200 hover:border-slate-300 text-slate-700"
                   )}
-                  style={isSelected ? {
-                    backgroundColor: `rgb(var(--${config.color}-500) / 0.2)`,
-                    borderColor: `rgb(var(--${config.color}-500))`,
-                  } : undefined}
                 >
                   <Icon className={clsx(
                     "w-5 h-5",
-                    isSelected ? `text-${config.color}-400` : "text-slate-400"
+                    isSelected ? "text-slate-900" : "text-slate-500"
                   )} />
                   <span className="font-medium">{config.label}</span>
                 </button>
@@ -520,12 +516,12 @@ export function Upload() {
         <div className={clsx("space-y-3 transition-opacity", !step2Complete && "opacity-50 pointer-events-none")}>
           <div className="flex items-center gap-2">
             <span className={clsx(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-              step3Complete ? "bg-emerald-500 text-white" : "bg-slate-700 text-slate-400"
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
+              step3Complete ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-500"
             )}>
               {step3Complete ? <CheckCircle2 className="w-4 h-4" /> : "3"}
             </span>
-            <label className="text-sm font-medium text-slate-300">Select File Format</label>
+            <label className={clsx("text-sm font-medium", step3Complete ? "text-slate-900" : "text-slate-600")}>Select File Format</label>
           </div>
           
           <div className="flex flex-wrap gap-3">
@@ -539,18 +535,18 @@ export function Upload() {
                   key={format}
                   onClick={() => setSelectedFormat(format)}
                   className={clsx(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl border transition-all",
+                    "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all bg-white shadow-sm",
                     isSelected 
-                      ? "bg-violet-500/20 border-violet-500"
-                      : "bg-slate-900 border-slate-700 hover:border-slate-600"
+                      ? "border-slate-800 bg-slate-50"
+                      : "border-slate-200 hover:border-slate-300"
                   )}
                 >
                   <Icon className={clsx(
                     "w-5 h-5",
-                    isSelected ? "text-violet-400" : "text-slate-400"
+                    isSelected ? "text-slate-900" : "text-slate-500"
                   )} />
                   <div className="text-left">
-                    <p className={clsx("font-medium", isSelected ? "text-violet-300" : "text-slate-300")}>
+                    <p className={clsx("font-medium", isSelected ? "text-slate-900" : "text-slate-700")}>
                       {config.label}
                     </p>
                     {config.description && (
@@ -575,10 +571,10 @@ export function Upload() {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={clsx(
-            "relative rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-200",
+            "relative rounded-lg border-2 border-dashed p-12 text-center transition-all duration-200 bg-white shadow-sm",
             isDragging 
-              ? "border-violet-500 bg-violet-500/10" 
-              : "border-slate-700 hover:border-slate-600 bg-slate-900"
+              ? "border-slate-800 bg-slate-50" 
+              : "border-slate-300 hover:border-slate-400"
           )}
         >
           <input
@@ -591,24 +587,24 @@ export function Upload() {
           />
           
           <div className={clsx(
-            "w-16 h-16 rounded-2xl bg-gradient-to-br flex items-center justify-center mx-auto mb-6 transition-transform",
-            isDragging ? "scale-110 from-violet-500 to-fuchsia-500" : "from-violet-500/20 to-fuchsia-500/20 border border-violet-500/30"
+            "w-16 h-16 rounded-lg bg-slate-100 border-2 border-dashed flex items-center justify-center mx-auto mb-6 transition-transform",
+            isDragging ? "scale-110 border-slate-800 bg-slate-200" : "border-slate-300"
           )}>
             <UploadIcon className={clsx(
               "w-8 h-8",
-              isDragging ? "text-white" : "text-violet-400"
+              isDragging ? "text-slate-900" : "text-slate-600"
             )} />
           </div>
           
-          <h3 className="text-xl font-semibold mb-2">
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">
             {isDragging ? "Drop files here" : "Drag & drop your statements"}
           </h3>
-          <p className="text-slate-400 mb-4">
+          <p className="text-slate-600 mb-4">
             or click to browse from your computer
           </p>
           <p className="text-sm text-slate-500">
-            Upload <strong className="text-violet-400">{selectedTemplate.file_format.toUpperCase()}</strong> files for{' '}
-            <strong className="text-white">{selectedBank?.bank_name}</strong>{' '}
+            Upload <strong className="text-slate-900">{selectedTemplate.file_format.toUpperCase()}</strong> files for{' '}
+            <strong className="text-slate-900">{selectedBank?.bank_name}</strong>{' '}
             {accountTypeConfig[selectedAccountType!]?.label || selectedAccountType}
           </p>
         </div>
@@ -616,14 +612,14 @@ export function Upload() {
 
       {/* Incomplete selection message */}
       {!allStepsComplete && !loadingTemplates && (
-        <div className="p-8 rounded-2xl border-2 border-dashed border-slate-700 bg-slate-900/50 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4">
-            <UploadIcon className="w-8 h-8 text-slate-500" />
+        <div className="p-8 rounded-lg border-2 border-dashed border-slate-300 bg-white text-center shadow-sm">
+          <div className="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
+            <UploadIcon className="w-8 h-8 text-slate-600" />
           </div>
-          <h3 className="text-lg font-medium text-slate-400 mb-2">
+          <h3 className="text-lg font-medium text-slate-900 mb-2">
             Complete the selection above
           </h3>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-600">
             Select your bank, account type, and file format to upload statements
           </p>
         </div>
@@ -631,16 +627,16 @@ export function Upload() {
 
       {/* Success Summary */}
       {successCount > 0 && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+        <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            <span className="text-emerald-300">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            <span className="text-emerald-700 font-medium">
               Successfully parsed {successCount} file{successCount > 1 ? 's' : ''} with {totalTransactions} transactions
             </span>
           </div>
           <a 
             href="/transactions"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
           >
             View Transactions
             <ArrowRight className="w-4 h-4" />
@@ -658,10 +654,10 @@ export function Upload() {
                 onClick={uploadAllFiles}
                 disabled={isUploading || !selectedTemplate}
                 className={clsx(
-                  "px-4 py-2 rounded-lg font-medium transition-all",
+                  "px-4 py-2 rounded-lg font-medium transition-all shadow-sm",
                   isUploading || !selectedTemplate
-                    ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white hover:from-violet-400 hover:to-fuchsia-400"
+                    ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                    : "bg-slate-800 text-white hover:bg-slate-700"
                 )}
               >
                 {isUploading ? 'Uploading...' : 'Upload All'}
@@ -673,28 +669,28 @@ export function Upload() {
             {files.map((file, index) => (
               <div 
                 key={index}
-                className="flex items-center gap-4 p-4 rounded-xl bg-slate-900 border border-slate-800"
+                className="flex items-center gap-4 p-4 rounded-lg bg-white border border-slate-200 shadow-sm"
               >
                 <div className={clsx(
                   "w-10 h-10 rounded-lg flex items-center justify-center",
-                  file.status === 'success' ? "bg-emerald-500/20" :
-                  file.status === 'error' ? "bg-rose-500/20" :
-                  "bg-slate-800"
+                  file.status === 'success' ? "bg-emerald-100" :
+                  file.status === 'error' ? "bg-red-100" :
+                  "bg-slate-100"
                 )}>
                   <FileText className={clsx(
                     "w-5 h-5",
-                    file.status === 'success' ? "text-emerald-400" :
-                    file.status === 'error' ? "text-rose-400" :
-                    "text-slate-400"
+                    file.status === 'success' ? "text-emerald-600" :
+                    file.status === 'error' ? "text-red-600" :
+                    "text-slate-600"
                   )} />
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{file.file.name}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-medium text-slate-900 truncate">{file.file.name}</p>
+                  <p className="text-sm text-slate-600">
                     {(file.file.size / 1024).toFixed(1)} KB
                     {file.transactionCount !== undefined && (
-                      <span className="ml-2 text-emerald-400">
+                      <span className="ml-2 text-emerald-600 font-medium">
                         • {file.transactionCount} transactions
                       </span>
                     )}
@@ -704,11 +700,11 @@ export function Upload() {
                 <div className="flex items-center gap-3">
                   {file.status === 'idle' && (
                     <>
-                      <span className="text-sm text-slate-500">Ready</span>
+                      <span className="text-sm text-slate-600">Ready</span>
                       <button
                         onClick={() => uploadFile(index)}
                         disabled={isUploading || !selectedTemplate}
-                        className="px-3 py-1.5 rounded-lg bg-slate-800 text-sm hover:bg-slate-700 transition-colors"
+                        className="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-sm hover:bg-slate-700 transition-colors shadow-sm disabled:opacity-50"
                       >
                         Upload
                       </button>
@@ -717,33 +713,33 @@ export function Upload() {
                   
                   {file.status === 'uploading' && (
                     <div className="flex items-center gap-2">
-                      <div className="w-24 h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div className="w-24 h-2 rounded-full bg-slate-200 overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-300"
+                          className="h-full bg-slate-800 transition-all duration-300"
                           style={{ width: `${file.progress}%` }}
                         />
                       </div>
-                      <span className="text-sm text-slate-400 w-10">{file.progress}%</span>
+                      <span className="text-sm text-slate-600 w-10">{file.progress}%</span>
                     </div>
                   )}
                   
                   {file.status === 'processing' && (
-                    <div className="flex items-center gap-2 text-amber-400">
+                    <div className="flex items-center gap-2 text-amber-600">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span className="text-sm">Parsing...</span>
                     </div>
                   )}
                   
                   {file.status === 'success' && (
-                    <div className="flex items-center gap-2 text-emerald-400">
+                    <div className="flex items-center gap-2 text-emerald-600">
                       <CheckCircle2 className="w-5 h-5" />
-                      <span className="text-sm">Complete</span>
+                      <span className="text-sm font-medium">Complete</span>
                     </div>
                   )}
                   
                   {file.status === 'error' && (
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 text-rose-400">
+                      <div className="flex items-center gap-2 text-red-600">
                         <AlertCircle className="w-5 h-5" />
                         <span className="text-sm max-w-[150px] truncate" title={file.error}>
                           {file.error}
@@ -751,7 +747,7 @@ export function Upload() {
                       </div>
                       <button
                         onClick={() => retryFile(index)}
-                        className="p-1.5 hover:bg-slate-800 rounded text-slate-400 hover:text-slate-200"
+                        className="p-1.5 hover:bg-slate-100 rounded text-slate-600 hover:text-slate-900"
                         title="Retry"
                       >
                         <RefreshCw className="w-4 h-4" />
@@ -762,7 +758,7 @@ export function Upload() {
                   {(file.status === 'idle' || file.status === 'error') && (
                     <button
                       onClick={() => removeFile(index)}
-                      className="p-1 hover:bg-slate-800 rounded"
+                      className="p-1 hover:bg-slate-100 rounded"
                     >
                       <X className="w-4 h-4 text-slate-500" />
                     </button>
@@ -775,19 +771,22 @@ export function Upload() {
       )}
 
       {/* Tips Section */}
-      <div className="p-6 rounded-xl bg-slate-900 border border-slate-800">
-        <h3 className="font-semibold mb-4">💡 Tips for best results</h3>
-        <ul className="space-y-2 text-sm text-slate-400">
+      <div className="p-6 rounded-lg bg-slate-800 text-white border border-slate-700">
+        <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <span className="text-2xl">💡</span>
+          <span>Tips for best results</span>
+        </h3>
+        <ul className="space-y-2 text-sm text-slate-300">
           <li className="flex items-start gap-2">
-            <span className="text-violet-400 mt-0.5">•</span>
-            <span>Download statements from your bank's <strong className="text-slate-200">NetBanking portal</strong></span>
+            <span className="text-white mt-0.5">•</span>
+            <span>Download statements from your bank's <strong className="text-white">NetBanking portal</strong></span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-violet-400 mt-0.5">•</span>
-            <span><strong className="text-slate-200">Excel and CSV</strong> formats provide better parsing accuracy than PDF</span>
+            <span className="text-white mt-0.5">•</span>
+            <span><strong className="text-white">Excel and CSV</strong> formats provide better parsing accuracy than PDF</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-violet-400 mt-0.5">•</span>
+            <span className="text-white mt-0.5">•</span>
             <span>Transactions are automatically categorized using AI after parsing</span>
           </li>
         </ul>
