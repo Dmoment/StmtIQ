@@ -37,7 +37,7 @@ gem "redis", "~> 5.0"
 # ============================================
 # File Processing & Parsing
 # ============================================
-gem "pdf-reader", "~> 2.11"        # PDF text extraction
+gem "pdf-reader", "~> 2.15"        # PDF text extraction
 gem "roo", "~> 2.10"               # Excel/CSV parsing (fallback for XLS)
 gem "roo-xls", "~> 1.2"            # .xls support
 gem "creek", "~> 2.6"              # TRUE streaming XLSX parser (memory-efficient)
