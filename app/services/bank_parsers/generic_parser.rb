@@ -1,112 +1,159 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/xlsx_streaming'
+
 module BankParsers
   class GenericParser < BaseParser
-    def parse
+    include Concerns::XlsxStreaming
+
+    # ============================================
+    # Streaming API (ONLY way to parse)
+    # ============================================
+
+    def each_transaction(&block)
+      return enum_for(:each_transaction) unless block_given?
+
+      @resolved_header_map = nil
+
       case File.extname(file_path).downcase
       when '.csv'
-        parse_csv
+        stream_csv(&block)
       when '.xls'
-        parse_xls
+        stream_xls(&block)
       when '.xlsx'
-        parse_xlsx
+        stream_xlsx(&block)
       else
         @errors << "Unsupported file format"
-        []
       end
     end
 
     private
 
-    def parse_csv
-      require 'csv'
-
-      transactions = []
-      skip_rows = parser_config[:skip_rows].to_i
-
-      CSV.foreach(file_path, headers: true, skip_blanks: true, liberal_parsing: true) do |row|
-        next if skip_rows > 0 && $. <= skip_rows + 1 # +1 for header
-
-        data = extract_transaction_data(row.to_h.with_indifferent_access)
-        transactions << data if valid_transaction_row?(data)
-      end
-
-      transactions
-    rescue => e
-      @errors << "CSV parsing error: #{e.message}"
-      []
-    end
-
-    def parse_xls
-      doc = Roo::Excel.new(file_path)
-      parse_spreadsheet(doc)
-    rescue => e
-      @errors << "XLS parsing error: #{e.message}"
-      []
-    end
-
-    def parse_xlsx
-      doc = Roo::Excelx.new(file_path)
-      parse_spreadsheet(doc)
-    rescue => e
-      @errors << "XLSX parsing error: #{e.message}"
-      []
-    end
-
-    def parse_spreadsheet(doc)
-      sheet = doc.sheet(0)
-      transactions = []
-
-      # Find header row
-      header_indicators = [
+    def header_indicators
+      [
         column_mappings[:date],
         column_mappings[:narration],
         column_mappings[:description],
-        'date', 'transaction', 'narration'
+        'date', 'transaction', 'narration', 'amount'
       ].compact
-
-      header_row_idx = parser_config[:header_row] || find_header_row(sheet, header_indicators)
-      headers = sheet.row(header_row_idx)
-
-      ((header_row_idx + 1)..sheet.last_row).each do |row_idx|
-        row = sheet.row(row_idx)
-        next if row.all?(&:nil?)
-
-        row_hash = row_to_hash(row, headers)
-        data = extract_transaction_data(row_hash)
-        transactions << data if valid_transaction_row?(data)
-      end
-
-      transactions
     end
 
-    def extract_transaction_data(row)
+    # ✅ TRUE STREAMING: Uses CSV.foreach
+    def stream_csv(&block)
+      require 'csv'
+
+      skip_rows = parser_config[:skip_rows].to_i
+      row_count = 0
+      headers_built = false
+
+      CSV.foreach(
+        file_path,
+        headers: true,
+        skip_blanks: true,
+        liberal_parsing: true
+      ) do |row|
+        row_count += 1
+        next if skip_rows > 0 && row_count <= skip_rows
+
+        unless headers_built
+          build_resolved_header_map!(row.headers)
+          headers_built = true
+        end
+
+        row_hash = row.to_h.with_indifferent_access
+        data = extract_transaction_data(row_hash)
+        yield data if valid_transaction_row?(data)
+      end
+    rescue => e
+      @errors << "CSV parsing error: #{e.message}"
+    end
+
+    # ⚠️ XLS: Roo with size limit
+    def stream_xls(&block)
+      stream_xls_with_roo(header_indicators: header_indicators) do |row_hash, _headers|
+        data = extract_transaction_data(row_hash)
+        yield data if valid_transaction_row?(data)
+      end
+    end
+
+    # ✅ XLSX: True streaming with Creek
+    def stream_xlsx(&block)
+      stream_xlsx_with_creek(header_indicators: header_indicators) do |row_hash, _headers|
+        data = extract_transaction_data(row_hash)
+        yield data if valid_transaction_row?(data)
+      end
+    end
+
+    def on_headers_found(headers)
+      build_resolved_header_map!(headers)
+    end
+
+    # ============================================
+    # Header Resolution (O(1) lookups)
+    # ============================================
+
+    def build_resolved_header_map!(headers)
+      @resolved_header_map = {}
       mappings = column_mappings
 
-      # Get date
-      date_col = mappings[:date] || mappings[:transaction_date] || mappings[:txn_date]
-      transaction_date = parse_date(row[date_col])
+      normalized_index = headers.each_with_index.to_h do |h, i|
+        [h&.to_s&.downcase&.strip, headers[i]]
+      end
 
-      # Get description
-      desc_col = mappings[:narration] || mappings[:description] || mappings[:particulars]
-      description = clean_description(row[desc_col])
+      {
+        date: [mappings[:date], mappings[:transaction_date], mappings[:txn_date], 'date'].compact,
+        narration: [mappings[:narration], mappings[:description], mappings[:particulars], 'narration', 'description'].compact,
+        reference: [mappings[:reference], mappings[:chq_no], mappings[:ref_no], 'reference'].compact,
+        withdrawal: [mappings[:withdrawal], mappings[:debit], mappings[:dr], 'withdrawal', 'debit'].compact,
+        deposit: [mappings[:deposit], mappings[:credit], mappings[:cr], 'deposit', 'credit'].compact,
+        amount: [mappings[:amount], 'amount'].compact,
+        balance: [mappings[:balance], mappings[:closing_balance], 'balance'].compact,
+        cr_dr: [mappings[:cr_dr], 'cr/dr', 'type'].compact
+      }.each do |key, candidates|
+        candidates.each do |c|
+          normalized = c.to_s.downcase.strip
+          if normalized_index[normalized]
+            @resolved_header_map[key] = normalized_index[normalized]
+            break
+          end
+        end
+      end
+    end
 
-      # Get reference
-      ref_col = mappings[:reference] || mappings[:chq_no] || mappings[:ref_no]
-      reference = row[ref_col]&.to_s&.strip
+    def get_fast(row, key)
+      col = @resolved_header_map&.[](key)
+      col ? row[col] : nil
+    end
 
-      # Get amount and type
-      withdrawal_col = mappings[:withdrawal] || mappings[:debit] || mappings[:dr]
-      deposit_col = mappings[:deposit] || mappings[:credit] || mappings[:cr]
-      amount_col = mappings[:amount]
-      cr_dr_col = mappings[:cr_dr]
+    # ============================================
+    # Transaction Extraction
+    # ============================================
 
-      transaction_type = determine_transaction_type(row, withdrawal_col, deposit_col, cr_dr_col)
-      amount = get_amount(row, withdrawal_col, deposit_col, amount_col)
+    def extract_transaction_data(row)
+      transaction_date = parse_date(get_fast(row, :date))
+      description = clean_description(get_fast(row, :narration))
+      reference = get_fast(row, :reference)&.to_s&.strip
 
-      # Get balance
-      balance_col = mappings[:balance] || mappings[:closing_balance]
-      balance = parse_amount(row[balance_col])
+      withdrawal = parse_amount(get_fast(row, :withdrawal))
+      deposit = parse_amount(get_fast(row, :deposit))
+      amount_col = parse_amount(get_fast(row, :amount))
+      cr_dr = get_fast(row, :cr_dr)
+
+      if deposit > 0
+        transaction_type = 'credit'
+        amount = deposit
+      elsif withdrawal > 0
+        transaction_type = 'debit'
+        amount = withdrawal
+      elsif amount_col > 0
+        transaction_type = determine_type_from_cr_dr(cr_dr) || 'debit'
+        amount = amount_col
+      else
+        transaction_type = 'debit'
+        amount = 0
+      end
+
+      balance = parse_amount(get_fast(row, :balance))
 
       {
         transaction_date: transaction_date,
@@ -123,6 +170,14 @@ module BankParsers
           template_id: template.id
         }
       }
+    end
+
+    def determine_type_from_cr_dr(value)
+      return nil if value.blank?
+      normalized = value.to_s.strip.downcase
+      return 'credit' if normalized.start_with?('cr', 'c')
+      return 'debit' if normalized.start_with?('dr', 'd')
+      nil
     end
   end
 end

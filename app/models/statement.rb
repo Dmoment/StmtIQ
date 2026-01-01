@@ -122,6 +122,24 @@ class Statement < ApplicationRecord
     }
   end
 
+  # Parsing progress from metadata
+  def parsing_progress
+    metadata&.dig('parsing_progress') || {
+      'status' => status,
+      'total' => 0,
+      'processed' => 0,
+      'percentage' => 0
+    }
+  end
+
+  def parsing_percentage
+    parsing_progress['percentage'] || 0
+  end
+
+  def parsing_status
+    parsing_progress['status'] || status
+  end
+
   private
 
   def set_defaults

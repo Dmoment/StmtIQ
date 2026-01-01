@@ -1,107 +1,129 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/xlsx_streaming'
+
 module BankParsers
   class AxisParser < BaseParser
-    def parse
+    include Concerns::XlsxStreaming
+
+    HEADER_INDICATORS = ['Tran Date', 'PARTICULARS', 'DR', 'CR', 'BAL'].freeze
+
+    def each_transaction(&block)
+      return enum_for(:each_transaction) unless block_given?
+
+      @resolved_header_map = nil
+      @cached_skip_patterns = nil
+
       case File.extname(file_path).downcase
       when '.csv'
-        parse_csv
+        stream_csv(&block)
       when '.xls'
-        parse_xls
+        stream_xls(&block)
       when '.xlsx'
-        parse_xlsx
+        stream_xlsx(&block)
       else
         @errors << "Unsupported file format for Axis Bank"
-        []
       end
     end
 
     private
 
-    def parse_csv
+    def stream_csv(&block)
       require 'csv'
 
-      transactions = []
+      headers_found = false
       headers = nil
-      data_started = false
 
-      File.readlines(file_path, encoding: 'UTF-8').each_with_index do |line, idx|
-        next if line.strip.empty?
+      CSV.foreach(file_path, encoding: 'UTF-8', liberal_parsing: true, skip_blanks: true).with_index do |row, idx|
+        next if row.nil? || row.all?(&:nil?)
 
-        if !data_started && (line.include?('Tran Date') || line.include?('PARTICULARS'))
-          headers = CSV.parse_line(line)
-          data_started = true
+        row_text = row.compact.map(&:to_s).join(' ')
+        if !headers_found && (row_text.include?('Tran Date') || row_text.include?('PARTICULARS'))
+          headers = row.map { |h| h&.to_s&.strip }
+          build_resolved_header_map!(headers)
+          headers_found = true
           next
         end
 
-        next unless data_started && headers
+        next unless headers_found
 
         begin
-          row = CSV.parse_line(line)
-          next if row.nil? || row.all?(&:nil?)
-
           row_hash = row_to_hash(row, headers)
+          next if summary_row?(row_hash)
           data = extract_axis_transaction(row_hash)
-          transactions << data if valid_transaction_row?(data)
+          yield data if valid_transaction_row?(data)
         rescue => e
-          Rails.logger.warn("Axis CSV row parse error at line #{idx}: #{e.message}")
+          Rails.logger.warn("Axis CSV error at line #{idx}: #{e.message}")
           next
         end
       end
-
-      transactions
     rescue => e
       @errors << "Axis CSV parsing error: #{e.message}"
-      []
     end
 
-    def parse_xls
-      doc = Roo::Excel.new(file_path)
-      parse_spreadsheet(doc)
-    rescue => e
-      @errors << "Axis XLS parsing error: #{e.message}"
-      []
-    end
-
-    def parse_xlsx
-      doc = Roo::Excelx.new(file_path)
-      parse_spreadsheet(doc)
-    rescue => e
-      @errors << "Axis XLSX parsing error: #{e.message}"
-      []
-    end
-
-    def parse_spreadsheet(doc)
-      sheet = doc.sheet(0)
-      transactions = []
-
-      header_indicators = ['Tran Date', 'PARTICULARS', 'DR', 'CR', 'BAL']
-      header_row_idx = find_header_row(sheet, header_indicators)
-      headers = sheet.row(header_row_idx).map { |h| h&.to_s&.strip }
-
-      ((header_row_idx + 1)..sheet.last_row).each do |row_idx|
-        row = sheet.row(row_idx)
-        next if row.all?(&:nil?)
-
-        row_hash = row_to_hash(row, headers)
+    def stream_xls(&block)
+      stream_xls_with_roo(header_indicators: HEADER_INDICATORS) do |row_hash, _|
         next if summary_row?(row_hash)
-
         data = extract_axis_transaction(row_hash)
-        transactions << data if valid_transaction_row?(data)
+        yield data if valid_transaction_row?(data)
       end
+    end
 
-      transactions
+    def stream_xlsx(&block)
+      stream_xlsx_with_creek(header_indicators: HEADER_INDICATORS) do |row_hash, _|
+        next if summary_row?(row_hash)
+        data = extract_axis_transaction(row_hash)
+        yield data if valid_transaction_row?(data)
+      end
+    end
+
+    def on_headers_found(headers)
+      build_resolved_header_map!(headers)
+    end
+
+    def build_resolved_header_map!(headers)
+      @resolved_header_map = {}
+      normalized_index = headers.each_with_index.to_h { |h, i| [h&.downcase&.strip, headers[i]] }
+
+      {
+        date: ['tran date', 'transaction date', 'date'],
+        narration: ['particulars', 'description'],
+        reference: ['chqno', 'cheque no', 'reference'],
+        debit: ['dr', 'debit'],
+        credit: ['cr', 'credit'],
+        balance: ['bal', 'balance']
+      }.each do |key, candidates|
+        candidates.each do |c|
+          if normalized_index[c]
+            @resolved_header_map[key] = normalized_index[c]
+            break
+          end
+        end
+      end
+    end
+
+    def get_fast(row, key)
+      col = @resolved_header_map&.[](key)
+      col ? row[col] : nil
+    end
+
+    def cached_skip_patterns
+      @cached_skip_patterns ||= ['opening balance', 'closing balance', 'total'].freeze
+    end
+
+    def summary_row?(row)
+      particulars = get_fast(row, :narration)&.to_s&.downcase || ''
+      return true if particulars.blank?
+      cached_skip_patterns.any? { |p| particulars.include?(p) }
     end
 
     def extract_axis_transaction(row)
-      date = parse_date(row['Tran Date'] || row['Transaction Date'] || row['Date'])
+      date = parse_date(get_fast(row, :date))
+      narration = clean_description(get_fast(row, :narration))
+      reference = get_fast(row, :reference)&.to_s&.strip
 
-      narration = clean_description(row['PARTICULARS'] || row['Particulars'] || row['Description'])
-      reference = (row['CHQNO'] || row['Cheque No'] || row['Reference'])&.to_s&.strip
-
-      # Axis uses DR/CR columns
-      debit = parse_amount(row['DR'] || row['Debit'])
-      credit = parse_amount(row['CR'] || row['Credit'])
+      debit = parse_amount(get_fast(row, :debit))
+      credit = parse_amount(get_fast(row, :credit))
 
       if credit > 0
         transaction_type = 'credit'
@@ -111,7 +133,7 @@ module BankParsers
         amount = debit
       end
 
-      balance = parse_amount(row['BAL'] || row['Balance'])
+      balance = parse_amount(get_fast(row, :balance))
 
       {
         transaction_date: date,
@@ -121,21 +143,8 @@ module BankParsers
         transaction_type: transaction_type,
         balance: balance,
         reference: reference,
-        metadata: {
-          bank: 'axis',
-          account_type: template.account_type,
-          source: 'statement_import',
-          template_id: template.id
-        }
+        metadata: { bank: 'axis', account_type: template.account_type, source: 'statement_import', template_id: template.id }
       }
-    end
-
-    def summary_row?(row)
-      particulars = (row['PARTICULARS'] || row['Particulars'] || '')&.to_s&.downcase
-      particulars.include?('opening balance') ||
-        particulars.include?('closing balance') ||
-        particulars.include?('total') ||
-        particulars.blank?
     end
   end
 end

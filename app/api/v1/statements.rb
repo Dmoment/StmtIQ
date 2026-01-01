@@ -118,6 +118,28 @@ module V1
         statement = current_user.statements.includes(:bank_template, :transactions).find(params[:id])
         present statement, with: V1::Entities::StatementSummary
       end
+
+      desc 'Get parsing progress'
+      params do
+        requires :id, type: Integer
+      end
+      get ':id/progress' do
+        authenticate!
+
+        statement = current_user.statements.find(params[:id])
+        progress = statement.parsing_progress
+
+        {
+          id: statement.id,
+          status: statement.status,
+          parsing_status: progress['status'],
+          total: progress['total'],
+          processed: progress['processed'],
+          percentage: progress['percentage'],
+          transaction_count: statement.transactions.count,
+          updated_at: progress['updated_at']
+        }
+      end
     end
   end
 end

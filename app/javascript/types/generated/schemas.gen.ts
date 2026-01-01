@@ -240,3 +240,165 @@ export const $patchV1TransactionsBulk = {
     required: ['transaction_ids'],
     description: 'Bulk update transactions'
 } as const;
+
+export const $postV1UploadsPresign = {
+    type: 'object',
+    properties: {
+        filename: {
+            type: 'string',
+            description: 'Original filename'
+        },
+        content_type: {
+            type: 'string',
+            description: 'File MIME type'
+        },
+        file_size: {
+            type: 'integer',
+            format: 'int32',
+            description: 'File size in bytes'
+        }
+    },
+    required: ['filename', 'content_type'],
+    description: 'Get presigned URL for direct S3 upload'
+} as const;
+
+export const $V1_Entities_PresignedUpload = {
+    type: 'object',
+    properties: {
+        upload_url: {
+            type: 'string',
+            description: 'Presigned S3 URL for direct upload'
+        },
+        s3_key: {
+            type: 'string',
+            description: 'S3 object key for the upload'
+        },
+        expires_in: {
+            type: 'integer',
+            format: 'int32',
+            description: 'URL expiration time in seconds'
+        },
+        method: {
+            type: 'string',
+            description: 'HTTP method to use (PUT)'
+        },
+        headers: {
+            type: 'object',
+            description: 'Headers to include in the upload request'
+        }
+    },
+    required: ['upload_url', 's3_key', 'expires_in', 'method', 'headers'],
+    description: 'V1_Entities_PresignedUpload model'
+} as const;
+
+export const $postV1UploadsConfirm = {
+    type: 'object',
+    properties: {
+        s3_key: {
+            type: 'string',
+            description: 'S3 key from presign response'
+        },
+        filename: {
+            type: 'string',
+            description: 'Original filename'
+        },
+        template_id: {
+            type: 'integer',
+            format: 'int32',
+            description: 'Bank template ID'
+        },
+        account_id: {
+            type: 'integer',
+            format: 'int32',
+            description: 'Associated account'
+        },
+        file_size: {
+            type: 'integer',
+            format: 'int32',
+            description: 'File size in bytes'
+        }
+    },
+    required: ['s3_key', 'filename', 'template_id'],
+    description: 'Confirm upload and create statement'
+} as const;
+
+export const $V1_Entities_Statement = {
+    type: 'object',
+    properties: {
+        id: {
+            type: 'string'
+        },
+        file_name: {
+            type: 'string'
+        },
+        file_type: {
+            type: 'string'
+        },
+        status: {
+            type: 'string'
+        },
+        parsed_at: {
+            type: 'string'
+        },
+        error_message: {
+            type: 'string'
+        },
+        created_at: {
+            type: 'string'
+        },
+        updated_at: {
+            type: 'string'
+        },
+        account: {
+            '$ref': '#/components/schemas/V1_Entities_Account'
+        },
+        transaction_count: {
+            type: 'string'
+        },
+        total_debits: {
+            type: 'string'
+        },
+        total_credits: {
+            type: 'string'
+        }
+    },
+    required: ['id', 'file_name', 'file_type', 'status', 'parsed_at', 'error_message', 'created_at', 'updated_at', 'transaction_count', 'total_debits', 'total_credits'],
+    description: 'V1_Entities_Statement model'
+} as const;
+
+export const $V1_Entities_Account = {
+    type: 'object',
+    properties: {
+        id: {
+            type: 'string'
+        },
+        name: {
+            type: 'string'
+        },
+        bank_name: {
+            type: 'string'
+        },
+        account_number_last4: {
+            type: 'string'
+        },
+        account_type: {
+            type: 'string'
+        },
+        currency: {
+            type: 'string'
+        },
+        is_active: {
+            type: 'string'
+        },
+        created_at: {
+            type: 'string'
+        },
+        display_name: {
+            type: 'string'
+        },
+        current_balance: {
+            type: 'string'
+        }
+    },
+    required: ['id', 'name', 'bank_name', 'account_number_last4', 'account_type', 'currency', 'is_active', 'created_at', 'display_name']
+} as const;

@@ -163,6 +163,109 @@ export type patchV1TransactionsBulk = {
     is_reviewed?: boolean;
 };
 
+/**
+ * Get presigned URL for direct S3 upload
+ */
+export type postV1UploadsPresign = {
+    /**
+     * Original filename
+     */
+    filename: string;
+    /**
+     * File MIME type
+     */
+    content_type: string;
+    /**
+     * File size in bytes
+     */
+    file_size?: number;
+};
+
+/**
+ * V1_Entities_PresignedUpload model
+ */
+export type V1_Entities_PresignedUpload = {
+    /**
+     * Presigned S3 URL for direct upload
+     */
+    upload_url: string;
+    /**
+     * S3 object key for the upload
+     */
+    s3_key: string;
+    /**
+     * URL expiration time in seconds
+     */
+    expires_in: number;
+    /**
+     * HTTP method to use (PUT)
+     */
+    method: string;
+    /**
+     * Headers to include in the upload request
+     */
+    headers: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Confirm upload and create statement
+ */
+export type postV1UploadsConfirm = {
+    /**
+     * S3 key from presign response
+     */
+    s3_key: string;
+    /**
+     * Original filename
+     */
+    filename: string;
+    /**
+     * Bank template ID
+     */
+    template_id: number;
+    /**
+     * Associated account
+     */
+    account_id?: number;
+    /**
+     * File size in bytes
+     */
+    file_size?: number;
+};
+
+/**
+ * V1_Entities_Statement model
+ */
+export type V1_Entities_Statement = {
+    id: string;
+    file_name: string;
+    file_type: string;
+    status: string;
+    parsed_at: string;
+    error_message: string;
+    created_at: string;
+    updated_at: string;
+    account?: V1_Entities_Account;
+    transaction_count: string;
+    total_debits: string;
+    total_credits: string;
+};
+
+export type V1_Entities_Account = {
+    id: string;
+    name: string;
+    bank_name: string;
+    account_number_last4: string;
+    account_type: string;
+    currency: string;
+    is_active: string;
+    created_at: string;
+    display_name: string;
+    current_balance?: string;
+};
+
 export type PostV1AuthSendOtpData = {
     requestBody: postV1AuthSendOtp;
 };
@@ -329,6 +432,12 @@ export type GetV1StatementsIdSummaryData = {
 
 export type GetV1StatementsIdSummaryResponse = unknown;
 
+export type GetV1StatementsIdProgressData = {
+    id: number;
+};
+
+export type GetV1StatementsIdProgressResponse = unknown;
+
 export type GetV1TransactionsData = {
     page?: number;
     perPage?: number;
@@ -358,6 +467,18 @@ export type PatchV1TransactionsBulkResponse = unknown;
 export type GetV1TransactionsStatsResponse = unknown;
 
 export type PostV1TransactionsCategorizeResponse = unknown;
+
+export type PostV1UploadsPresignData = {
+    requestBody: postV1UploadsPresign;
+};
+
+export type PostV1UploadsPresignResponse = V1_Entities_PresignedUpload;
+
+export type PostV1UploadsConfirmData = {
+    requestBody: postV1UploadsConfirm;
+};
+
+export type PostV1UploadsConfirmResponse = V1_Entities_Statement;
 
 export type $OpenApiTs = {
     '/v1/auth/send_otp': {
@@ -714,6 +835,19 @@ export type $OpenApiTs = {
             };
         };
     };
+    '/v1/statements/{id}/progress': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get parsing progress
+                 */
+                200: unknown;
+            };
+        };
+    };
     '/v1/transactions': {
         get: {
             req: {
@@ -783,6 +917,44 @@ export type $OpenApiTs = {
                  * Categorize uncategorized transactions with AI
                  */
                 201: unknown;
+            };
+        };
+    };
+    '/v1/uploads/presign': {
+        post: {
+            req: {
+                requestBody: postV1UploadsPresign;
+            };
+            res: {
+                /**
+                 * Get presigned URL for direct S3 upload
+                 */
+                201: V1_Entities_PresignedUpload;
+                /**
+                 * Invalid file type
+                 */
+                422: unknown;
+            };
+        };
+    };
+    '/v1/uploads/confirm': {
+        post: {
+            req: {
+                requestBody: postV1UploadsConfirm;
+            };
+            res: {
+                /**
+                 * Confirm upload and create statement
+                 */
+                201: V1_Entities_Statement;
+                /**
+                 * Upload not found in S3
+                 */
+                404: unknown;
+                /**
+                 * File format mismatch
+                 */
+                422: unknown;
             };
         };
     };

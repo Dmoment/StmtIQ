@@ -1,117 +1,158 @@
 # frozen_string_literal: true
 
+require_relative 'concerns/xlsx_streaming'
+
 module BankParsers
   class HdfcParser < BaseParser
-    def parse
+    include Concerns::XlsxStreaming
+
+    HEADER_INDICATORS = ['Date', 'Narration', 'Closing Balance', 'Withdrawal', 'Deposit'].freeze
+
+    # ============================================
+    # Streaming API (ONLY way to parse)
+    # ============================================
+
+    def each_transaction(&block)
+      return enum_for(:each_transaction) unless block_given?
+
+      @resolved_header_map = nil
+      @cached_skip_patterns = nil
+
       case File.extname(file_path).downcase
       when '.csv'
-        parse_csv
+        stream_csv(&block)
       when '.xls'
-        parse_xls
+        stream_xls(&block)
       when '.xlsx'
-        parse_xlsx
+        stream_xlsx(&block)
       else
         @errors << "Unsupported file format for HDFC"
-        []
       end
     end
 
     private
 
-    def parse_csv
+    # ✅ TRUE STREAMING
+    def stream_csv(&block)
       require 'csv'
 
-      transactions = []
+      headers_found = false
       headers = nil
-      data_started = false
 
-      File.readlines(file_path, encoding: 'UTF-8').each_with_index do |line, idx|
-        # Skip empty lines
-        next if line.strip.empty?
+      CSV.foreach(
+        file_path,
+        encoding: 'UTF-8',
+        liberal_parsing: true,
+        skip_blanks: true
+      ).with_index do |row, idx|
+        next if row.nil? || row.all?(&:nil?)
 
-        # Look for header row
-        if !data_started && line.include?('Date') && line.include?('Narration')
-          headers = CSV.parse_line(line)
-          data_started = true
+        row_text = row.compact.map(&:to_s).join(' ')
+        if !headers_found && row_text.include?('Date') && row_text.include?('Narration')
+          headers = row.map { |h| h&.to_s&.strip }
+          build_resolved_header_map!(headers)
+          headers_found = true
           next
         end
 
-        next unless data_started && headers
+        next unless headers_found
 
         begin
-          row = CSV.parse_line(line)
-          next if row.nil? || row.all?(&:nil?)
-
           row_hash = row_to_hash(row, headers)
+          next if summary_row?(row_hash)
+
           data = extract_hdfc_transaction(row_hash)
-          transactions << data if valid_transaction_row?(data)
+          yield data if valid_transaction_row?(data)
         rescue => e
           Rails.logger.warn("HDFC CSV row parse error at line #{idx}: #{e.message}")
           next
         end
       end
-
-      transactions
     rescue => e
       @errors << "HDFC CSV parsing error: #{e.message}"
-      []
     end
 
-    def parse_xls
-      doc = Roo::Excel.new(file_path)
-      parse_spreadsheet(doc)
-    rescue => e
-      @errors << "HDFC XLS parsing error: #{e.message}"
-      []
-    end
-
-    def parse_xlsx
-      doc = Roo::Excelx.new(file_path)
-      parse_spreadsheet(doc)
-    rescue => e
-      @errors << "HDFC XLSX parsing error: #{e.message}"
-      []
-    end
-
-    def parse_spreadsheet(doc)
-      sheet = doc.sheet(0)
-      transactions = []
-
-      # Find header row containing 'Date' and 'Narration'
-      header_row_idx = find_header_row(sheet, ['Date', 'Narration', 'Closing Balance'])
-      headers = sheet.row(header_row_idx)
-
-      ((header_row_idx + 1)..sheet.last_row).each do |row_idx|
-        row = sheet.row(row_idx)
-        next if row.all?(&:nil?)
-
-        # Skip summary rows (usually have less columns filled)
-        filled_cells = row.compact.count
-        next if filled_cells < 3
-
-        row_hash = row_to_hash(row, headers)
-
-        # Skip if it looks like a summary row
+    # ⚠️ XLS: Roo with size limit
+    def stream_xls(&block)
+      stream_xls_with_roo(header_indicators: HEADER_INDICATORS) do |row_hash, _headers|
         next if summary_row?(row_hash)
-
         data = extract_hdfc_transaction(row_hash)
-        transactions << data if valid_transaction_row?(data)
+        yield data if valid_transaction_row?(data)
       end
-
-      transactions
     end
+
+    # ✅ XLSX: True streaming with Creek
+    def stream_xlsx(&block)
+      stream_xlsx_with_creek(header_indicators: HEADER_INDICATORS) do |row_hash, _headers|
+        next if summary_row?(row_hash)
+        data = extract_hdfc_transaction(row_hash)
+        yield data if valid_transaction_row?(data)
+      end
+    end
+
+    # Called by XlsxStreaming concern when headers are found
+    def on_headers_found(headers)
+      build_resolved_header_map!(headers)
+    end
+
+    # ============================================
+    # Header Resolution
+    # ============================================
+
+    def build_resolved_header_map!(headers)
+      @resolved_header_map = {}
+      normalized_index = headers.each_with_index.to_h { |h, i| [h&.downcase&.strip, headers[i]] }
+
+      {
+        date: ['date'],
+        narration: ['narration'],
+        reference: ['chq./ref.no.', 'chq./ref. no.'],
+        withdrawal: ['withdrawal amt.', 'withdrawal amount', 'dr'],
+        deposit: ['deposit amt.', 'deposit amount', 'cr'],
+        balance: ['closing balance', 'balance'],
+        value_date: ['value dt']
+      }.each do |key, candidates|
+        candidates.each do |c|
+          if normalized_index[c]
+            @resolved_header_map[key] = normalized_index[c]
+            break
+          end
+        end
+      end
+    end
+
+    def get_fast(row, key)
+      col = @resolved_header_map&.[](key)
+      col ? row[col] : nil
+    end
+
+    # ============================================
+    # Skip Detection
+    # ============================================
+
+    def cached_skip_patterns
+      @cached_skip_patterns ||= [
+        'opening balance', 'closing balance', 'total', 'statement summary'
+      ].freeze
+    end
+
+    def summary_row?(row)
+      narration = (get_fast(row, :narration) || row.values.first)&.to_s&.downcase || ''
+      cached_skip_patterns.any? { |p| narration.include?(p) }
+    end
+
+    # ============================================
+    # Transaction Extraction
+    # ============================================
 
     def extract_hdfc_transaction(row)
-      # HDFC column names
-      date = parse_date(row['Date'])
-      narration = clean_description(row['Narration'])
-      reference = row['Chq./Ref.No.']&.to_s&.strip || row['Chq./Ref. No.']&.to_s&.strip
+      date = parse_date(get_fast(row, :date))
+      narration = clean_description(get_fast(row, :narration))
+      reference = get_fast(row, :reference)&.to_s&.strip
 
-      # HDFC uses separate columns for withdrawal and deposit
-      withdrawal = parse_amount(row['Withdrawal Amt.'] || row['Withdrawal Amount'] || row['Dr'])
-      deposit = parse_amount(row['Deposit Amt.'] || row['Deposit Amount'] || row['Cr'])
+      withdrawal = parse_amount(get_fast(row, :withdrawal))
+      deposit = parse_amount(get_fast(row, :deposit))
 
-      # Determine transaction type and amount
       if deposit > 0
         transaction_type = 'credit'
         amount = deposit
@@ -120,7 +161,7 @@ module BankParsers
         amount = withdrawal
       end
 
-      balance = parse_amount(row['Closing Balance'] || row['Balance'])
+      balance = parse_amount(get_fast(row, :balance))
 
       {
         transaction_date: date,
@@ -135,18 +176,9 @@ module BankParsers
           account_type: template.account_type,
           source: 'statement_import',
           template_id: template.id,
-          value_date: row['Value Dt']&.to_s
+          value_date: get_fast(row, :value_date)&.to_s
         }
       }
-    end
-
-    def summary_row?(row)
-      # Check if this is a summary/total row
-      narration = row['Narration']&.to_s&.downcase || ''
-      narration.include?('opening balance') ||
-        narration.include?('closing balance') ||
-        narration.include?('total') ||
-        narration.include?('statement summary')
     end
   end
 end

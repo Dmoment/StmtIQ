@@ -28,8 +28,9 @@ Rails.application.configure do
   # Change to :null_store to avoid any caching.
   config.cache_store = :memory_store
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Store uploaded files on Amazon S3 (same as production for consistency)
+  # Requires AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_BUCKET env vars
+  config.active_storage.service = :amazon
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
@@ -46,8 +47,9 @@ Rails.application.configure do
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
 
-  # Run jobs inline in development (no need for Sidekiq)
-  config.active_job.queue_adapter = :inline
+  # Run jobs asynchronously in development (supports retries and delayed jobs)
+  # Use :inline for synchronous execution, :async for background processing
+  config.active_job.queue_adapter = :async
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true

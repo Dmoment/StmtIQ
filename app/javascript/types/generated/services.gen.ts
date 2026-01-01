@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsResponse, PostV1TransactionsCategorizeResponse } from './types.gen';
+import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1StatementsIdProgressData, GetV1StatementsIdProgressResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsResponse, PostV1TransactionsCategorizeResponse, PostV1UploadsPresignData, PostV1UploadsPresignResponse, PostV1UploadsConfirmData, PostV1UploadsConfirmResponse } from './types.gen';
 
 export class AuthService {
     /**
@@ -499,6 +499,23 @@ export class StatementsService {
         });
     }
     
+    /**
+     * Get parsing progress
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get parsing progress
+     * @throws ApiError
+     */
+    public static getV1StatementsIdProgress(data: GetV1StatementsIdProgressData): CancelablePromise<GetV1StatementsIdProgressResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/statements/{id}/progress',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
 }
 
 export class TransactionsService {
@@ -595,6 +612,48 @@ export class TransactionsService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/v1/transactions/categorize'
+        });
+    }
+    
+}
+
+export class UploadsService {
+    /**
+     * Get presigned URL for direct S3 upload
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns V1_Entities_PresignedUpload Get presigned URL for direct S3 upload
+     * @throws ApiError
+     */
+    public static postV1UploadsPresign(data: PostV1UploadsPresignData): CancelablePromise<PostV1UploadsPresignResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/uploads/presign',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Invalid file type'
+            }
+        });
+    }
+    
+    /**
+     * Confirm upload and create statement
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns V1_Entities_Statement Confirm upload and create statement
+     * @throws ApiError
+     */
+    public static postV1UploadsConfirm(data: PostV1UploadsConfirmData): CancelablePromise<PostV1UploadsConfirmResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/uploads/confirm',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                404: 'Upload not found in S3',
+                422: 'File format mismatch'
+            }
         });
     }
     

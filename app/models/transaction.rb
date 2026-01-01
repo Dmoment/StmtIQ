@@ -26,7 +26,7 @@ class Transaction < ApplicationRecord
     amount
     transaction_type
     balance
-    reference_number
+    reference
     category_id
     account_id
     statement_id

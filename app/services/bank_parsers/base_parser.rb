@@ -10,8 +10,31 @@ module BankParsers
       @errors = []
     end
 
-    def parse
-      raise NotImplementedError, "Subclasses must implement #parse"
+    # ============================================
+    # Streaming API (ONLY way to parse)
+    # ============================================
+
+    # Yields transactions one-by-one. NEVER holds full array in memory.
+    # Memory usage stays CONSTANT regardless of file size.
+    #
+    # Usage:
+    #   parser.each_transaction do |tx|
+    #     buffer << tx
+    #     if buffer.size >= 500
+    #       Transaction.insert_all(buffer)
+    #       buffer.clear
+    #     end
+    #   end
+    #
+    # Subclasses MUST implement this method.
+    #
+    def each_transaction(&block)
+      raise NotImplementedError, "Subclasses must implement #each_transaction"
+    end
+
+    # Returns an Enumerator for lazy processing
+    def to_enum
+      each_transaction
     end
 
     protected
