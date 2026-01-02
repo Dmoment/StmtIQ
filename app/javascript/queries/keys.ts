@@ -75,6 +75,8 @@ export const transactionKeys = {
   details: () => [...transactionKeys.all, "detail"] as const,
   detail: (id: number) => [...transactionKeys.details(), id] as const,
   stats: (filters?: {
+    detailed?: boolean;
+    statement_id?: number;
     start_date?: string;
     end_date?: string;
     account_id?: number;

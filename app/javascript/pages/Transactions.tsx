@@ -1,5 +1,4 @@
-import { useState, useMemo } from 'react';
-import { useQueries } from '@tanstack/react-query';
+import { useState } from 'react';
 import { 
   Search, 
   Filter, 
@@ -26,13 +25,12 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight,
-  TrendingDown
+  ChevronsRight
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CategoryPicker } from '../components/CategoryPicker';
-import { useTransactions } from '../queries/useTransactions';
-import { statementSummaryQueryOptions } from '../queries/statements';
+import { TransactionStats } from '../components/TransactionStats';
+import { useTransactions, useTransactionStats } from '../queries/useTransactions';
 import type { Transaction } from '../types/api';
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -52,23 +50,7 @@ const categoryIcons: Record<string, React.ElementType> = {
   other: HelpCircle,
 };
 
-// Muted, professional category colors
-const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
-  shopping: { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200' },
-  food: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
-  transport: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  housing: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
-  utilities: { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' },
-  business: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
-  health: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-  entertainment: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
-  transfer: { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
-  salary: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  investment: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200' },
-  emi: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  tax: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
-  other: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
-};
+import { getCategoryColorWithCustom } from '../lib/theme';
 
 export function Transactions() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,26 +67,9 @@ export function Transactions() {
     per_page: perPage 
   });
   
-  const statementIds = useMemo(() => {
-    return [...new Set(transactions
-      .map((tx) => tx.statement_id)
-      .filter((id): id is number => id !== null)
-    )];
-  }, [transactions]);
+  const { data: detailedStats, isLoading: statsLoading } = useTransactionStats(true);
+  
 
-  const statementQueries = useQueries({
-    queries: statementIds.map((id) => statementSummaryQueryOptions(id)),
-  });
-
-  const statementAccountTypes = useMemo(() => {
-    const typeMap = new Map<number, string>();
-    statementQueries.forEach((query, index) => {
-      if (query.data) {
-        typeMap.set(statementIds[index], query.data.account_type || 'unknown');
-      }
-    });
-    return typeMap;
-  }, [statementQueries, statementIds]);
 
   const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load transactions') : null;
 
@@ -135,37 +100,6 @@ export function Transactions() {
     }
     return true;
   });
-
-  const totalDebits = filteredTransactions
-    .filter(tx => tx.transaction_type === 'debit')
-    .reduce((sum, tx) => sum + Math.abs(parseFloat(tx.amount)), 0);
-
-  const totalCredits = filteredTransactions
-    .filter(tx => tx.transaction_type === 'credit')
-    .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
-
-  const creditCardStatementIds = Array.from(statementAccountTypes.entries())
-    .filter(([, accountType]) => accountType === 'credit_card')
-    .map(([id]) => id);
-  
-  const creditCardTransactions = filteredTransactions.filter(tx => 
-    tx.statement_id && creditCardStatementIds.includes(tx.statement_id)
-  );
-  
-  const isCreditCardView = creditCardTransactions.length > 0 && 
-    creditCardTransactions.length === filteredTransactions.length;
-  
-  const totalSpent = isCreditCardView ? totalDebits : 0;
-  const paymentsMade = isCreditCardView ? totalCredits : 0;
-  const outstandingBalance = isCreditCardView ? Math.max(totalDebits - totalCredits, 0) : 0;
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
 
   const getCategoryIcon = (slug: string | undefined) => {
     if (!slug) return HelpCircle;
@@ -209,74 +143,9 @@ export function Transactions() {
         </div>
       </div>
 
-      {/* Summary Cards - Professional muted design */}
-      {transactions.length > 0 && (
-        <div className={clsx(
-          "grid gap-4",
-          isCreditCardView ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"
-        )}>
-          {isCreditCardView ? (
-            <>
-              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="w-4 h-4 text-red-700" />
-                  <p className="text-sm font-medium text-slate-600">Total Spent</p>
-                </div>
-                <p className="text-2xl font-bold text-red-700">{formatCurrency(totalSpent)}</p>
-              </div>
-              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-700" />
-                  <p className="text-sm font-medium text-slate-600">Payments Made</p>
-                </div>
-                <p className="text-2xl font-bold text-emerald-700">{formatCurrency(paymentsMade)}</p>
-              </div>
-              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <CreditCard className="w-4 h-4 text-amber-700" />
-                  <p className="text-sm font-medium text-slate-600">Outstanding Balance</p>
-                </div>
-                <p className="text-2xl font-bold text-amber-700">{formatCurrency(outstandingBalance)}</p>
-              </div>
-              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <Wallet className="w-4 h-4 text-slate-700" />
-                  <p className="text-sm font-medium text-slate-600">Amount Due</p>
-                </div>
-                <p className="text-2xl font-bold text-slate-900">{formatCurrency(outstandingBalance)}</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingDown className="w-4 h-4 text-red-700" />
-                  <p className="text-sm font-medium text-slate-600">Total Debits</p>
-                </div>
-                <p className="text-2xl font-bold text-red-700">{formatCurrency(totalDebits)}</p>
-              </div>
-              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-700" />
-                  <p className="text-sm font-medium text-slate-600">Total Credits</p>
-                </div>
-                <p className="text-2xl font-bold text-emerald-700">{formatCurrency(totalCredits)}</p>
-              </div>
-              <div className="p-5 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowRightLeft className="w-4 h-4 text-slate-700" />
-                  <p className="text-sm font-medium text-slate-600">Net Flow</p>
-                </div>
-                <p className={clsx(
-                  "text-2xl font-bold",
-                  totalCredits - totalDebits >= 0 ? "text-emerald-700" : "text-red-700"
-                )}>
-                  {formatCurrency(totalCredits - totalDebits)}
-                </p>
-              </div>
-            </>
-          )}
-        </div>
+      {/* Transaction Statistics */}
+      {transactions.length > 0 && detailedStats && (
+        <TransactionStats stats={detailedStats} isLoading={statsLoading} />
       )}
 
       {/* Filters */}
@@ -374,8 +243,8 @@ export function Transactions() {
               const confidence = tx.confidence ? parseFloat(tx.confidence) : null;
               const amount = parseFloat(tx.amount);
               
-              const hasCustomColor = !!categoryColor;
-              const colorScheme = categoryColors[categorySlug] || categoryColors.other;
+              const colorInfo = getCategoryColorWithCustom(categorySlug, categoryColor);
+              const colorScheme = colorInfo;
               
               return (
                 <div key={tx.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-50 transition-colors">
@@ -400,14 +269,14 @@ export function Transactions() {
                       onClick={(e) => handleCategoryClick(tx, e)}
                       className="group inline-flex items-center gap-2 hover:bg-slate-100 rounded-lg p-1 -m-1 transition-colors"
                     >
-                      {hasCustomColor ? (
+                      {colorInfo.hasCustomColor && colorInfo.customColor ? (
                         <div 
                           className="w-6 h-6 rounded-md flex items-center justify-center"
-                          style={{ backgroundColor: `${categoryColor}20` }}
+                          style={{ backgroundColor: `${colorInfo.customColor}20` }}
                         >
                           <Icon 
                             className="w-3.5 h-3.5" 
-                            style={{ color: categoryColor }} 
+                            style={{ color: colorInfo.customColor }} 
                           />
                         </div>
                       ) : (
@@ -422,7 +291,7 @@ export function Transactions() {
                       )}
                       <span 
                         className="text-sm capitalize group-hover:text-slate-900"
-                        style={hasCustomColor ? { color: categoryColor } : {}}
+                        style={colorInfo.hasCustomColor && colorInfo.customColor ? { color: colorInfo.customColor } : {}}
                       >
                         {category?.name || 'Other'}
                       </span>

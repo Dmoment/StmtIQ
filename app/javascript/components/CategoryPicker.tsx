@@ -228,7 +228,7 @@ export function CategoryPicker({
   return (
     <div 
       ref={popupRef}
-      className="fixed z-50 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+      className="fixed z-50 w-80 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden"
       style={anchorPosition ? {
         top: anchorPosition.top,
         left: anchorPosition.left,
@@ -239,20 +239,20 @@ export function CategoryPicker({
       }}
     >
       {/* Header */}
-      <div className="p-3 border-b border-slate-800 flex items-center justify-between">
-        <h3 className="font-semibold text-sm">Assign Category</h3>
+      <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 className="font-semibold text-sm text-slate-900">Assign Category</h3>
         <button 
           onClick={onClose}
-          className="p-1 hover:bg-slate-800 rounded-lg transition-colors"
+          className="p-1 hover:bg-slate-200 rounded-lg transition-colors"
         >
-          <X className="w-4 h-4 text-slate-400" />
+          <X className="w-4 h-4 text-slate-600" />
         </button>
       </div>
 
       {/* Search Input */}
-      <div className="p-2 border-b border-slate-800">
+      <div className="p-2 border-b border-slate-200 bg-white">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             ref={inputRef}
             type="text"
@@ -265,7 +265,7 @@ export function CategoryPicker({
                 setIsCreating(true);
               }
             }}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-lg bg-slate-800 border border-slate-700 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
+            className="w-full pl-9 pr-4 py-2 text-sm rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white"
           />
         </div>
       </div>
@@ -277,10 +277,10 @@ export function CategoryPicker({
             setNewCategoryName(searchQuery);
             setIsCreating(true);
           }}
-          className="w-full p-3 flex items-center gap-3 hover:bg-emerald-500/10 text-emerald-400 border-b border-slate-800 transition-colors"
+          className="w-full p-3 flex items-center gap-3 hover:bg-emerald-50 text-emerald-700 border-b border-slate-200 transition-colors bg-white"
         >
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-            <Plus className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+            <Plus className="w-4 h-4 text-emerald-700" />
           </div>
           <span className="text-sm font-medium">Create "{searchQuery}"</span>
         </button>
@@ -288,10 +288,10 @@ export function CategoryPicker({
 
       {/* Create Form */}
       {isCreating && (
-        <div className="p-3 border-b border-slate-800 bg-slate-800/50">
+        <div className="p-3 border-b border-slate-200 bg-slate-50">
           <div className="flex items-center gap-2 mb-3">
-            <Tag className="w-4 h-4 text-emerald-400" />
-            <span className="text-sm font-medium">New Category</span>
+            <Tag className="w-4 h-4 text-emerald-700" />
+            <span className="text-sm font-medium text-slate-900">New Category</span>
           </div>
           
           {/* Name Input */}
@@ -304,7 +304,7 @@ export function CategoryPicker({
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleCreate();
             }}
-            className="w-full px-3 py-2 text-sm rounded-lg bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 mb-3"
+            className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white mb-3"
           />
 
           {/* Color Picker Toggle */}
@@ -312,10 +312,10 @@ export function CategoryPicker({
             <button
               type="button"
               onClick={() => setShowColorPicker(!showColorPicker)}
-              className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
             >
               <div 
-                className="w-5 h-5 rounded-md border border-slate-600"
+                className="w-5 h-5 rounded-md border border-slate-300"
                 style={{ backgroundColor: selectedColor }}
               />
               <Palette className="w-4 h-4" />
@@ -324,7 +324,7 @@ export function CategoryPicker({
             
             {/* Color Palette */}
             {showColorPicker && (
-              <div className="mt-2 p-2 bg-slate-900 rounded-lg border border-slate-700">
+              <div className="mt-2 p-2 bg-white rounded-lg border border-slate-200 shadow-sm">
                 <div className="grid grid-cols-6 gap-2">
                   {colorPalette.map((color) => (
                     <button
@@ -337,14 +337,14 @@ export function CategoryPicker({
                       className={clsx(
                         "w-8 h-8 rounded-lg border-2 transition-all hover:scale-110",
                         selectedColor === color.value 
-                          ? "border-white shadow-lg" 
-                          : "border-transparent"
+                          ? "border-slate-900 shadow-md" 
+                          : "border-slate-200"
                       )}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
                     >
                       {selectedColor === color.value && (
-                        <Check className="w-4 h-4 text-white mx-auto" />
+                        <Check className="w-4 h-4 text-white mx-auto drop-shadow-sm" />
                       )}
                     </button>
                   ))}
@@ -361,14 +361,14 @@ export function CategoryPicker({
                 setNewCategoryName('');
                 setShowColorPicker(false);
               }}
-              className="flex-1 px-3 py-2 text-sm rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors"
+              className="flex-1 px-3 py-2 text-sm rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleCreate}
               disabled={!newCategoryName.trim() || isUpdating}
-              className="flex-1 px-3 py-2 text-sm rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-3 py-2 text-sm rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isUpdating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -384,7 +384,7 @@ export function CategoryPicker({
       )}
 
       {/* Categories List */}
-      <div className="max-h-64 overflow-y-auto">
+      <div className="max-h-64 overflow-y-auto bg-white">
         {categoriesLoading ? (
           <div className="p-4 flex items-center justify-center">
             <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
@@ -406,25 +406,25 @@ export function CategoryPicker({
                 className={clsx(
                   "w-full p-3 flex items-center gap-3 transition-colors",
                   isSelected 
-                    ? "bg-emerald-500/10 text-emerald-400" 
-                    : "hover:bg-slate-800 text-slate-300",
+                    ? "bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500" 
+                    : "hover:bg-slate-50 text-slate-700",
                   isUpdating && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <div 
                   className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${category.color}20` }}
+                  style={{ backgroundColor: `${category.color}15` }}
                 >
                   <Icon 
                     className="w-4 h-4" 
-                    style={{ color: category.color || '#94a3b8' }} 
+                    style={{ color: category.color || '#64748b' }} 
                   />
                 </div>
                 <span className="text-sm font-medium flex-1 text-left">
                   {category.name}
                 </span>
                 {isSelected && (
-                  <Check className="w-4 h-4 text-emerald-400" />
+                  <Check className="w-4 h-4 text-emerald-600" />
                 )}
               </button>
             );
@@ -433,11 +433,12 @@ export function CategoryPicker({
       </div>
 
       {/* Transaction Info Footer */}
-      <div className="p-2 border-t border-slate-800 bg-slate-800/30">
-        <p className="text-xs text-slate-500 truncate">
+      <div className="p-2 border-t border-slate-200 bg-slate-50">
+        <p className="text-xs text-slate-600 truncate">
           {transaction.description}
         </p>
       </div>
     </div>
   );
 }
+

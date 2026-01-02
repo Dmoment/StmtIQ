@@ -992,6 +992,24 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "detailed",
+            "description": "Include detailed analytics",
+            "type": "boolean",
+            "default": false,
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "statement_id",
+            "description": "Get analytics for specific statement",
+            "type": "integer",
+            "format": "int32",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "Get transaction statistics"
@@ -1001,26 +1019,6 @@
           "transactions"
         ],
         "operationId": "getV1TransactionsStats"
-      }
-    },
-    "/v1/transactions/categorize": {
-      "post": {
-        "description": "Categorize uncategorized transactions with AI",
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "responses": {
-          "201": {
-            "description": "Categorize uncategorized transactions with AI"
-          }
-        },
-        "tags": [
-          "transactions"
-        ],
-        "operationId": "postV1TransactionsCategorize"
       }
     },
     "/v1/uploads/presign": {

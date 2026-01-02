@@ -45,7 +45,9 @@ module Parsing
         statement.mark_parsed!
         progress.complete!(processed_count)
 
-        enqueue_categorization_jobs
+        # TODO: Re-enable when AI service is integrated
+        # enqueue_categorization_jobs
+        enqueue_analytics_computation
 
         { success: true, transaction_count: processed_count }
       rescue => e
@@ -196,12 +198,23 @@ module Parsing
     # Post-processing
     # ============================================
 
-    def enqueue_categorization_jobs
-      # Enqueue categorization in chunks
-      statement.transactions.uncategorized.find_in_batches(batch_size: CHUNK_SIZE) do |batch|
-        AICategorizeJob.perform_later(batch.pluck(:id))
-      end
-    end
+    # TODO: Re-enable when AI service is integrated
+    # def enqueue_categorization_jobs
+    #   # Enqueue categorization in chunks
+    #   statement.transactions.uncategorized.find_in_batches(batch_size: CHUNK_SIZE) do |batch|
+    #     AICategorizeJob.perform_later(batch.pluck(:id))
+    #   end
+    # end
+
+            def enqueue_analytics_computation
+              # Compute analytics asynchronously after parsing completes
+              # Only enqueue if not already queued/running
+              analytic = StatementAnalytic.find_or_initialize_by(statement_id: statement.id)
+              return if analytic.queued? || analytic.running?
+
+              analytic.update!(status: :queued)
+              AnalyticsComputeJob.perform_later(statement.id)
+            end
 
     # Custom error
     class ParsingError < StandardError; end

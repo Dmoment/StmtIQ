@@ -464,9 +464,18 @@ export type PatchV1TransactionsBulkData = {
 
 export type PatchV1TransactionsBulkResponse = unknown;
 
-export type GetV1TransactionsStatsResponse = unknown;
+export type GetV1TransactionsStatsData = {
+    /**
+     * Include detailed analytics
+     */
+    detailed?: boolean;
+    /**
+     * Get analytics for specific statement
+     */
+    statementId?: number;
+};
 
-export type PostV1TransactionsCategorizeResponse = unknown;
+export type GetV1TransactionsStatsResponse = unknown;
 
 export type PostV1UploadsPresignData = {
     requestBody: postV1UploadsPresign;
@@ -902,21 +911,21 @@ export type $OpenApiTs = {
     };
     '/v1/transactions/stats': {
         get: {
+            req: {
+                /**
+                 * Include detailed analytics
+                 */
+                detailed?: boolean;
+                /**
+                 * Get analytics for specific statement
+                 */
+                statementId?: number;
+            };
             res: {
                 /**
                  * Get transaction statistics
                  */
                 200: unknown;
-            };
-        };
-    };
-    '/v1/transactions/categorize': {
-        post: {
-            res: {
-                /**
-                 * Categorize uncategorized transactions with AI
-                 */
-                201: unknown;
             };
         };
     };

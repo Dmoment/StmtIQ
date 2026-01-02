@@ -899,6 +899,28 @@
         "/v1/transactions/stats": {
             "get": {
                 "description": "Get transaction statistics",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "detailed",
+                        "description": "Include detailed analytics",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "statement_id",
+                        "description": "Get analytics for specific statement",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Get transaction statistics"
@@ -908,20 +930,6 @@
                     "transactions"
                 ],
                 "operationId": "getV1TransactionsStats"
-            }
-        },
-        "/v1/transactions/categorize": {
-            "post": {
-                "description": "Categorize uncategorized transactions with AI",
-                "responses": {
-                    "201": {
-                        "description": "Categorize uncategorized transactions with AI"
-                    }
-                },
-                "tags": [
-                    "transactions"
-                ],
-                "operationId": "postV1TransactionsCategorize"
             }
         },
         "/v1/uploads/presign": {

@@ -70,7 +70,9 @@ module V1
 
       desc 'Get transaction statistics'
       params do
-        optional :q, type: Hash, desc: 'Ransack query params'
+        optional :q, type: Hash, desc: 'Ransack query params', documentation: { in: 'query', type: 'object' }
+        optional :detailed, type: Boolean, default: false, desc: 'Include detailed analytics', documentation: { in: 'query', type: 'boolean' }
+        optional :statement_id, type: Integer, desc: 'Get analytics for specific statement', documentation: { in: 'query', type: 'integer', format: 'int32' }
       end
       get :stats do
         authenticate!
@@ -81,37 +83,30 @@ module V1
           transactions = transactions.ransack(params[:q]).result(distinct: true)
         end
 
-        debits = transactions.debits
-        credits = transactions.credits
-
-        {
-          total_transactions: transactions.count,
-          total_debits: debits.sum(:amount),
-          total_credits: credits.sum(:amount),
-          net: credits.sum(:amount) - debits.sum(:amount),
-          by_category: transactions.group(:category_id).sum(:amount),
-          by_type: {
-            debit: debits.count,
-            credit: credits.count
-          },
-          uncategorized_count: transactions.uncategorized.count
-        }
+        # Use service to compute stats (follows SOLID principles)
+        TransactionStatsService.new(
+          transactions,
+          detailed: params[:detailed],
+          statement_id: params[:statement_id],
+          user: current_user
+        ).call
       end
 
-      desc 'Categorize uncategorized transactions with AI'
-      post :categorize do
-        authenticate!
-
-        transactions = current_user.transactions.uncategorized.limit(100)
-
-        if transactions.empty?
-          return { message: 'No uncategorized transactions found' }
-        end
-
-        AICategorizeJob.perform_later(transactions.pluck(:id))
-
-        { queued: transactions.count, message: 'Categorization started' }
-      end
+      # TODO: Re-enable when AI service is integrated
+      # desc 'Categorize uncategorized transactions with AI'
+      # post :categorize do
+      #   authenticate!
+      #
+      #   transactions = current_user.transactions.uncategorized.limit(100)
+      #
+      #   if transactions.empty?
+      #     return { message: 'No uncategorized transactions found' }
+      #   end
+      #
+      #   AICategorizeJob.perform_later(transactions.pluck(:id))
+      #
+      #   { queued: transactions.count, message: 'Categorization started' }
+      # end
     end
   end
 end

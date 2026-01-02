@@ -65,14 +65,17 @@ export const useTransaction = (id: number, enabled = true) => {
  * Get transaction statistics with Ransack filtering
  * Uses auto-generated TransactionsService
  */
-export const useTransactionStats = () => {
+export const useTransactionStats = (detailed = false, statementId?: number) => {
   return useQuery({
-    queryKey: transactionKeys.stats(),
+    queryKey: transactionKeys.stats({ detailed, statement_id: statementId }),
     queryFn: async () => {
-      const response = await TransactionsService.getV1TransactionsStats();
+      const response = await TransactionsService.getV1TransactionsStats({
+        detailed: detailed || undefined,
+        statementId: statementId,
+      });
       return response as unknown as TransactionStats;
     },
-    staleTime: 1 * 60 * 1000,
+    staleTime: detailed ? 5 * 60 * 1000 : 1 * 60 * 1000, // Cache detailed stats longer
   });
 };
 

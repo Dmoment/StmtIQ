@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_27_130925) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_01_200433) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -84,6 +84,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_27_130925) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "statement_analytics", force: :cascade do |t|
+    t.bigint "statement_id", null: false
+    t.datetime "computed_at"
+    t.jsonb "monthly_spend", default: {}
+    t.jsonb "category_breakdown", default: {}
+    t.jsonb "merchant_breakdown", default: {}
+    t.jsonb "recurring_expenses", default: {}
+    t.jsonb "silent_drains", default: {}
+    t.jsonb "weekend_weekday", default: {}
+    t.jsonb "largest_expense", default: {}
+    t.jsonb "income_expense_ratio", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "status", default: 0, null: false
+    t.text "error_message"
+    t.datetime "started_at"
+    t.index ["computed_at"], name: "index_statement_analytics_on_computed_at"
+    t.index ["statement_id"], name: "index_statement_analytics_on_statement_id", unique: true
+    t.index ["status"], name: "index_statement_analytics_on_status"
+  end
+
   create_table "statements", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "account_id"
@@ -123,6 +144,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_27_130925) do
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["category_id"], name: "index_transactions_on_category_id"
     t.index ["statement_id"], name: "index_transactions_on_statement_id"
+    t.index ["transaction_type", "category_id"], name: "index_transactions_on_transaction_type_and_category_id"
+    t.index ["user_id", "category_id"], name: "index_transactions_on_user_id_and_category_id"
+    t.index ["user_id", "transaction_date"], name: "index_transactions_on_user_id_and_transaction_date"
+    t.index ["user_id", "transaction_type"], name: "index_transactions_on_user_id_and_transaction_type"
     t.index ["user_id"], name: "index_transactions_on_user_id"
   end
 
@@ -148,6 +173,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_27_130925) do
   add_foreign_key "accounts", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "statement_analytics", "statements"
   add_foreign_key "statements", "accounts"
   add_foreign_key "statements", "bank_templates"
   add_foreign_key "statements", "users"
