@@ -12,8 +12,19 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # SPA - serve React app for all other routes (HTML only)
-  root "home#index"
+  # Landing page (server-side rendered for SEO)
+  root "pages#landing"
+
+  # React SPA routes - serve React app for authenticated routes
+  get 'app', to: 'home#index', as: :app_root
+  get 'app/*path', to: 'home#index'
+
+  # Auth routes (React handles these)
+  get 'login', to: 'home#index'
+  get 'signup', to: 'home#index'
+  get 'verify', to: 'home#index'
+
+  # Catch-all for any other React routes
   get '*path', to: 'home#index', constraints: ->(req) {
     !req.path.start_with?('/api', '/rails') &&
     req.format.html?

@@ -1,0 +1,1286 @@
+<% content_for :title, "StmtIQ - Understand where your money goes" %>
+<% content_for :description, "Upload your bank statement. Get clarity on your spending. A simple tool for people who want to understand their finances better." %>
+
+<style>
+  /* Custom fonts */
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .font-serif { font-family: 'Source Serif 4', Georgia, serif; }
+
+  /* Subtle animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .delay-2 { animation-delay: 0.2s; opacity: 0; }
+  .delay-3 { animation-delay: 0.3s; opacity: 0; }
+  .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+  /* ========== REDUCTO-STYLE HERO ANIMATION ========== */
+
+  /* Tab navigation */
+  .demo-tab {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    border-radius: 0 12px 12px 0;
+    margin-left: -16px;
+    padding-left: 19px !important;
+  }
+  .demo-tab:hover {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+  }
+  .demo-tab.active {
+    border-left-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 4px 16px rgba(59, 130, 246, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .demo-tab.active .tab-title {
+    color: #2563eb;
+  }
+  .demo-tab .tab-description {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+  }
+  .demo-tab.active .tab-description {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 8px;
+  }
+
+  /* Demo visualization area */
+  .demo-visual {
+    position: relative;
+    min-height: 400px;
+  }
+  .demo-scene {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+    pointer-events: none;
+  }
+  .demo-scene.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* Document mockup with glass effect */
+  .doc-mockup {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    padding: 20px;
+    position: relative;
+  }
+  .doc-stack {
+    position: relative;
+  }
+  .doc-stack::before,
+  .doc-stack::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    z-index: -1;
+  }
+  .doc-stack::before {
+    inset: 8px -4px -8px 4px;
+    transform: rotate(2deg);
+  }
+  .doc-stack::after {
+    inset: 16px -8px -16px 8px;
+    transform: rotate(4deg);
+  }
+
+  /* Text placeholder lines */
+  .text-line {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .text-line.short { width: 60%; }
+  .text-line.medium { width: 80%; }
+  .text-line.long { width: 100%; }
+
+  /* Highlight markers animation */
+  @keyframes highlightPop {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .highlight-marker {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: #fbbf24;
+    border-radius: 4px;
+    opacity: 0;
+    animation: highlightPop 0.4s ease forwards;
+  }
+
+  /* Scanning animation */
+  @keyframes scanMove {
+    0% { top: 0; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: calc(100% - 2px); opacity: 0; }
+  }
+  .scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3b82f6, #8b5cf6, transparent);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+
+  /* Category badges with glass effect */
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+  }
+  .category-badge:hover {
+    transform: scale(1.05);
+  }
+  .category-badge.food { color: #ea580c; border-color: rgba(254, 215, 170, 0.6); background: rgba(255, 247, 237, 0.8); }
+  .category-badge.transport { color: #2563eb; border-color: rgba(191, 219, 254, 0.6); background: rgba(239, 246, 255, 0.8); }
+  .category-badge.shopping { color: #db2777; border-color: rgba(251, 207, 232, 0.6); background: rgba(253, 242, 248, 0.8); }
+  .category-badge.income { color: #16a34a; border-color: rgba(187, 247, 208, 0.6); background: rgba(240, 253, 244, 0.8); }
+  .category-badge.bills { color: #7c3aed; border-color: rgba(221, 214, 254, 0.6); background: rgba(245, 243, 255, 0.8); }
+  .category-badge.transfer { color: #0891b2; border-color: rgba(165, 243, 252, 0.6); background: rgba(236, 254, 255, 0.8); }
+
+  /* Flying elements animation */
+  @keyframes flyOut {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--fly-x), var(--fly-y)) scale(1); opacity: 1; }
+  }
+  @keyframes flyIn {
+    0% { transform: translate(var(--start-x), var(--start-y)) scale(0.8); opacity: 0; }
+    100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  }
+
+  /* Status pill with glass effect */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: white;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .status-pill .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Chart animations */
+  @keyframes barGrow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @keyframes pieGrow {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: var(--target-offset); }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* File type icons with glass effect */
+  .file-type-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 88px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px dashed;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+  .file-type-icon:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.9);
+  }
+  .file-type-icon.pdf { border-color: rgba(252, 165, 165, 0.8); background: rgba(254, 242, 242, 0.6); }
+  .file-type-icon.xls { border-color: rgba(134, 239, 172, 0.8); background: rgba(240, 253, 244, 0.6); }
+  .file-type-icon.csv { border-color: rgba(147, 197, 253, 0.8); background: rgba(239, 246, 255, 0.6); }
+
+  /* Insight card with glass effect */
+  .insight-card {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: white;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow:
+      0 8px 24px rgba(16, 185, 129, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+  .insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+  }
+
+  /* Auto-play animation controller */
+  .demo-container[data-auto-play="true"] .demo-scene {
+    animation: sceneTransition 12s infinite;
+  }
+
+  /* ========== GLASSMORPHISM STYLES ========== */
+
+  .glass-container {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  /* Gradient background for glassmorphism effect */
+  .glass-bg {
+    background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.12) 0%,
+      rgba(168, 85, 247, 0.1) 25%,
+      rgba(236, 72, 153, 0.08) 50%,
+      rgba(59, 130, 246, 0.1) 75%,
+      rgba(16, 185, 129, 0.08) 100%
+    );
+    position: relative;
+  }
+
+  .glass-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 70%, rgba(16, 185, 129, 0.12) 0%, transparent 40%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Animated gradient orbs */
+  .glass-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: orbFloat 10s ease-in-out infinite;
+  }
+
+  .glass-orb-1 {
+    width: 300px;
+    height: 300px;
+    background: rgba(99, 102, 241, 0.4);
+    top: -100px;
+    left: -60px;
+    animation-delay: 0s;
+  }
+
+  .glass-orb-2 {
+    width: 280px;
+    height: 280px;
+    background: rgba(236, 72, 153, 0.35);
+    bottom: -80px;
+    right: -60px;
+    animation-delay: -4s;
+  }
+
+  .glass-orb-3 {
+    width: 220px;
+    height: 220px;
+    background: rgba(16, 185, 129, 0.3);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -6s;
+  }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -25px) scale(1.08); }
+    50% { transform: translate(-15px, 30px) scale(0.92); }
+    75% { transform: translate(-25px, -15px) scale(1.04); }
+  }
+
+  /* Glass tabs */
+  .glass-tabs {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  /* Glass demo visual area */
+  .glass-visual {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+  }
+
+  /* Shine effect on hover */
+  .glass-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-shine::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 60%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+  }
+
+  .glass-shine:hover::after {
+    transform: translateX(100%);
+  }
+
+  /* Custom selection */
+  ::selection {
+    background: #3b82f6;
+    color: white;
+  }
+
+  /* Smooth scroll */
+  html { scroll-behavior: smooth; }
+
+  /* Link underline animation */
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: currentColor;
+    transition: width 0.3s ease;
+  }
+  .link-underline:hover::after {
+    width: 100%;
+  }
+
+  /* Animated step arrow */
+  @keyframes arrowBounce {
+    0%, 100% { transform: translateX(0); opacity: 0.4; }
+    50% { transform: translateX(6px); opacity: 1; }
+  }
+  .step-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+  }
+  .step-arrow svg {
+    animation: arrowBounce 1.5s ease-in-out infinite;
+  }
+  .step-arrow.arrow-2 svg {
+    animation-delay: 0.5s;
+  }
+</style>
+
+<!-- Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-slate-100">
+  <div class="max-w-4xl mx-auto px-6 py-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="font-mono text-lg font-semibold text-slate-900 tracking-tight">
+        stmt<span class="text-blue-600">IQ</span>
+      </a>
+      <div class="flex items-center gap-8">
+        <a href="#how" class="text-sm text-slate-600 hover:text-slate-900 transition-colors link-underline">How it works</a>
+        <a href="#features" class="text-sm text-slate-600 hover:text-slate-900 transition-colors link-underline">Features</a>
+        <a href="/app" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Open App &rarr;</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="min-h-screen flex items-center pt-20">
+  <div class="max-w-4xl mx-auto px-6 py-20">
+    <div class="max-w-2xl">
+      <p class="font-mono text-sm text-blue-600 mb-6 animate-in">A tool for understanding your money</p>
+
+      <h1 class="font-serif text-5xl md:text-6xl font-semibold text-slate-900 leading-tight mb-8 animate-in delay-1">
+        Upload a bank statement.<br>
+        See where it all goes.
+      </h1>
+
+      <p class="text-xl text-slate-600 leading-relaxed mb-10 animate-in delay-2">
+        StmtIQ reads your bank statements and categorizes every transaction automatically.
+        No manual entry. No complicated setup. Just drag, drop, and understand.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 animate-in delay-3">
+        <a href="/app" class="inline-flex items-center justify-center px-6 py-3 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 transition-colors">
+          Try it free
+        </a>
+        <a href="#how" class="inline-flex items-center justify-center px-6 py-3 text-slate-700 font-medium hover:text-slate-900 transition-colors">
+          See how it works
+        </a>
+      </div>
+    </div>
+
+    <!-- Reducto-style Interactive Demo with Glassmorphism -->
+    <div class="mt-16 demo-container relative" id="demoContainer" data-auto-play="true">
+      <!-- Animated gradient orbs for glass effect background -->
+      <div class="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+        <div class="glass-orb glass-orb-1"></div>
+        <div class="glass-orb glass-orb-2"></div>
+        <div class="glass-orb glass-orb-3"></div>
+      </div>
+
+      <div class="glass-container glass-shine rounded-2xl overflow-hidden relative z-10">
+        <div class="flex flex-col md:flex-row">
+
+          <!-- Left: Vertical Tabs -->
+          <div class="md:w-72 border-b md:border-b-0 md:border-r border-white/30 p-6 glass-tabs">
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-4">How it works</p>
+
+            <!-- Tab 1: Upload -->
+            <div class="demo-tab active py-4 px-4 -mx-4 mb-2" data-tab="upload" onmouseenter="switchTab('upload')">
+              <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <span class="tab-title font-medium text-slate-900">Upload</span>
+              </div>
+              <p class="tab-description text-sm text-slate-500 leading-relaxed pl-8">
+                Drag and drop your bank statement. We support PDF, Excel, and CSV files from 20+ Indian banks including ICICI, HDFC, SBI, and Axis.
+              </p>
+            </div>
+
+            <!-- Tab 2: Parse -->
+            <div class="demo-tab py-4 px-4 -mx-4 mb-2" data-tab="parse" onmouseenter="switchTab('parse')">
+              <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                <span class="tab-title font-medium text-slate-900">Parse</span>
+              </div>
+              <p class="tab-description text-sm text-slate-500 leading-relaxed pl-8">
+                Our parser reads every line like a human would—extracting dates, descriptions, amounts, and balances with 99% accuracy.
+              </p>
+            </div>
+
+            <!-- Tab 3: Categorize -->
+            <div class="demo-tab py-4 px-4 -mx-4 mb-2" data-tab="categorize" onmouseenter="switchTab('categorize')">
+              <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span class="tab-title font-medium text-slate-900">Categorize</span>
+              </div>
+              <p class="tab-description text-sm text-slate-500 leading-relaxed pl-8">
+                AI assigns categories to each transaction. Swiggy → Food. Uber → Transport. The more you use it, the smarter it gets.
+              </p>
+            </div>
+
+            <!-- Tab 4: Analyze -->
+            <div class="demo-tab py-4 px-4 -mx-4" data-tab="analyze" onmouseenter="switchTab('analyze')">
+              <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span class="tab-title font-medium text-slate-900">Analyze</span>
+              </div>
+              <p class="tab-description text-sm text-slate-500 leading-relaxed pl-8">
+                See where your money goes. Pie charts, trends, and insights help you understand your spending patterns at a glance.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right: Animated Visualization -->
+          <div class="flex-1 p-8 glass-visual demo-visual">
+
+            <!-- Scene 1: Upload -->
+            <div class="demo-scene active" data-scene="upload">
+              <div class="flex flex-col items-center justify-center h-full min-h-[350px]">
+                <div class="flex items-end gap-6 mb-8">
+                  <!-- PDF -->
+                  <div class="file-type-icon pdf transform hover:-translate-y-2 transition-transform">
+                    <svg class="w-8 h-8 text-red-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="font-mono text-xs text-red-600 font-bold">PDF</span>
+                  </div>
+                  <!-- XLS -->
+                  <div class="file-type-icon xls transform hover:-translate-y-2 transition-transform">
+                    <svg class="w-8 h-8 text-emerald-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span class="font-mono text-xs text-emerald-600 font-bold">XLS</span>
+                  </div>
+                  <!-- CSV -->
+                  <div class="file-type-icon csv transform hover:-translate-y-2 transition-transform">
+                    <svg class="w-8 h-8 text-blue-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    <span class="font-mono text-xs text-blue-600 font-bold">CSV</span>
+                  </div>
+                </div>
+                <p class="text-slate-400 text-sm mb-6">Drop your bank statement here</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                  <span class="text-xs px-4 py-1.5 bg-white/70 backdrop-blur-sm rounded-full border border-white/50 text-slate-600 shadow-sm">ICICI</span>
+                  <span class="text-xs px-4 py-1.5 bg-white/70 backdrop-blur-sm rounded-full border border-white/50 text-slate-600 shadow-sm">HDFC</span>
+                  <span class="text-xs px-4 py-1.5 bg-white/70 backdrop-blur-sm rounded-full border border-white/50 text-slate-600 shadow-sm">SBI</span>
+                  <span class="text-xs px-4 py-1.5 bg-white/70 backdrop-blur-sm rounded-full border border-white/50 text-slate-600 shadow-sm">Axis</span>
+                  <span class="text-xs px-4 py-1.5 bg-lime-100/70 backdrop-blur-sm rounded-full border border-lime-200/50 text-lime-700 shadow-sm font-medium">+16 more</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scene 2: Parse -->
+            <div class="demo-scene" data-scene="parse">
+              <div class="flex items-center justify-center h-full min-h-[350px]">
+                <div class="doc-stack w-80">
+                  <div class="doc-mockup relative" id="parseDoc">
+                    <!-- Header -->
+                    <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                      <div class="w-8 h-8 bg-slate-100 rounded"></div>
+                      <div class="text-line short"></div>
+                    </div>
+                    <!-- Transaction rows -->
+                    <div class="space-y-3" id="parseRows">
+                      <div class="flex items-center gap-3">
+                        <div class="text-line" style="width:60px"></div>
+                        <div class="text-line flex-1"></div>
+                        <div class="text-line" style="width:70px"></div>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <div class="text-line" style="width:60px"></div>
+                        <div class="text-line flex-1"></div>
+                        <div class="text-line" style="width:70px"></div>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <div class="text-line" style="width:60px"></div>
+                        <div class="text-line flex-1"></div>
+                        <div class="text-line" style="width:70px"></div>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <div class="text-line" style="width:60px"></div>
+                        <div class="text-line flex-1"></div>
+                        <div class="text-line" style="width:70px"></div>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <div class="text-line" style="width:60px"></div>
+                        <div class="text-line flex-1"></div>
+                        <div class="text-line" style="width:70px"></div>
+                      </div>
+                    </div>
+                    <!-- Scan line -->
+                    <div class="scan-line" id="scanLine" style="top: 0;"></div>
+                    <!-- Highlight markers (will be added by JS) -->
+                    <div id="highlightMarkers"></div>
+                  </div>
+                </div>
+                <!-- Status pill -->
+                <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
+                  <div class="status-pill">
+                    <div class="spinner"></div>
+                    <span>Reading transactions...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scene 3: Categorize -->
+            <div class="demo-scene" data-scene="categorize">
+              <div class="flex items-center justify-center h-full min-h-[350px]">
+                <div class="w-full max-w-md">
+                  <!-- AI Brain in center -->
+                  <div class="flex justify-center mb-8">
+                    <div class="relative">
+                      <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+                          <circle cx="12" cy="5" r="1.5" fill="currentColor" opacity="0.6"/>
+                          <circle cx="18" cy="8" r="1.5" fill="currentColor" opacity="0.6"/>
+                          <circle cx="18" cy="16" r="1.5" fill="currentColor" opacity="0.6"/>
+                          <circle cx="12" cy="19" r="1.5" fill="currentColor" opacity="0.6"/>
+                          <circle cx="6" cy="16" r="1.5" fill="currentColor" opacity="0.6"/>
+                          <circle cx="6" cy="8" r="1.5" fill="currentColor" opacity="0.6"/>
+                          <path d="M12 9.5V6.5M14 11L16.5 9M14 13L16.5 15M12 14.5V17.5M10 13L7.5 15M10 11L7.5 9" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                        </svg>
+                      </div>
+                      <div class="absolute -inset-2 border-2 border-indigo-200 rounded-2xl animate-pulse"></div>
+                    </div>
+                  </div>
+                  <!-- Transaction list with categories flying in -->
+                  <div class="space-y-3" id="categorizeList">
+                    <div class="flex items-center justify-between p-4 glass-card rounded-xl category-row" style="animation-delay: 0.2s">
+                      <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-sm"></div>
+                        <span class="text-sm font-medium text-slate-700">Swiggy</span>
+                      </div>
+                      <span class="category-badge food">Food & Dining</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 glass-card rounded-xl category-row" style="animation-delay: 0.4s">
+                      <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-400 shadow-sm"></div>
+                        <span class="text-sm font-medium text-slate-700">Uber</span>
+                      </div>
+                      <span class="category-badge transport">Transport</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 glass-card rounded-xl category-row" style="animation-delay: 0.6s">
+                      <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm"></div>
+                        <span class="text-sm font-medium text-slate-700">Salary Credit</span>
+                      </div>
+                      <span class="category-badge income">Income</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 glass-card rounded-xl category-row" style="animation-delay: 0.8s">
+                      <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-pink-400 shadow-sm"></div>
+                        <span class="text-sm font-medium text-slate-700">Amazon</span>
+                      </div>
+                      <span class="category-badge shopping">Shopping</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Status pill -->
+                <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
+                  <div class="status-pill">
+                    <div class="spinner"></div>
+                    <span>AI categorizing...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scene 4: Analyze -->
+            <div class="demo-scene" data-scene="analyze">
+              <div class="flex items-center justify-center h-full min-h-[350px] gap-6">
+                <!-- Pie Chart Card -->
+                <div class="glass-card rounded-xl p-5 w-52">
+                  <p class="text-xs font-medium text-slate-500 mb-4">Spending Breakdown</p>
+                  <div class="flex items-center gap-4">
+                    <svg class="w-20 h-20" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" stroke-width="3"/>
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#fb923c" stroke-width="3" stroke-dasharray="25 75" stroke-dashoffset="25" transform="rotate(-90 18 18)" class="chart-segment"/>
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#60a5fa" stroke-width="3" stroke-dasharray="20 80" stroke-dashoffset="0" transform="rotate(-90 18 18)" class="chart-segment"/>
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f472b6" stroke-width="3" stroke-dasharray="30 70" stroke-dashoffset="-45" transform="rotate(-90 18 18)" class="chart-segment"/>
+                      <circle cx="18" cy="18" r="15.9" fill="none" stroke="#34d399" stroke-width="3" stroke-dasharray="25 75" stroke-dashoffset="-75" transform="rotate(-90 18 18)" class="chart-segment"/>
+                    </svg>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-orange-400"></div>
+                        <span class="text-xs text-slate-600">Food 25%</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                        <span class="text-xs text-slate-600">Transport 20%</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                        <span class="text-xs text-slate-600">Shopping 30%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bar Chart + Insight -->
+                <div class="space-y-4">
+                  <!-- Bar Chart Card -->
+                  <div class="glass-card rounded-xl p-5 w-56">
+                    <p class="text-xs font-medium text-slate-500 mb-4">Top Categories</p>
+                    <div class="space-y-3">
+                      <div>
+                        <div class="flex justify-between text-xs mb-1">
+                          <span class="text-slate-600">Shopping</span>
+                          <span class="font-mono text-slate-900">₹12,450</span>
+                        </div>
+                        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div class="h-full bg-pink-400 rounded-full bar-animated" style="width: 85%"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="flex justify-between text-xs mb-1">
+                          <span class="text-slate-600">Food</span>
+                          <span class="font-mono text-slate-900">₹8,200</span>
+                        </div>
+                        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div class="h-full bg-orange-400 rounded-full bar-animated" style="width: 60%"></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="flex justify-between text-xs mb-1">
+                          <span class="text-slate-600">Transport</span>
+                          <span class="font-mono text-slate-900">₹3,840</span>
+                        </div>
+                        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div class="h-full bg-blue-400 rounded-full bar-animated" style="width: 35%"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Insight Card -->
+                  <div class="insight-card">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="text-xs text-emerald-100">vs last month</p>
+                        <p class="text-lg font-bold">15% less spent</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Learning Banner -->
+      <div class="mt-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-xl p-6 border border-indigo-100">
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-slate-900 mb-1">Gets smarter with every statement</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              The more you use StmtIQ, the better it understands <em>your</em> spending. Your local chai wala isn't "Transfer" — it's "Food."
+              Correct it once, and it remembers. Our AI adapts to your unique financial patterns.
+            </p>
+          </div>
+          <div class="flex-shrink-0 hidden md:flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-slate-200">
+            <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-sm font-medium text-slate-700">95%+ accuracy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+// Tab switching and auto-play functionality
+let currentTab = 'upload';
+let autoPlayInterval = null;
+const tabs = ['upload', 'parse', 'categorize', 'analyze'];
+let tabIndex = 0;
+
+function switchTab(tabName) {
+  currentTab = tabName;
+  tabIndex = tabs.indexOf(tabName);
+
+  // Update tab states
+  document.querySelectorAll('.demo-tab').forEach(tab => {
+    tab.classList.remove('active');
+    if (tab.dataset.tab === tabName) {
+      tab.classList.add('active');
+    }
+  });
+
+  // Update scene states
+  document.querySelectorAll('.demo-scene').forEach(scene => {
+    scene.classList.remove('active');
+    if (scene.dataset.scene === tabName) {
+      scene.classList.add('active');
+      // Trigger scene-specific animations
+      animateScene(tabName);
+    }
+  });
+}
+
+function animateScene(sceneName) {
+  if (sceneName === 'parse') {
+    animateParsing();
+  } else if (sceneName === 'categorize') {
+    animateCategories();
+  } else if (sceneName === 'analyze') {
+    animateCharts();
+  }
+}
+
+function animateParsing() {
+  const scanLine = document.getElementById('scanLine');
+  const markersContainer = document.getElementById('highlightMarkers');
+
+  // Reset
+  if (scanLine) {
+    scanLine.style.animation = 'none';
+    scanLine.offsetHeight; // Trigger reflow
+    scanLine.style.animation = 'scanMove 2s ease-in-out forwards';
+  }
+
+  // Clear existing markers
+  if (markersContainer) {
+    markersContainer.innerHTML = '';
+
+    // Add highlight markers with delays
+    const positions = [
+      { top: 60, left: 20 }, { top: 60, left: 180 },
+      { top: 95, left: 50 }, { top: 95, left: 220 },
+      { top: 130, left: 30 }, { top: 130, left: 200 },
+      { top: 165, left: 70 }, { top: 165, left: 240 },
+    ];
+
+    positions.forEach((pos, i) => {
+      setTimeout(() => {
+        const marker = document.createElement('div');
+        marker.className = 'highlight-marker';
+        marker.style.top = pos.top + 'px';
+        marker.style.left = pos.left + 'px';
+        markersContainer.appendChild(marker);
+      }, 300 + (i * 200));
+    });
+  }
+}
+
+function animateCategories() {
+  const rows = document.querySelectorAll('.category-row');
+  rows.forEach((row, i) => {
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(-20px)';
+    setTimeout(() => {
+      row.style.transition = 'all 0.4s ease';
+      row.style.opacity = '1';
+      row.style.transform = 'translateX(0)';
+    }, 200 + (i * 200));
+  });
+}
+
+function animateCharts() {
+  const bars = document.querySelectorAll('.bar-animated');
+  bars.forEach((bar, i) => {
+    const width = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(() => {
+      bar.style.transition = 'width 0.6s ease';
+      bar.style.width = width;
+    }, 200 + (i * 150));
+  });
+}
+
+function startAutoPlay() {
+  autoPlayInterval = setInterval(() => {
+    tabIndex = (tabIndex + 1) % tabs.length;
+    switchTab(tabs[tabIndex]);
+  }, 4000);
+}
+
+function stopAutoPlay() {
+  if (autoPlayInterval) {
+    clearInterval(autoPlayInterval);
+    autoPlayInterval = null;
+  }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  // Start auto-play after a short delay
+  setTimeout(() => {
+    startAutoPlay();
+  }, 2000);
+
+  // Stop auto-play on user interaction (hover)
+  document.querySelectorAll('.demo-tab').forEach(tab => {
+    tab.addEventListener('mouseenter', () => {
+      stopAutoPlay();
+    });
+  });
+
+  // Initial animation
+  setTimeout(() => animateScene('upload'), 500);
+});
+</script>
+
+<!-- How it works -->
+<section id="how" class="py-32 bg-slate-50">
+  <div class="max-w-4xl mx-auto px-6">
+    <p class="font-mono text-sm text-blue-600 mb-4">How it works</p>
+    <h2 class="font-serif text-4xl font-semibold text-slate-900 mb-16">Three steps to clarity</h2>
+
+    <div class="grid md:grid-cols-5 gap-6 items-start">
+      <!-- Step 1 -->
+      <div>
+        <div class="font-mono text-6xl font-bold text-slate-200 mb-4">01</div>
+        <h3 class="font-semibold text-slate-900 mb-2">Upload your statement</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Download a PDF or CSV from your bank's website. Drag it into StmtIQ. We support ICICI, HDFC, SBI, Axis, and 15+ other banks.
+        </p>
+      </div>
+
+      <!-- Arrow 1 -->
+      <div class="step-arrow hidden md:flex pt-8">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </div>
+
+      <!-- Step 2 -->
+      <div>
+        <div class="font-mono text-6xl font-bold text-slate-200 mb-4">02</div>
+        <h3 class="font-semibold text-slate-900 mb-2">AI reads every line</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Our system parses the statement and categorizes each transaction. Swiggy goes to Food. Uber to Transport. Netflix to Entertainment.
+        </p>
+      </div>
+
+      <!-- Arrow 2 -->
+      <div class="step-arrow arrow-2 hidden md:flex pt-8">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </div>
+
+      <!-- Step 3 -->
+      <div>
+        <div class="font-mono text-6xl font-bold text-slate-200 mb-4">03</div>
+        <h3 class="font-semibold text-slate-900 mb-2">See the full picture</h3>
+        <p class="text-slate-600 leading-relaxed">
+          View breakdowns by category. Spot trends over time. Finally understand where your money actually goes each month.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="py-32">
+  <div class="max-w-4xl mx-auto px-6">
+    <p class="font-mono text-sm text-blue-600 mb-4">What you get</p>
+    <h2 class="font-serif text-4xl font-semibold text-slate-900 mb-6">Built for real people,<br>not finance experts</h2>
+    <p class="text-xl text-slate-600 mb-16 max-w-xl">
+      We built StmtIQ because existing tools were either too complicated or too basic. This one's just right.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-x-16 gap-y-12">
+      <div class="border-l-2 border-slate-200 pl-6">
+        <h3 class="font-semibold text-slate-900 mb-2">Automatic categorization</h3>
+        <p class="text-slate-600 leading-relaxed">
+          95% of transactions are categorized automatically using rules, machine learning, and AI. The remaining 5%? One click to fix.
+        </p>
+      </div>
+
+      <div class="border-l-2 border-slate-200 pl-6">
+        <h3 class="font-semibold text-slate-900 mb-2">Works with your bank</h3>
+        <p class="text-slate-600 leading-relaxed">
+          ICICI, HDFC, SBI, Axis, Kotak, Yes Bank, IDFC First, and more. Credit cards too. If your bank isn't supported, tell us.
+        </p>
+      </div>
+
+      <div class="border-l-2 border-slate-200 pl-6">
+        <h3 class="font-semibold text-slate-900 mb-2">Learns your preferences</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Correct a category once, and StmtIQ remembers. Your local chai wala isn't "Transfer" — it's "Food." We get it.
+        </p>
+      </div>
+
+      <div class="border-l-2 border-slate-200 pl-6">
+        <h3 class="font-semibold text-slate-900 mb-2">Private by default</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Your data stays yours. We don't sell it, share it, or use it to train models. Encrypted at rest and in transit.
+        </p>
+      </div>
+
+      <div class="border-l-2 border-slate-200 pl-6">
+        <h3 class="font-semibold text-slate-900 mb-2">Subcategories that make sense</h3>
+        <p class="text-slate-600 leading-relaxed">
+          "Food" splits into Delivery, Dining Out, and Groceries. "Transfer" becomes P2P, Self, or Wallet. The detail you need.
+        </p>
+      </div>
+
+      <div class="border-l-2 border-slate-200 pl-6">
+        <h3 class="font-semibold text-slate-900 mb-2">Export anytime</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Download your categorized data as CSV or Excel. Your data, your format, your terms. No lock-in.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Banks -->
+<section class="py-20 border-y border-slate-200">
+  <div class="max-w-4xl mx-auto px-6">
+    <p class="text-center text-sm text-slate-500 mb-8">Works with statements from</p>
+    <div class="flex flex-wrap items-center justify-center gap-8 font-mono text-sm text-slate-400">
+      <span>ICICI</span>
+      <span class="text-slate-300">•</span>
+      <span>HDFC</span>
+      <span class="text-slate-300">•</span>
+      <span>SBI</span>
+      <span class="text-slate-300">•</span>
+      <span>Axis</span>
+      <span class="text-slate-300">•</span>
+      <span>Kotak</span>
+      <span class="text-slate-300">•</span>
+      <span>Yes Bank</span>
+      <span class="text-slate-300">•</span>
+      <span>IDFC First</span>
+      <span class="text-slate-300">•</span>
+      <span class="text-blue-500">+15 more</span>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="py-32 bg-slate-50">
+  <div class="max-w-4xl mx-auto px-6">
+    <p class="font-mono text-sm text-blue-600 mb-4">Pricing</p>
+    <h2 class="font-serif text-4xl font-semibold text-slate-900 mb-6">Start free, pay when you need more</h2>
+    <p class="text-xl text-slate-600 mb-16 max-w-xl">
+      Most people never need to pay. The free tier handles casual use just fine.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-8 max-w-2xl">
+      <!-- Free -->
+      <div class="bg-white rounded-xl p-8 border border-slate-200">
+        <div class="font-mono text-sm text-slate-500 mb-2">Free</div>
+        <div class="text-3xl font-semibold text-slate-900 mb-6">₹0<span class="text-lg font-normal text-slate-400">/month</span></div>
+        <ul class="space-y-3 text-slate-600 mb-8">
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-500 mt-1">&#10003;</span>
+            <span>3 statements per month</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-500 mt-1">&#10003;</span>
+            <span>Automatic categorization</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-500 mt-1">&#10003;</span>
+            <span>Basic analytics</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-500 mt-1">&#10003;</span>
+            <span>CSV export</span>
+          </li>
+        </ul>
+        <a href="/app" class="block w-full text-center py-3 border border-slate-300 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          Get started
+        </a>
+      </div>
+
+      <!-- Pro -->
+      <div class="bg-slate-900 rounded-xl p-8 text-white">
+        <div class="font-mono text-sm text-slate-400 mb-2">Pro</div>
+        <div class="text-3xl font-semibold mb-6">₹199<span class="text-lg font-normal text-slate-400">/month</span></div>
+        <ul class="space-y-3 text-slate-300 mb-8">
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 mt-1">&#10003;</span>
+            <span>Unlimited statements</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 mt-1">&#10003;</span>
+            <span>AI-powered categorization</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 mt-1">&#10003;</span>
+            <span>Custom categories & rules</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 mt-1">&#10003;</span>
+            <span>Trend analysis</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 mt-1">&#10003;</span>
+            <span>Priority support</span>
+          </li>
+        </ul>
+        <a href="/app" class="block w-full text-center py-3 bg-white text-slate-900 rounded-lg font-medium hover:bg-slate-100 transition-colors">
+          Start free trial
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="py-32">
+  <div class="max-w-2xl mx-auto px-6">
+    <p class="font-mono text-sm text-blue-600 mb-4">Questions</p>
+    <h2 class="font-serif text-4xl font-semibold text-slate-900 mb-16">Things people ask us</h2>
+
+    <div class="space-y-8">
+      <div class="border-b border-slate-200 pb-8">
+        <h3 class="font-semibold text-slate-900 mb-3">Is my data safe?</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Yes. We use bank-level encryption (AES-256) for all data. We never store your bank login credentials — we only process the statement files you upload. Your data isn't sold or shared with anyone.
+        </p>
+      </div>
+
+      <div class="border-b border-slate-200 pb-8">
+        <h3 class="font-semibold text-slate-900 mb-3">How accurate is the categorization?</h3>
+        <p class="text-slate-600 leading-relaxed">
+          About 95% accurate out of the box. Our system uses a combination of rules, machine learning, and AI to categorize transactions. When it gets something wrong, you correct it once and it learns.
+        </p>
+      </div>
+
+      <div class="border-b border-slate-200 pb-8">
+        <h3 class="font-semibold text-slate-900 mb-3">What if my bank isn't supported?</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Let us know. We add new bank formats regularly. Most requests are handled within a week. Just upload a sample statement and we'll figure it out.
+        </p>
+      </div>
+
+      <div class="border-b border-slate-200 pb-8">
+        <h3 class="font-semibold text-slate-900 mb-3">Can I cancel anytime?</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Yes. No contracts, no commitments. Cancel from your settings page and you won't be charged again. You can export all your data before you go.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="font-semibold text-slate-900 mb-3">Do you have a mobile app?</h3>
+        <p class="text-slate-600 leading-relaxed">
+          Not yet. StmtIQ works great on mobile browsers though. A native app is on the roadmap for later this year.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-32 bg-slate-900">
+  <div class="max-w-2xl mx-auto px-6 text-center">
+    <h2 class="font-serif text-4xl font-semibold text-white mb-6">Ready to see where your money goes?</h2>
+    <p class="text-xl text-slate-400 mb-10">
+      Upload your first statement in 30 seconds. No credit card required.
+    </p>
+    <a href="/app" class="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-900 font-medium rounded-lg hover:bg-slate-100 transition-colors">
+      Open StmtIQ &rarr;
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-16 border-t border-slate-200">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+      <div>
+        <a href="/" class="font-mono text-lg font-semibold text-slate-900 tracking-tight">
+          stmt<span class="text-blue-600">IQ</span>
+        </a>
+        <p class="text-sm text-slate-500 mt-2">Understand where your money goes.</p>
+      </div>
+
+      <div class="flex flex-wrap gap-8 text-sm text-slate-600">
+        <a href="#how" class="hover:text-slate-900 transition-colors">How it works</a>
+        <a href="#features" class="hover:text-slate-900 transition-colors">Features</a>
+        <a href="#pricing" class="hover:text-slate-900 transition-colors">Pricing</a>
+        <a href="#faq" class="hover:text-slate-900 transition-colors">FAQ</a>
+        <a href="/app" class="hover:text-slate-900 transition-colors">Open App</a>
+      </div>
+    </div>
+
+    <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <p class="text-sm text-slate-400">
+        &copy; 2026 StmtIQ. Made in India.
+      </p>
+      <div class="flex gap-6 text-sm text-slate-400">
+        <a href="#" class="hover:text-slate-600 transition-colors">Privacy</a>
+        <a href="#" class="hover:text-slate-600 transition-colors">Terms</a>
+        <a href="mailto:hello@stmtiq.com" class="hover:text-slate-600 transition-colors">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
