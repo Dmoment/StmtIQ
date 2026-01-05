@@ -16,6 +16,7 @@ Rails.autoloaders.each do |autoloader|
     "base_api" => "BaseAPI",
     "api" => "API",
     "ai_categorize_job" => "AICategorizeJob",
-    "ai_categorizer" => "AICategorizer"
+    "ai_categorizer" => "AICategorizer",
+    "ml" => "ML"
   )
 end

@@ -10,6 +10,12 @@ puts "Creating system categories..."
 Category.seed_system_categories!
 puts "Created #{Category.count} categories"
 
+# Create subcategories
+puts "Creating subcategories..."
+require_relative 'seeds/subcategories'
+seed_subcategories!
+puts "Created #{Subcategory.count} subcategories"
+
 # Create bank templates from YAML config files
 puts "Creating bank templates from config files..."
 template_count = BankTemplate.seed_templates!

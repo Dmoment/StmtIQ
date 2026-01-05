@@ -45,8 +45,8 @@ module Parsing
         statement.mark_parsed!
         progress.complete!(processed_count)
 
-        # TODO: Re-enable when AI service is integrated
-        # enqueue_categorization_jobs
+        # Enqueue ML categorization jobs
+        enqueue_categorization_jobs
         enqueue_analytics_computation
 
         { success: true, transaction_count: processed_count }
@@ -198,23 +198,22 @@ module Parsing
     # Post-processing
     # ============================================
 
-    # TODO: Re-enable when AI service is integrated
-    # def enqueue_categorization_jobs
-    #   # Enqueue categorization in chunks
-    #   statement.transactions.uncategorized.find_in_batches(batch_size: CHUNK_SIZE) do |batch|
-    #     AICategorizeJob.perform_later(batch.pluck(:id))
-    #   end
-    # end
+    def enqueue_categorization_jobs
+      # Enqueue ML categorization in chunks
+      statement.transactions.uncategorized.find_in_batches(batch_size: CHUNK_SIZE) do |batch|
+        ::ML::CategorizeBatchJob.perform_later(batch.pluck(:id), user_id: statement.user_id)
+      end
+    end
 
-            def enqueue_analytics_computation
-              # Compute analytics asynchronously after parsing completes
-              # Only enqueue if not already queued/running
-              analytic = StatementAnalytic.find_or_initialize_by(statement_id: statement.id)
-              return if analytic.queued? || analytic.running?
+    def enqueue_analytics_computation
+      # Compute analytics asynchronously after parsing completes
+      # Only enqueue if not already queued/running
+      analytic = StatementAnalytic.find_or_initialize_by(statement_id: statement.id)
+      return if analytic.queued? || analytic.running?
 
-              analytic.update!(status: :queued)
-              AnalyticsComputeJob.perform_later(statement.id)
-            end
+      analytic.update!(status: :queued)
+      AnalyticsComputeJob.perform_later(statement.id)
+    end
 
     # Custom error
     class ParsingError < StandardError; end

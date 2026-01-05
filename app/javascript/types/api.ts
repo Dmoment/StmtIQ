@@ -63,6 +63,17 @@ export interface Category {
   updated_at: string;
 }
 
+export interface Subcategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  display_order: number;
+  is_default: boolean;
+  category_id: number;
+}
+
 // ============================================
 // Account Types
 // ============================================
@@ -151,6 +162,14 @@ export interface Transaction {
   user_id: number;
   category?: Category;
   ai_category?: Category;
+  subcategory?: Subcategory;
+  tx_kind?: string | null;
+  counterparty_name?: string | null;
+  metadata?: {
+    categorization_method?: 'rule' | 'embedding' | 'llm' | 'none';
+    normalized_description?: string;
+    [key: string]: unknown;
+  };
   created_at: string;
   updated_at: string;
 }

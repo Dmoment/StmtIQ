@@ -2,10 +2,10 @@
 
 FactoryBot.define do
   factory :bank_template do
-    bank_name { "ICICI Bank" }
-    bank_code { "icici" }
+    sequence(:bank_name) { |n| "Test Bank #{n}" }
+    sequence(:bank_code) { |n| "test_bank_#{n}" }
     account_type { "savings" }
-    file_format { "xlsx" }
+    sequence(:file_format) { |n| n.even? ? "xlsx" : "xls" }
     description { "ICICI Savings Account statement" }
     is_active { true }
     display_order { 1 }

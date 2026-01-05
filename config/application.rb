@@ -37,6 +37,9 @@ module StmtIq
     # Don't generate system test files.
     config.generators.system_tests = nil
 
+    # Use SQL format for schema (needed for pgvector)
+    config.active_record.schema_format = :sql
+
     # API-only responses for Grape
     config.middleware.use Rack::Cors do
       allow do

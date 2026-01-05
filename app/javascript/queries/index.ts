@@ -61,5 +61,6 @@ export {
   useUpdateTransaction,
   useBulkUpdateTransactions,
   useCategorizeTransactions,
+  useTransactionFeedback,
 } from "./useTransactions";
 

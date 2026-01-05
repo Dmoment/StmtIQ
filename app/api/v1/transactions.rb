@@ -12,7 +12,7 @@ module V1
       get do
         authenticate!
 
-        transactions = current_user.transactions.includes(:category, :account).recent
+        transactions = current_user.transactions.includes(:category, :ai_category, :subcategory, :account).recent
 
         if params[:q].present?
           transactions = transactions.ransack(params[:q]).result(distinct: true)
@@ -92,21 +92,121 @@ module V1
         ).call
       end
 
-      # TODO: Re-enable when AI service is integrated
-      # desc 'Categorize uncategorized transactions with AI'
-      # post :categorize do
-      #   authenticate!
-      #
-      #   transactions = current_user.transactions.uncategorized.limit(100)
-      #
-      #   if transactions.empty?
-      #     return { message: 'No uncategorized transactions found' }
-      #   end
-      #
-      #   AICategorizeJob.perform_later(transactions.pluck(:id))
-      #
-      #   { queued: transactions.count, message: 'Categorization started' }
-      # end
+      desc 'Get categorization progress'
+      get 'categorization/progress' do
+        authenticate!
+
+        total = current_user.transactions.count
+        pending = current_user.transactions.where(categorization_status: 'pending').count
+        processing = current_user.transactions.where(categorization_status: 'processing').count
+        completed = current_user.transactions.where(categorization_status: 'completed').count
+
+        categorized = current_user.transactions.where.not(ai_category_id: nil).count
+
+        {
+          total: total,
+          pending: pending,
+          processing: processing,
+          completed: completed,
+          categorized: categorized,
+          in_progress: processing > 0,
+          progress_percent: total > 0 ? ((completed.to_f / total) * 100).round(1) : 100
+        }
+      end
+
+      desc 'Categorize uncategorized transactions with ML'
+      params do
+        optional :limit, type: Integer, default: 100, desc: 'Maximum number of transactions to categorize'
+      end
+      post :categorize do
+        authenticate!
+
+        # Find transactions that need categorization
+        transactions = current_user.transactions.needs_categorization.limit(params[:limit])
+
+        if transactions.empty?
+          return { message: 'No transactions need categorization', queued: 0 }
+        end
+
+        # Mark all as pending before enqueueing
+        transaction_ids = transactions.pluck(:id)
+        Transaction.where(id: transaction_ids).update_all(categorization_status: 'pending')
+
+        # Enqueue ML categorization jobs in batches
+        ::ML::CategorizeBatchJob.perform_later(transaction_ids, user_id: current_user.id)
+
+        {
+          queued: transaction_ids.count,
+          message: 'ML categorization started',
+          poll_url: '/api/v1/transactions/categorization/progress'
+        }
+      end
+
+      desc 'Provide feedback on a transaction category (teaches the system)'
+      params do
+        requires :id, type: Integer, desc: 'Transaction ID'
+        requires :category_id, type: Integer, desc: 'Correct category ID'
+        optional :apply_to_similar, type: Boolean, default: false, desc: 'Apply to similar uncategorized transactions'
+      end
+      post ':id/feedback' do
+        authenticate!
+
+        transaction = current_user.transactions.find(params[:id])
+        category = Category.find(params[:category_id])
+
+        feedback_service = ::ML::FeedbackService.new(transaction, user: current_user)
+        result = feedback_service.process_correction!(category)
+
+        unless result[:success]
+          error!({ error: result[:message] }, 422)
+        end
+
+        response = {
+          success: true,
+          message: result[:message],
+          transaction: V1::Entities::Transaction.represent(transaction.reload)
+        }
+
+        # Optionally apply to similar transactions
+        if params[:apply_to_similar]
+          similar_result = feedback_service.apply_to_similar!(category)
+          response[:similar_updated] = similar_result[:updated]
+          response[:similar_ids] = similar_result[:ids]
+        end
+
+        response
+      end
+
+      desc 'Get user rules for transaction categorization'
+      get :rules do
+        authenticate!
+
+        rules = UserRule.for_user(current_user)
+        rules.map do |rule|
+          {
+            id: rule.id,
+            pattern: rule.pattern,
+            pattern_type: rule.pattern_type,
+            category: { id: rule.category_id, name: rule.category.name, slug: rule.category.slug },
+            match_count: rule.match_count,
+            is_active: rule.is_active,
+            created_at: rule.created_at
+          }
+        end
+      end
+
+      desc 'Delete a user rule'
+      params do
+        requires :rule_id, type: Integer
+      end
+      delete 'rules/:rule_id' do
+        authenticate!
+
+        rule = UserRule.find_by!(id: params[:rule_id], user: current_user)
+        rule.destroy!
+
+        { success: true, message: 'Rule deleted' }
+      end
     end
   end
 end

@@ -6,7 +6,6 @@ import {
   FileText,
   PieChart,
   Loader2,
-  RefreshCw,
   Trash2,
   ChevronDown,
   ChevronUp,
@@ -51,8 +50,8 @@ export function Dashboard() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [expandedStatementId, setExpandedStatementId] = useState<number | null>(null);
 
-  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useTransactionStats();
-  const { data: statementsData, isLoading: statementsLoading, refetch: refetchStatements } = useStatements({ per_page: 5 });
+  const { data: stats, isLoading: statsLoading } = useTransactionStats();
+  const { data: statementsData, isLoading: statementsLoading } = useStatements({ per_page: 5 });
   const deleteStatementMutation = useDeleteStatement();
 
   const statements = statementsData || [];
@@ -65,11 +64,6 @@ export function Dashboard() {
     } catch (err) {
       console.error('Error deleting statement:', err);
     }
-  };
-
-  const refetchData = () => {
-    refetchStats();
-    refetchStatements();
   };
 
   const formatCurrency = (amount: number | string) => {
@@ -170,31 +164,6 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Good Morning</h1>
-          <p className="text-slate-600 text-sm">
-            Here's an overview of your financial activity and statements
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={refetchData}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span className="hidden sm:inline">Refresh</span>
-          </button>
-          <a
-            href="/upload"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors shadow-sm"
-          >
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">Upload Statement</span>
-          </a>
-        </div>
-      </div>
 
       {/* Key Metrics - Professional muted cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

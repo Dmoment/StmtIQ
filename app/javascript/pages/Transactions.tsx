@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
+import { useState, useEffect } from 'react';
+import {
+  Search,
+  Filter,
   Download,
   ArrowUpDown,
   ShoppingBag,
@@ -25,12 +25,16 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  Brain,
+  CheckCircle2,
+  AlertCircle,
+  Play
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CategoryPicker } from '../components/CategoryPicker';
 import { TransactionStats } from '../components/TransactionStats';
-import { useTransactions, useTransactionStats } from '../queries/useTransactions';
+import { useTransactions, useTransactionStats, useCategorizationProgress, useCategorizeTransactions } from '../queries/useTransactions';
 import type { Transaction } from '../types/api';
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -57,17 +61,31 @@ export function Transactions() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
+  const [showOnlyUncategorized, setShowOnlyUncategorized] = useState(false);
   
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
-  const { data: transactions = [], isLoading: loading, error: queryError, refetch } = useTransactions({ 
+  const { data: transactions = [], isLoading: loading, error: queryError, refetch, isRefetching } = useTransactions({ 
     page: currentPage, 
-    per_page: perPage 
+    per_page: perPage,
+    uncategorized: showOnlyUncategorized
   });
-  
   const { data: detailedStats, isLoading: statsLoading } = useTransactionStats(true);
+
+  // Categorization progress
+  const { data: categorizationProgress } = useCategorizationProgress();
+  const categorizeMutation = useCategorizeTransactions();
+
+  const handleStartCategorization = () => {
+    categorizeMutation.mutate({ limit: 500 });
+  };
+
+  const hasUncategorized = categorizationProgress &&
+    (categorizationProgress.total - categorizationProgress.categorized) > 0;
+  const isCategorizationRunning = categorizationProgress?.in_progress ||
+    categorizeMutation.isPending;
   
 
 
@@ -142,6 +160,87 @@ export function Transactions() {
           </button>
         </div>
       </div>
+
+      {/* AI Categorization Progress */}
+      {categorizationProgress && transactions.length > 0 && (
+        <div className="rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-indigo-600" />
+              <span className="font-semibold text-slate-900">AI Categorization</span>
+            </div>
+            {hasUncategorized && !isCategorizationRunning && (
+              <button
+                onClick={handleStartCategorization}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+              >
+                <Play className="w-4 h-4" />
+                Categorize
+              </button>
+            )}
+            {isCategorizationRunning && (
+              <div className="flex items-center gap-2 text-indigo-600 text-sm font-medium">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </div>
+            )}
+          </div>
+
+          {/* Progress Bar */}
+          <div className="relative h-2 bg-slate-200 rounded-full overflow-hidden mb-2">
+            <div
+              className={clsx(
+                "absolute top-0 left-0 h-full rounded-full transition-all duration-500",
+                isCategorizationRunning ? "bg-indigo-500 animate-pulse" : "bg-indigo-600"
+              )}
+              style={{ width: `${categorizationProgress.progress_percent}%` }}
+            />
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span className="text-slate-700">
+                  <span className="font-semibold text-emerald-700">{categorizationProgress.categorized}</span>
+                  <span className="text-slate-500"> categorized</span>
+                </span>
+              </div>
+              {categorizationProgress.processing > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
+                  <span className="text-slate-700">
+                    <span className="font-semibold text-indigo-600">{categorizationProgress.processing}</span>
+                    <span className="text-slate-500"> processing</span>
+                  </span>
+                </div>
+              )}
+              {(categorizationProgress.total - categorizationProgress.categorized) > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-amber-500" />
+                  <span className="text-slate-700">
+                    <span className="font-semibold text-amber-600">
+                      {categorizationProgress.total - categorizationProgress.categorized}
+                    </span>
+                    <span className="text-slate-500"> uncategorized</span>
+                  </span>
+                </div>
+              )}
+            </div>
+            <span className="font-semibold text-slate-700">
+              {categorizationProgress.progress_percent.toFixed(1)}%
+            </span>
+          </div>
+
+          {/* Categorization method breakdown hint */}
+          {categorizationProgress.categorized > 0 && !isCategorizationRunning && (
+            <p className="mt-2 text-xs text-slate-500">
+              Categorized using: Rules (instant) + Embeddings (similarity) + LLM (AI)
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Transaction Statistics */}
       {transactions.length > 0 && detailedStats && (
@@ -227,8 +326,8 @@ export function Transactions() {
             <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-slate-900">
               Date <ArrowUpDown className="w-4 h-4" />
             </div>
-            <div className="col-span-5">Description</div>
-            <div className="col-span-2">Category</div>
+            <div className="col-span-4">Description</div>
+            <div className="col-span-3">Category</div>
             <div className="col-span-2 text-right">Amount</div>
             <div className="col-span-1 text-right">Conf.</div>
           </div>
@@ -252,50 +351,69 @@ export function Transactions() {
                     <span className="sm:hidden font-medium text-slate-900 mr-2">
                       {tx.transaction_type === 'credit' ? '+' : '-'}₹{amount.toLocaleString('en-IN')}
                     </span>
-                    {new Date(tx.transaction_date).toLocaleDateString('en-IN', { 
-                      day: 'numeric', 
+                    {new Date(tx.transaction_date).toLocaleDateString('en-IN', {
+                      day: 'numeric',
                       month: 'short',
                       year: '2-digit'
                     })}
                   </div>
-                  <div className="col-span-12 sm:col-span-5">
+                  <div className="col-span-12 sm:col-span-4">
                     <p className="font-medium text-slate-900 truncate">{tx.description}</p>
-                    {tx.raw_description && tx.raw_description !== tx.description && (
-                      <p className="text-sm text-slate-500 truncate">{tx.raw_description}</p>
+                    {tx.ai_explanation && (
+                      <p className="text-xs text-slate-400 truncate mt-0.5" title={tx.ai_explanation}>
+                        {tx.ai_explanation}
+                      </p>
                     )}
                   </div>
-                  <div className="col-span-6 sm:col-span-2">
+                  <div className="col-span-6 sm:col-span-3">
                     <button
                       onClick={(e) => handleCategoryClick(tx, e)}
-                      className="group inline-flex items-center gap-2 hover:bg-slate-100 rounded-lg p-1 -m-1 transition-colors"
+                      className="group inline-flex items-center gap-1.5 hover:bg-slate-100 rounded-lg p-1 -m-1 transition-colors"
                     >
                       {colorInfo.hasCustomColor && colorInfo.customColor ? (
-                        <div 
-                          className="w-6 h-6 rounded-md flex items-center justify-center"
+                        <div
+                          className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
                           style={{ backgroundColor: `${colorInfo.customColor}20` }}
                         >
-                          <Icon 
-                            className="w-3.5 h-3.5" 
-                            style={{ color: colorInfo.customColor }} 
+                          <Icon
+                            className="w-3.5 h-3.5"
+                            style={{ color: colorInfo.customColor }}
                           />
                         </div>
                       ) : (
                         <div className={clsx(
-                          "w-6 h-6 rounded-md flex items-center justify-center",
+                          "w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0",
                           colorScheme.bg
                         )}>
-                          <Icon 
-                            className={clsx("w-3.5 h-3.5", colorScheme.text)} 
+                          <Icon
+                            className={clsx("w-3.5 h-3.5", colorScheme.text)}
                           />
                         </div>
                       )}
-                      <span 
-                        className="text-sm capitalize group-hover:text-slate-900"
-                        style={colorInfo.hasCustomColor && colorInfo.customColor ? { color: colorInfo.customColor } : {}}
-                      >
-                        {category?.name || 'Other'}
-                      </span>
-                      <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="flex flex-col items-start min-w-0 overflow-visible">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span
+                            className="text-sm capitalize group-hover:text-slate-900"
+                            style={colorInfo.hasCustomColor && colorInfo.customColor ? { color: colorInfo.customColor } : {}}
+                          >
+                            {category?.name || 'Other'}
+                          </span>
+                          {tx.subcategory && (
+                            <>
+                              <ChevronRight className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                              <span className="text-xs text-slate-500">
+                                {tx.subcategory.name}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        {tx.counterparty_name && tx.tx_kind?.startsWith('transfer') && (
+                          <span className="text-xs text-slate-400 truncate mt-0.5">
+                            → {tx.counterparty_name}
+                          </span>
+                        )}
+                      </div>
+                      <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                     </button>
                   </div>
                   <div className={clsx(
@@ -306,14 +424,21 @@ export function Transactions() {
                   </div>
                   <div className="col-span-6 sm:col-span-1 text-right">
                     {confidence !== null && (
-                      <span className={clsx(
-                        "text-xs px-2 py-1 rounded-full font-medium",
-                        confidence > 0.8 ? "bg-emerald-100 text-emerald-700" :
-                        confidence > 0.5 ? "bg-amber-100 text-amber-700" :
-                        "bg-red-100 text-red-700"
-                      )}>
-                        {Math.round(confidence * 100)}%
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={clsx(
+                          "text-xs px-2 py-1 rounded-full font-medium",
+                          confidence > 0.8 ? "bg-emerald-100 text-emerald-700" :
+                          confidence > 0.5 ? "bg-amber-100 text-amber-700" :
+                          "bg-red-100 text-red-700"
+                        )}>
+                          {Math.round(confidence * 100)}%
+                        </span>
+                        {tx.metadata?.categorization_method && (
+                          <span className="text-xs text-slate-500 capitalize">
+                            {tx.metadata.categorization_method}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -7,6 +7,7 @@ class Transaction < ApplicationRecord
   belongs_to :user
   belongs_to :category, optional: true
   belongs_to :ai_category, class_name: 'Category', optional: true
+  belongs_to :subcategory, optional: true
 
   # Validations
   validates :transaction_date, presence: true
@@ -52,6 +53,26 @@ class Transaction < ApplicationRecord
     by_date_range
   ]
 
+  # Categorization status constants
+  CATEGORIZATION_STATUSES = %w[pending processing completed failed].freeze
+
+  # Transaction kind constants (high-level intent)
+  TX_KINDS = %w[
+    spend
+    transfer_p2p
+    transfer_self
+    transfer_wallet
+    income_salary
+    income_bonus
+    income_investment
+    income_refund
+    investment
+    loan_emi
+    fee
+    tax
+    cash
+  ].freeze
+
   # Scopes
   scope :debits, -> { where(transaction_type: 'debit') }
   scope :credits, -> { where(transaction_type: 'credit') }
@@ -61,6 +82,10 @@ class Transaction < ApplicationRecord
   scope :categorized, -> { where.not(category_id: nil) }
   scope :recent, -> { order(transaction_date: :desc, created_at: :desc) }
   scope :by_date_range, ->(start_date, end_date) { where(transaction_date: start_date..end_date) }
+  scope :categorization_pending, -> { where(categorization_status: 'pending') }
+  scope :categorization_processing, -> { where(categorization_status: 'processing') }
+  scope :categorization_completed, -> { where(categorization_status: 'completed') }
+  scope :needs_categorization, -> { where(category_id: nil, ai_category_id: nil, categorization_status: %w[pending failed]) }
   scope :by_month, ->(year, month) {
     start_date = Date.new(year, month, 1)
     end_date = start_date.end_of_month
@@ -84,6 +109,27 @@ class Transaction < ApplicationRecord
     category || ai_category
   end
 
+  def effective_subcategory
+    subcategory
+  end
+
+  # Transaction kind helpers
+  def transfer?
+    tx_kind&.start_with?('transfer_')
+  end
+
+  def income?
+    tx_kind&.start_with?('income_')
+  end
+
+  def spend?
+    tx_kind == 'spend'
+  end
+
+  def personal_transfer?
+    tx_kind == 'transfer_p2p'
+  end
+
   def high_confidence?
     confidence.present? && confidence >= 0.8
   end
@@ -94,6 +140,30 @@ class Transaction < ApplicationRecord
 
   def low_confidence?
     confidence.present? && confidence < 0.5
+  end
+
+  def categorization_pending?
+    categorization_status == 'pending'
+  end
+
+  def categorization_processing?
+    categorization_status == 'processing'
+  end
+
+  def categorization_completed?
+    categorization_status == 'completed'
+  end
+
+  def mark_categorization_processing!
+    update_column(:categorization_status, 'processing')
+  end
+
+  def mark_categorization_completed!
+    update_column(:categorization_status, 'completed')
+  end
+
+  def mark_categorization_failed!
+    update_column(:categorization_status, 'failed')
   end
 
   def apply_ai_category!

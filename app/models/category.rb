@@ -9,6 +9,9 @@ class Category < ApplicationRecord
   has_many :transactions, dependent: :nullify
   has_many :ai_categorized_transactions, class_name: 'Transaction', foreign_key: 'ai_category_id', dependent: :nullify
 
+  # Subcategories
+  has_many :subcategories, dependent: :destroy
+
   # Validations
   validates :name, presence: true, uniqueness: { scope: :parent_id }
   validates :slug, presence: true, uniqueness: true

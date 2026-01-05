@@ -23,7 +23,7 @@ import {
   Palette
 } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useCategories, useCreateCategory, useUpdateTransaction } from '../queries';
+import { useCategories, useCreateCategory, useUpdateTransaction, useTransactionFeedback } from '../queries';
 import type { Category, Transaction } from '../types/api';
 
 // Icon mapping
@@ -104,6 +104,7 @@ export function CategoryPicker({
   const { data: categories = [], isLoading: categoriesLoading } = useCategories();
   const createCategory = useCreateCategory();
   const updateTransaction = useUpdateTransaction();
+  const transactionFeedback = useTransactionFeedback();
 
   // Focus input when opened
   useEffect(() => {
@@ -177,14 +178,16 @@ export function CategoryPicker({
     return slugToIcon[slug] || Tag;
   };
 
-  // Handle category selection
+  // Handle category selection - uses feedback endpoint to create UserRules for learning
   const handleSelect = async (categoryId: number) => {
     try {
-      const result = await updateTransaction.mutateAsync({
-        id: transaction.id,
-        data: { category_id: categoryId }
+      // Use feedback endpoint to teach the system (creates UserRule + LabeledExample)
+      const result = await transactionFeedback.mutateAsync({
+        transactionId: transaction.id,
+        categoryId: categoryId,
+        applyToSimilar: false,
       });
-      onSuccess?.(result);
+      onSuccess?.(result.transaction);
       onClose();
     } catch (error) {
       console.error('Failed to update category:', error);
@@ -202,14 +205,15 @@ export function CategoryPicker({
         color: selectedColor,
         icon: 'tag',
       });
-      
-      // Now assign it to the transaction
-      const result = await updateTransaction.mutateAsync({
-        id: transaction.id,
-        data: { category_id: newCategory.id }
+
+      // Now assign it to the transaction using feedback endpoint (creates UserRule)
+      const result = await transactionFeedback.mutateAsync({
+        transactionId: transaction.id,
+        categoryId: newCategory.id,
+        applyToSimilar: false,
       });
-      
-      onSuccess?.(result);
+
+      onSuccess?.(result.transaction);
       setIsCreating(false);
       setNewCategoryName('');
       setSearchQuery('');
@@ -223,7 +227,7 @@ export function CategoryPicker({
   if (!isOpen) return null;
 
   const currentCategory = transaction.category || transaction.ai_category;
-  const isUpdating = updateTransaction.isPending || createCategory.isPending;
+  const isUpdating = updateTransaction.isPending || createCategory.isPending || transactionFeedback.isPending;
 
   return (
     <div 

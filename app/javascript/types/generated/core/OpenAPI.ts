@@ -23,6 +23,11 @@ export class Interceptors<T> {
   }
 }
 
+function getCsrfToken(): string {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  return meta?.getAttribute('content') || '';
+}
+
 export type OpenAPIConfig = {
 	BASE: string;
 	CREDENTIALS: 'include' | 'omit' | 'same-origin';
@@ -40,10 +45,13 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-	BASE: '//localhost/api',
+	BASE: '/api',
 	CREDENTIALS: 'include',
 	ENCODE_PATH: undefined,
-	HEADERS: undefined,
+	HEADERS: {
+		'X-CSRF-Token': getCsrfToken(),
+		'Content-Type': 'application/json',
+	},
 	PASSWORD: undefined,
 	TOKEN: undefined,
 	USERNAME: undefined,

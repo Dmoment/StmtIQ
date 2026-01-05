@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_01_200433) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_03_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "vector"
 
   create_table "accounts", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -84,6 +85,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_01_200433) do
     t.datetime "updated_at", null: false
   end
 
+# Could not dump table "labeled_examples" because of following StandardError
+#   Unknown type 'vector' for column 'embedding'
+
+
   create_table "statement_analytics", force: :cascade do |t|
     t.bigint "statement_id", null: false
     t.datetime "computed_at"
@@ -122,33 +127,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_01_200433) do
     t.index ["user_id"], name: "index_statements_on_user_id"
   end
 
-  create_table "transactions", force: :cascade do |t|
-    t.bigint "statement_id"
-    t.bigint "account_id"
+# Could not dump table "transactions" because of following StandardError
+#   Unknown type 'vector' for column 'embedding'
+
+
+  create_table "user_rules", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "category_id"
-    t.date "transaction_date"
-    t.text "description"
-    t.text "original_description"
-    t.decimal "amount"
-    t.string "transaction_type"
-    t.decimal "balance"
-    t.string "reference"
-    t.integer "ai_category_id"
-    t.decimal "confidence"
-    t.text "ai_explanation"
-    t.boolean "is_reviewed"
-    t.jsonb "metadata"
+    t.bigint "category_id", null: false
+    t.string "pattern", null: false
+    t.string "pattern_type", default: "keyword"
+    t.string "match_field", default: "description"
+    t.decimal "amount_min"
+    t.decimal "amount_max"
+    t.boolean "is_active", default: true
+    t.integer "priority", default: 0
+    t.integer "match_count", default: 0
+    t.datetime "last_matched_at"
+    t.bigint "source_transaction_id"
+    t.string "source", default: "manual"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_transactions_on_account_id"
-    t.index ["category_id"], name: "index_transactions_on_category_id"
-    t.index ["statement_id"], name: "index_transactions_on_statement_id"
-    t.index ["transaction_type", "category_id"], name: "index_transactions_on_transaction_type_and_category_id"
-    t.index ["user_id", "category_id"], name: "index_transactions_on_user_id_and_category_id"
-    t.index ["user_id", "transaction_date"], name: "index_transactions_on_user_id_and_transaction_date"
-    t.index ["user_id", "transaction_type"], name: "index_transactions_on_user_id_and_transaction_type"
-    t.index ["user_id"], name: "index_transactions_on_user_id"
+    t.index ["category_id"], name: "index_user_rules_on_category_id"
+    t.index ["user_id", "is_active", "priority"], name: "idx_user_rules_lookup"
+    t.index ["user_id", "pattern"], name: "idx_user_rules_unique_pattern", unique: true
+    t.index ["user_id"], name: "index_user_rules_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -173,6 +175,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_01_200433) do
   add_foreign_key "accounts", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "labeled_examples", "categories"
+  add_foreign_key "labeled_examples", "transactions"
+  add_foreign_key "labeled_examples", "users"
   add_foreign_key "statement_analytics", "statements"
   add_foreign_key "statements", "accounts"
   add_foreign_key "statements", "bank_templates"
@@ -181,4 +186,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_01_200433) do
   add_foreign_key "transactions", "categories"
   add_foreign_key "transactions", "statements"
   add_foreign_key "transactions", "users"
+  add_foreign_key "user_rules", "categories"
+  add_foreign_key "user_rules", "users"
 end
