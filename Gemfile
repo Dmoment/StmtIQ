@@ -45,7 +45,7 @@ gem "creek", "~> 2.6"              # TRUE streaming XLSX parser (memory-efficien
 # ============================================
 # AI Integration
 # ============================================
-gem "ruby-openai", "~> 7.0"        # OpenAI API client
+gem "ruby-openai", "~> 8.3"        # OpenAI API client
 
 # ============================================
 # Google API / Gmail Integration
