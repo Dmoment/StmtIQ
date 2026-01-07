@@ -2,14 +2,24 @@
 
 module Invoices
   class FieldParser
-    # Amount patterns - various formats used in Indian invoices
+    # Amount patterns - prioritized by specificity (most specific first)
+    # IMPORTANT: Use FINAL_AMOUNT_PATTERNS first, then fall back to AMOUNT_PATTERNS
+    FINAL_AMOUNT_PATTERNS = [
+      # "Total (INR) ₹4,625.60" - Parentheses REQUIRED for currency indicator
+      /total\s*\((?:inr|₹)\)[:\s]*(?:Rs\.?|INR|₹)?\s*([\d,]+(?:\.\d{2})?)/i,
+      # "Grand Total: ₹1234.56" or "Net Payable: Rs. 1,234.56"
+      /(?:grand\s*total|net\s*payable|payable\s*amount|amount\s*payable|final\s*amount|invoice\s*total)[:\s]*(?:Rs\.?|INR|₹)?\s*([\d,]+(?:\.\d{2})?)/i,
+      # "Total Due: ₹1234.56"
+      /(?:total\s*due|amount\s*due|balance\s*due)[:\s]*(?:Rs\.?|INR|₹)?\s*([\d,]+(?:\.\d{2})?)/i
+    ].freeze
+
     AMOUNT_PATTERNS = [
-      # "Total: Rs. 1,234.56" or "Grand Total: ₹1234.56"
-      /(?:total|amount|grand\s*total|net\s*payable|payable\s*amount|invoice\s*total)[:\s]*(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i,
+      # "Total: Rs. 1,234.56" - generic total
+      /(?:total)[:\s]*(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i,
       # "Rs. 1,234.56 Total" or "₹1234 only"
       /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)\s*(?:total|only|-\/|-)/i,
       # "Total Amount: 1,234.56"
-      /(?:total\s*amount|amount\s*payable|invoice\s*amount)[:\s]*([\d,]+(?:\.\d{2})?)/i,
+      /(?:total\s*amount|invoice\s*amount)[:\s]*([\d,]+(?:\.\d{2})?)/i,
       # Fallback: any currency symbol followed by amount
       /(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{2})?)/i
     ].freeze
@@ -18,7 +28,9 @@ module Invoices
     DATE_PATTERNS = [
       # "Invoice Date: 01/01/2024" or "Date: 01-01-2024"
       /(?:invoice\s*date|date|dated|bill\s*date|order\s*date)[:\s]*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/i,
-      # "01 Jan 2024" or "01 January 2024"
+      # "Dec 03, 2025" or "December 03, 2025" (Mon DD, YYYY with comma)
+      /((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2},?\s+\d{4})/i,
+      # "01 Jan 2024" or "01 January 2024" (DD Mon YYYY)
       /(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{2,4})/i,
       # "2024-01-01" ISO format
       /(\d{4}-\d{2}-\d{2})/,
@@ -57,15 +69,14 @@ module Invoices
       'Myntra' => ['myntra', 'myntra designs'],
       'Nykaa' => ['nykaa', 'fsn e-commerce'],
       'Zepto' => ['zepto', 'kiranakart'],
-      'Blinkit' => ['blinkit', 'grofers']
+      'Blinkit' => ['blinkit', 'grofers'],
+      'Refrens' => ['refrens', 'refrens internet']
     }.freeze
 
     attr_reader :text
 
     def initialize(text)
       @text = text.to_s
-      # Performance: Compile patterns once
-      compile_patterns!
     end
 
     def parse
@@ -82,17 +93,22 @@ module Invoices
 
     private
 
-    # Performance: Compile patterns once instead of on every parse
-    def compile_patterns!
-      @compiled_amount_patterns = AMOUNT_PATTERNS
-      @compiled_date_patterns = DATE_PATTERNS
-      @compiled_gstin_pattern = GSTIN_PATTERN
-      @compiled_invoice_patterns = INVOICE_NUMBER_PATTERNS
+    # Performance: Memoize to avoid re-computation in calculate_confidence
+    def extract_amount
+      @extract_amount ||= find_amount
     end
 
-    def extract_amount
-      # Try patterns in order of specificity
-      @compiled_amount_patterns.each do |pattern|
+    def find_amount
+      # Try FINAL patterns first (Grand Total, Total INR, Net Payable, etc.)
+      amount = try_amount_patterns(FINAL_AMOUNT_PATTERNS)
+      return amount if amount
+
+      # Fall back to generic amount patterns
+      try_amount_patterns(AMOUNT_PATTERNS)
+    end
+
+    def try_amount_patterns(patterns)
+      patterns.each do |pattern|
         if (match = @text.match(pattern))
           amount_str = match[1].gsub(',', '')
           amount = amount_str.to_f
@@ -103,8 +119,13 @@ module Invoices
       nil
     end
 
+    # Performance: Memoize to avoid re-computation in calculate_confidence
     def extract_date
-      @compiled_date_patterns.each do |pattern|
+      @extract_date ||= find_date
+    end
+
+    def find_date
+      DATE_PATTERNS.each do |pattern|
         if (match = @text.match(pattern))
           return parse_date(match[1])
         end
@@ -113,14 +134,18 @@ module Invoices
     end
 
     def parse_date(date_str)
+      # Clean up the date string (remove extra whitespace, normalize commas)
+      cleaned = date_str.strip.gsub(/\s+/, ' ')
+
       # Try common Indian date formats
       formats = [
         '%d/%m/%Y', '%d-%m-%Y', '%d/%m/%y', '%d-%m-%y',
-        '%Y-%m-%d', '%d %b %Y', '%d %B %Y', '%d%b%Y'
+        '%Y-%m-%d', '%d %b %Y', '%d %B %Y', '%d%b%Y',
+        '%b %d, %Y', '%B %d, %Y', '%b %d %Y', '%B %d %Y'  # Dec 03, 2025 format
       ]
 
       formats.each do |fmt|
-        date = Date.strptime(date_str.strip, fmt)
+        date = Date.strptime(cleaned, fmt)
         # Sanity check: date should be reasonable (not too old or in far future)
         return date if date.year >= 2000 && date <= Date.current + 1.year
       rescue ArgumentError
@@ -130,13 +155,21 @@ module Invoices
       nil
     end
 
+    # Performance: Memoize to avoid re-computation in calculate_confidence
     def extract_gstin
-      match = @text.match(@compiled_gstin_pattern)
-      match ? match[0] : nil
+      @extract_gstin ||= begin
+        match = @text.match(GSTIN_PATTERN)
+        match ? match[0] : nil
+      end
     end
 
+    # Performance: Memoize to avoid re-computation in calculate_confidence
     def extract_invoice_number
-      @compiled_invoice_patterns.each do |pattern|
+      @extract_invoice_number ||= find_invoice_number
+    end
+
+    def find_invoice_number
+      INVOICE_NUMBER_PATTERNS.each do |pattern|
         if (match = @text.match(pattern))
           invoice_num = match[1].strip
           # Sanity check: should be reasonable length
@@ -146,17 +179,32 @@ module Invoices
       nil
     end
 
+    # Performance: Memoize to avoid re-computation in calculate_confidence
     def extract_vendor_name
-      text_lower = @text.downcase
+      @extract_vendor_name ||= find_vendor_name
+    end
 
-      # Check known vendors first (most reliable)
+    # SRP: Broken into smaller focused methods
+    def find_vendor_name
+      # Strategy 1: Check known vendors (most reliable)
+      known = match_known_vendor
+      return known if known
+
+      # Strategy 2: Extract from common patterns
+      extract_vendor_from_patterns
+    end
+
+    def match_known_vendor
+      text_lower = @text.downcase
       KNOWN_VENDORS.each do |normalized_name, patterns|
         patterns.each do |pattern|
           return normalized_name if text_lower.include?(pattern.downcase)
         end
       end
+      nil
+    end
 
-      # Try to extract from common patterns
+    def extract_vendor_from_patterns
       vendor_patterns = [
         /(?:sold\s*by|from|seller|merchant|vendor)[:\s]*([A-Za-z][A-Za-z\s&\.]{2,40})/i,
         /(?:billed\s*by|invoice\s*from)[:\s]*([A-Za-z][A-Za-z\s&\.]{2,40})/i,
@@ -165,14 +213,17 @@ module Invoices
 
       vendor_patterns.each do |pattern|
         if (match = @text.match(pattern))
-          vendor = match[1].strip.titleize
-          # Clean up common suffixes
-          vendor = vendor.gsub(/\s*(Private|Pvt|Ltd|Limited|LLP|Inc|Corp)\s*/i, ' ').strip
-          return vendor if vendor.length >= 2
+          return clean_vendor_name(match[1])
         end
       end
-
       nil
+    end
+
+    def clean_vendor_name(raw_name)
+      vendor = raw_name.strip.titleize
+      # Remove common suffixes
+      vendor = vendor.gsub(/\s*(Private|Pvt|Ltd|Limited|LLP|Inc|Corp)\s*/i, ' ').strip
+      vendor.length >= 2 ? vendor : nil
     end
 
     def calculate_confidence

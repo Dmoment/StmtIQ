@@ -171,6 +171,7 @@ export interface Transaction {
     normalized_description?: string;
     [key: string]: unknown;
   };
+  invoice?: InvoiceCompact;
   created_at: string;
   updated_at: string;
 }
@@ -202,6 +203,17 @@ export interface PaginatedResponse<T> {
 // ============================================
 export type InvoiceStatus = 'pending' | 'processing' | 'extracted' | 'matched' | 'unmatched' | 'failed';
 export type InvoiceSource = 'upload' | 'gmail';
+
+// Compact invoice for transaction display
+export interface InvoiceCompact {
+  id: number;
+  vendor_name: string | null;
+  invoice_number: string | null;
+  invoice_date: string | null;
+  total_amount: string | null;
+  status: InvoiceStatus;
+  match_confidence: string | null;
+}
 
 export interface Invoice {
   id: number;
@@ -241,6 +253,33 @@ export interface InvoiceSuggestion {
     date_score: number;
     vendor_score: number;
   };
+}
+
+// ============================================
+// Gmail Connection Types
+// ============================================
+export type GmailConnectionStatus = 'pending' | 'active' | 'syncing' | 'error' | 'disconnected';
+
+export interface GmailConnection {
+  id: number;
+  email: string;
+  status: GmailConnectionStatus;
+  display_status: string;
+  sync_enabled: boolean;
+  last_sync_at: string | null;
+  invoice_count: number;
+  error_message?: string;
+  created_at: string;
+}
+
+export interface GmailAuthResponse {
+  authorization_url: string;
+  state: string;
+}
+
+export interface GmailStatusResponse {
+  configured: boolean;
+  enabled: boolean;
 }
 
 // ============================================

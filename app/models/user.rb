@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :user_rules, dependent: :destroy
   has_many :labeled_examples, dependent: :destroy
   has_many :invoices, dependent: :destroy
+  has_many :gmail_connections, dependent: :destroy
 
   # Validations
   validates :phone_number, presence: true, uniqueness: true,

@@ -100,3 +100,10 @@ export const invoiceKeys = {
   stats: () => [...invoiceKeys.all, "stats"] as const,
 };
 
+export const gmailKeys = {
+  all: ["gmail"] as const,
+  status: () => [...gmailKeys.all, "status"] as const,
+  connections: () => [...gmailKeys.all, "connections"] as const,
+  connection: (id: number) => [...gmailKeys.connections(), id] as const,
+};
+

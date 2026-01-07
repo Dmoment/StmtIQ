@@ -7,6 +7,9 @@ class Invoice < ApplicationRecord
 
   has_one_attached :file
 
+  # Callbacks
+  before_save :sanitize_extracted_data
+
   # Validations
   validates :source, presence: true, inclusion: { in: %w[upload gmail] }
   validates :status, presence: true, inclusion: {
@@ -153,5 +156,39 @@ class Invoice < ApplicationRecord
 
   def image?
     file_content_type&.start_with?('image/')
+  end
+
+  private
+
+  # Remove null characters and other problematic Unicode from all text fields
+  # PostgreSQL cannot store \u0000 (null bytes) in text/jsonb fields
+  def sanitize_extracted_data
+    # Sanitize JSON field
+    self.extracted_data = deep_sanitize(extracted_data) if extracted_data.present?
+
+    # Sanitize string fields that might contain extracted text
+    self.vendor_name = sanitize_string(vendor_name) if vendor_name.present?
+    self.vendor_gstin = sanitize_string(vendor_gstin) if vendor_gstin.present?
+    self.invoice_number = sanitize_string(invoice_number) if invoice_number.present?
+  end
+
+  def deep_sanitize(obj)
+    case obj
+    when Hash
+      obj.transform_values { |v| deep_sanitize(v) }
+    when Array
+      obj.map { |v| deep_sanitize(v) }
+    when String
+      sanitize_string(obj)
+    else
+      obj
+    end
+  end
+
+  def sanitize_string(str)
+    return str unless str.is_a?(String)
+
+    # Remove null bytes and other control characters (except newlines, tabs)
+    str.gsub(/\u0000/, '').gsub(/[\x00-\x08\x0B\x0C\x0E-\x1F]/, '')
   end
 end

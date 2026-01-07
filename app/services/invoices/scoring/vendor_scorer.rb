@@ -51,7 +51,9 @@ module Invoices
       end
 
       def normalized_txn_merchant
-        @normalized_txn_merchant ||= normalize(@transaction.normalized_merchant_name.to_s)
+        # Use counterparty_name if available, otherwise fall back to original_description
+        merchant_name = @transaction.counterparty_name.presence || @transaction.original_description.to_s
+        @normalized_txn_merchant ||= normalize(merchant_name)
       end
 
       def invoice_words
@@ -64,7 +66,8 @@ module Invoices
 
       def normalize(text)
         text.to_s.downcase
-          .gsub(/[^a-z0-9\s]/, '')
+          .gsub(/[\/\-_@.]/, ' ')  # Replace common separators with spaces first
+          .gsub(/[^a-z0-9\s]/, '') # Then remove other special chars
           .gsub(/\s+/, ' ')
           .strip
       end

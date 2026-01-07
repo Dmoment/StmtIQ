@@ -84,12 +84,12 @@ module V1
         file_content = uploaded_file[:tempfile].read
         uploaded_file[:tempfile].rewind
 
-        # Security: Validate file thoroughly
+        # Security: Validate file thoroughly (use :: to reference global namespace)
         begin
-          Invoices::FileValidator.new(file_content, content_type, file_content.bytesize).validate!
-        rescue Invoices::FileValidator::InvalidFileTypeError,
-               Invoices::FileValidator::FileTooLargeError,
-               Invoices::FileValidator::MaliciousContentError => e
+          ::Invoices::FileValidator.new(file_content, content_type, file_content.bytesize).validate!
+        rescue ::Invoices::FileValidator::InvalidFileTypeError,
+               ::Invoices::FileValidator::FileTooLargeError,
+               ::Invoices::FileValidator::MaliciousContentError => e
           error!({ error: e.message }, 422)
         end
 

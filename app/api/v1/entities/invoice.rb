@@ -2,6 +2,29 @@
 
 module V1
   module Entities
+    # Compact transaction representation for invoice matching
+    # Defined first so it can be referenced by Invoice entity
+    class TransactionCompact < Grape::Entity
+      expose :id
+      expose :description
+      expose :amount
+      expose :transaction_date
+      expose :transaction_type
+      expose :reference
+
+      expose :category_name do |txn|
+        txn.category&.name
+      end
+
+      expose :category_icon do |txn|
+        txn.category&.icon
+      end
+
+      expose :account_name do |txn|
+        txn.account&.name
+      end
+    end
+
     class Invoice < Grape::Entity
       expose :id
       expose :source
@@ -43,28 +66,6 @@ module V1
       expose :account, using: V1::Entities::Account, if: ->(invoice, options) {
         options[:full] && invoice.account.present?
       }
-    end
-
-    # Compact transaction representation for invoice matching
-    class TransactionCompact < Grape::Entity
-      expose :id
-      expose :description
-      expose :amount
-      expose :transaction_date
-      expose :transaction_type
-      expose :reference
-
-      expose :category_name do |txn|
-        txn.category&.name
-      end
-
-      expose :category_icon do |txn|
-        txn.category&.icon
-      end
-
-      expose :account_name do |txn|
-        txn.account&.name
-      end
     end
   end
 end

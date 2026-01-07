@@ -7,6 +7,9 @@ import { transactionKeys } from "./keys";
 // ============================================
 // Types
 // ============================================
+export type SortField = 'transaction_date' | 'amount' | 'description';
+export type SortDirection = 'asc' | 'desc';
+
 export interface TransactionFilters {
   page?: number;
   per_page?: number;
@@ -14,6 +17,12 @@ export interface TransactionFilters {
   q?: Record<string, unknown>;
   // Show only uncategorized transactions
   uncategorized?: boolean;
+  // Sorting
+  sort_by?: SortField;
+  sort_direction?: SortDirection;
+  // Client-side filters (converted to Ransack)
+  search?: string;
+  category_slug?: string;
 }
 
 export interface StatsFilters {
@@ -26,23 +35,69 @@ export interface StatsFilters {
 // ============================================
 
 /**
- * List all transactions with Ransack filtering and Kaminari pagination
- * Uses auto-generated TransactionsService
- * 
+ * List all transactions with Ransack filtering, sorting, and Kaminari pagination
+ * Uses manual fetch to support Ransack query params including sorting
+ *
  * Example filters:
  * - { q: { category_id_eq: 1 } }
  * - { q: { description_cont: 'amazon', transaction_type_eq: 'debit' } }
- * - { q: { transaction_date_gteq: '2025-01-01', s: 'amount desc' } }
+ * - { sort_by: 'transaction_date', sort_direction: 'desc' }
+ * - { sort_by: 'amount', sort_direction: 'asc' }
  */
 export const useTransactions = (filters?: TransactionFilters) => {
   return useQuery({
     queryKey: transactionKeys.list(filters),
     queryFn: async () => {
-      const response = await TransactionsService.getV1Transactions({
-        page: filters?.page,
-        perPage: filters?.per_page,
-      });
-      return response as unknown as Transaction[];
+      const token = localStorage.getItem('auth_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // Build query params
+      const params = new URLSearchParams();
+
+      if (filters?.page) {
+        params.append('page', filters.page.toString());
+      }
+      if (filters?.per_page) {
+        params.append('per_page', filters.per_page.toString());
+      }
+      if (filters?.uncategorized) {
+        params.append('q[category_id_null]', 'true');
+        params.append('q[ai_category_id_null]', 'true');
+      }
+
+      // Add search filter (Ransack: description contains)
+      if (filters?.search) {
+        params.append('q[description_cont]', filters.search);
+      }
+
+      // Add category filter (Ransack: category.slug OR ai_category.slug equals)
+      // Using Ransack grouping for OR logic
+      if (filters?.category_slug) {
+        params.append('q[g][0][category_slug_eq]', filters.category_slug);
+        params.append('q[g][0][ai_category_slug_eq]', filters.category_slug);
+        params.append('q[g][0][m]', 'or');
+      }
+
+      // Add Ransack sort parameter
+      if (filters?.sort_by) {
+        const direction = filters.sort_direction || 'desc';
+        params.append('q[s]', `${filters.sort_by} ${direction}`);
+      }
+
+      const url = `/api/v1/transactions${params.toString() ? `?${params.toString()}` : ''}`;
+
+      const response = await fetch(url, { headers });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions');
+      }
+
+      return response.json() as Promise<Transaction[]>;
     },
     staleTime: 10 * 1000, // 10 seconds - shorter cache for faster updates
     refetchInterval: 5 * 1000, // Auto-refetch every 5 seconds to catch categorization updates

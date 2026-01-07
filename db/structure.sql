@@ -296,6 +296,46 @@ ALTER SEQUENCE public.global_patterns_id_seq OWNED BY public.global_patterns.id;
 
 
 --
+-- Name: gmail_connections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gmail_connections (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    email character varying NOT NULL,
+    access_token text,
+    refresh_token text,
+    token_expires_at timestamp(6) without time zone,
+    last_sync_at timestamp(6) without time zone,
+    last_history_id character varying,
+    sync_enabled boolean DEFAULT true NOT NULL,
+    status character varying DEFAULT 'pending'::character varying NOT NULL,
+    error_message text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: gmail_connections_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.gmail_connections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gmail_connections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.gmail_connections_id_seq OWNED BY public.gmail_connections.id;
+
+
+--
 -- Name: invoices; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -700,6 +740,13 @@ ALTER TABLE ONLY public.global_patterns ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
+-- Name: gmail_connections id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gmail_connections ALTER COLUMN id SET DEFAULT nextval('public.gmail_connections_id_seq'::regclass);
+
+
+--
 -- Name: invoices id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -817,6 +864,14 @@ ALTER TABLE ONLY public.categories
 
 ALTER TABLE ONLY public.global_patterns
     ADD CONSTRAINT global_patterns_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gmail_connections gmail_connections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gmail_connections
+    ADD CONSTRAINT gmail_connections_pkey PRIMARY KEY (id);
 
 
 --
@@ -1022,6 +1077,41 @@ CREATE INDEX index_global_patterns_on_pattern ON public.global_patterns USING bt
 --
 
 CREATE UNIQUE INDEX index_global_patterns_on_pattern_and_category_id ON public.global_patterns USING btree (pattern, category_id);
+
+
+--
+-- Name: index_gmail_connections_on_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_gmail_connections_on_email ON public.gmail_connections USING btree (email);
+
+
+--
+-- Name: index_gmail_connections_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_gmail_connections_on_status ON public.gmail_connections USING btree (status);
+
+
+--
+-- Name: index_gmail_connections_on_sync_enabled; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_gmail_connections_on_sync_enabled ON public.gmail_connections USING btree (sync_enabled);
+
+
+--
+-- Name: index_gmail_connections_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_gmail_connections_on_user_id ON public.gmail_connections USING btree (user_id);
+
+
+--
+-- Name: index_gmail_connections_on_user_id_and_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_gmail_connections_on_user_id_and_email ON public.gmail_connections USING btree (user_id, email);
 
 
 --
@@ -1321,6 +1411,14 @@ ALTER TABLE ONLY public.transactions
 
 
 --
+-- Name: gmail_connections fk_rails_178f034934; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gmail_connections
+    ADD CONSTRAINT fk_rails_178f034934 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: statements fk_rails_1e0d2f384b; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1511,6 +1609,7 @@ ALTER TABLE ONLY public.user_rules
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260107190617'),
 ('20260107103522'),
 ('20260106180000'),
 ('20260105165646'),

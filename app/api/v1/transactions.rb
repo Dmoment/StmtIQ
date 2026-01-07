@@ -6,14 +6,16 @@ module V1
       desc 'List all transactions with filtering and pagination'
       params do
         optional :page, type: Integer, default: 1
-        optional :per_page, type: Integer, default: 50
+        # Security: Limit max per_page to prevent DoS attacks
+        optional :per_page, type: Integer, default: 50, values: 1..100
         optional :q, type: Hash, desc: 'Ransack query params'
       end
       get do
         authenticate!
 
-        transactions = current_user.transactions.includes(:category, :ai_category, :subcategory, :account).recent
+        transactions = current_user.transactions.includes(:category, :ai_category, :subcategory, :account, :attached_invoice).recent
 
+        # Security: Validate ransack params against whitelisted attributes only
         if params[:q].present?
           transactions = transactions.ransack(params[:q]).result(distinct: true)
         end

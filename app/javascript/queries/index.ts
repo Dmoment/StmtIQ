@@ -79,3 +79,15 @@ export {
   useRetryInvoiceExtraction,
 } from "./useInvoices";
 
+// Gmail hooks
+export {
+  useGmailStatus,
+  useGmailConnections,
+  useGmailConnection,
+  useGmailAuth,
+  useGmailCallback,
+  useUpdateGmailConnection,
+  useSyncGmail,
+  useDisconnectGmail,
+} from "./useGmail";
+

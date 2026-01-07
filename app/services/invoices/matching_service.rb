@@ -3,8 +3,8 @@
 module Invoices
   class MatchingService
     # Thresholds for auto-matching and suggestions
-    AUTO_MATCH_THRESHOLD = 80
-    SUGGEST_THRESHOLD = 40
+    AUTO_MATCH_THRESHOLD = 70
+    SUGGEST_THRESHOLD = 25
     MAX_SUGGESTIONS = 5
 
     attr_reader :invoice, :user
@@ -59,8 +59,8 @@ module Invoices
     def find_candidates
       # Performance: Select only needed columns to reduce memory
       base_query = user.transactions
-        .select(:id, :description, :amount, :transaction_date, :transaction_type,
-                :normalized_merchant_name, :metadata, :category_id, :account_id)
+        .select(:id, :description, :original_description, :amount, :transaction_date, :transaction_type,
+                :counterparty_name, :metadata, :category_id, :account_id)
         .where(invoice_id: nil)
         .where(transaction_type: 'debit')
 
@@ -117,13 +117,15 @@ module Invoices
       if invoice.invoice_date
         (invoice.invoice_date - 7.days)..(invoice.invoice_date + 7.days)
       else
-        30.days.ago.to_date..Date.current
+        # Use wider range when invoice date is unknown (90 days)
+        90.days.ago.to_date..Date.current
       end
     end
 
     def calculate_amount_range
       amount = invoice.total_amount
-      tolerance = [amount * 0.05, 10].max
+      # Use 25% tolerance to account for discounts, taxes, and partial payments
+      tolerance = [amount * 0.25, 100].max
       (amount - tolerance)..(amount + tolerance)
     end
 

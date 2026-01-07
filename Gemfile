@@ -48,6 +48,12 @@ gem "creek", "~> 2.6"              # TRUE streaming XLSX parser (memory-efficien
 gem "ruby-openai", "~> 7.0"        # OpenAI API client
 
 # ============================================
+# Google API / Gmail Integration
+# ============================================
+gem "google-apis-gmail_v1", "~> 0.30"  # Gmail API
+gem "googleauth", "~> 1.8"             # Google OAuth2
+
+# ============================================
 # Storage & File Uploads
 # ============================================
 gem "aws-sdk-s3", require: false   # S3 storage

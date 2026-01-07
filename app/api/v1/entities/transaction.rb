@@ -2,6 +2,17 @@
 
 module V1
   module Entities
+    # Compact invoice representation for transaction display
+    class InvoiceCompact < Grape::Entity
+      expose :id
+      expose :vendor_name
+      expose :invoice_number
+      expose :invoice_date
+      expose :total_amount
+      expose :status
+      expose :match_confidence
+    end
+
     class Transaction < Grape::Entity
       expose :id
       expose :transaction_date
@@ -28,6 +39,9 @@ module V1
       expose :counterparty_name
 
       expose :account, using: V1::Entities::Account, if: ->(_, opts) { opts[:full] }
+
+      # Linked invoice (if matched)
+      expose :attached_invoice, as: :invoice, using: InvoiceCompact, if: ->(tx, _) { tx.attached_invoice.present? }
 
       expose :signed_amount do |transaction|
         transaction.signed_amount

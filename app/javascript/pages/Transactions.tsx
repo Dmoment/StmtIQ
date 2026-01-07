@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Search,
   Filter,
   Download,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   ShoppingBag,
   Utensils,
   Car,
@@ -34,7 +36,9 @@ import {
 import { clsx } from 'clsx';
 import { CategoryPicker } from '../components/CategoryPicker';
 import { TransactionStats } from '../components/TransactionStats';
+import { InvoiceBadge } from '../components/InvoiceBadge';
 import { useTransactions, useTransactionStats, useCategorizationProgress, useCategorizeTransactions } from '../queries/useTransactions';
+import type { SortField, SortDirection } from '../queries/useTransactions';
 import type { Transaction } from '../types/api';
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -62,16 +66,48 @@ export function Transactions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
   const [showOnlyUncategorized, setShowOnlyUncategorized] = useState(false);
-  
+
+  // Sorting state
+  const [sortBy, setSortBy] = useState<SortField>('transaction_date');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
-  const { data: transactions = [], isLoading: loading, error: queryError, refetch, isRefetching } = useTransactions({ 
-    page: currentPage, 
+  const { data: transactions = [], isLoading: loading, error: queryError, refetch } = useTransactions({
+    page: currentPage,
     per_page: perPage,
-    uncategorized: showOnlyUncategorized
+    uncategorized: showOnlyUncategorized,
+    sort_by: sortBy,
+    sort_direction: sortDirection,
+    search: searchQuery || undefined,
+    category_slug: selectedCategory || undefined,
   });
+
+  // Handle column header click for sorting
+  const handleSort = (field: SortField) => {
+    if (sortBy === field) {
+      // Toggle direction if same field
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New field, default to desc for date/amount, asc for description
+      setSortBy(field);
+      setSortDirection(field === 'description' ? 'asc' : 'desc');
+    }
+    // Reset to first page when sorting changes
+    setCurrentPage(1);
+  };
+
+  // Get sort icon for a column
+  const getSortIcon = (field: SortField) => {
+    if (sortBy !== field) {
+      return <ArrowUpDown className="w-4 h-4 text-slate-400" />;
+    }
+    return sortDirection === 'asc'
+      ? <ArrowUp className="w-4 h-4 text-slate-900" />
+      : <ArrowDown className="w-4 h-4 text-slate-900" />;
+  };
   const { data: detailedStats, isLoading: statsLoading } = useTransactionStats(true);
 
   // Categorization progress
@@ -105,19 +141,16 @@ export function Transactions() {
     refetch();
   };
 
-  const filteredTransactions = transactions.filter(tx => {
-    const category = tx.category || tx.ai_category;
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      if (!tx.description.toLowerCase().includes(query)) {
-        return false;
-      }
-    }
-    if (selectedCategory && category?.slug !== selectedCategory) {
-      return false;
-    }
-    return true;
-  });
+  // Reset to page 1 when filters change
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleCategorySelect = (category: string | null) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
 
   const getCategoryIcon = (slug: string | undefined) => {
     if (!slug) return HelpCircle;
@@ -255,14 +288,14 @@ export function Transactions() {
             type="text"
             placeholder="Search transactions..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-300 shadow-sm"
           />
         </div>
         
         <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
           <button
-            onClick={() => setSelectedCategory(null)}
+            onClick={() => handleCategorySelect(null)}
             className={clsx(
               "px-4 py-2 rounded-lg whitespace-nowrap transition-colors border text-sm font-medium",
               !selectedCategory 
@@ -275,7 +308,7 @@ export function Transactions() {
           {Object.keys(categoryIcons).map(cat => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat === selectedCategory ? null : cat)}
+              onClick={() => handleCategorySelect(cat === selectedCategory ? null : cat)}
               className={clsx(
                 "px-4 py-2 rounded-lg capitalize whitespace-nowrap transition-colors border text-sm font-medium",
                 cat === selectedCategory 
@@ -297,7 +330,7 @@ export function Transactions() {
       )}
 
       {/* Transactions Table/List */}
-      {filteredTransactions.length === 0 ? (
+      {transactions.length === 0 ? (
         <div className="rounded-lg bg-white border border-slate-200 p-12 text-center shadow-sm">
           <div className="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-6">
             <Filter className="w-8 h-8 text-slate-600" />
@@ -323,18 +356,46 @@ export function Transactions() {
         <div className="rounded-lg bg-white border border-slate-200 overflow-hidden shadow-sm">
           {/* Table Header */}
           <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b border-slate-200 text-sm font-semibold text-slate-600 bg-slate-50">
-            <div className="col-span-2 flex items-center gap-1 cursor-pointer hover:text-slate-900">
-              Date <ArrowUpDown className="w-4 h-4" />
-            </div>
-            <div className="col-span-4">Description</div>
+            <button
+              type="button"
+              onClick={() => handleSort('transaction_date')}
+              className={clsx(
+                "col-span-2 flex items-center gap-1.5 hover:text-slate-900 transition-colors text-left",
+                sortBy === 'transaction_date' && "text-slate-900"
+              )}
+              aria-label={`Sort by date ${sortBy === 'transaction_date' ? (sortDirection === 'asc' ? 'descending' : 'ascending') : ''}`}
+            >
+              Date {getSortIcon('transaction_date')}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSort('description')}
+              className={clsx(
+                "col-span-4 flex items-center gap-1.5 hover:text-slate-900 transition-colors text-left",
+                sortBy === 'description' && "text-slate-900"
+              )}
+              aria-label={`Sort by description ${sortBy === 'description' ? (sortDirection === 'asc' ? 'descending' : 'ascending') : ''}`}
+            >
+              Description {getSortIcon('description')}
+            </button>
             <div className="col-span-3">Category</div>
-            <div className="col-span-2 text-right">Amount</div>
+            <button
+              type="button"
+              onClick={() => handleSort('amount')}
+              className={clsx(
+                "col-span-2 flex items-center justify-end gap-1.5 hover:text-slate-900 transition-colors text-right",
+                sortBy === 'amount' && "text-slate-900"
+              )}
+              aria-label={`Sort by amount ${sortBy === 'amount' ? (sortDirection === 'asc' ? 'descending' : 'ascending') : ''}`}
+            >
+              Amount {getSortIcon('amount')}
+            </button>
             <div className="col-span-1 text-right">Conf.</div>
           </div>
 
           {/* Table Body */}
           <div className="divide-y divide-slate-200">
-            {filteredTransactions.map((tx) => {
+            {transactions.map((tx) => {
               const category = tx.category || tx.ai_category;
               const categorySlug = category?.slug || 'other';
               const categoryColor = category?.color;
@@ -345,8 +406,18 @@ export function Transactions() {
               const colorInfo = getCategoryColorWithCustom(categorySlug, categoryColor);
               const colorScheme = colorInfo;
               
+              const hasInvoice = !!tx.invoice;
+
               return (
-                <div key={tx.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-slate-50 transition-colors">
+                <div
+                  key={tx.id}
+                  className={clsx(
+                    "grid grid-cols-12 gap-4 p-4 items-center transition-colors relative",
+                    hasInvoice
+                      ? "bg-gradient-to-r from-emerald-50/50 to-transparent hover:from-emerald-50 border-l-2 border-l-emerald-400"
+                      : "hover:bg-slate-50"
+                  )}
+                >
                   <div className="col-span-12 sm:col-span-2 text-sm text-slate-600">
                     <span className="sm:hidden font-medium text-slate-900 mr-2">
                       {tx.transaction_type === 'credit' ? '+' : '-'}₹{amount.toLocaleString('en-IN')}
@@ -358,7 +429,10 @@ export function Transactions() {
                     })}
                   </div>
                   <div className="col-span-12 sm:col-span-4">
-                    <p className="font-medium text-slate-900 truncate">{tx.description}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-900 truncate flex-1">{tx.description}</p>
+                      {tx.invoice && <InvoiceBadge invoice={tx.invoice} />}
+                    </div>
                     {tx.ai_explanation && (
                       <p className="text-xs text-slate-400 truncate mt-0.5" title={tx.ai_explanation}>
                         {tx.ai_explanation}

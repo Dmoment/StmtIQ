@@ -7,7 +7,9 @@ module Invoices
       WEIGHTS = {
         exact: 50,
         within_1_percent: 35,
-        within_5_percent: 20
+        within_5_percent: 25,
+        within_10_percent: 15,  # Handle discounts
+        within_20_percent: 10   # Handle larger discounts
       }.freeze
 
       def score
@@ -20,6 +22,10 @@ module Invoices
           WEIGHTS[:within_1_percent]
         elsif percent_diff <= 0.05
           WEIGHTS[:within_5_percent]
+        elsif percent_diff <= 0.10
+          WEIGHTS[:within_10_percent]
+        elsif percent_diff <= 0.20
+          WEIGHTS[:within_20_percent]
         else
           0
         end
@@ -29,15 +35,8 @@ module Invoices
         diff = (@transaction.amount - @invoice.total_amount).abs
         percent_diff = (diff / @invoice.total_amount * 100).round(2)
 
-        if diff < 0.01
-          { match: 'exact', points: WEIGHTS[:exact] }
-        elsif percent_diff <= 1
-          { match: "#{percent_diff}% diff", points: WEIGHTS[:within_1_percent] }
-        elsif percent_diff <= 5
-          { match: "#{percent_diff}% diff", points: WEIGHTS[:within_5_percent] }
-        else
-          { match: "#{percent_diff}% diff", points: 0 }
-        end
+        points = score
+        { match: diff < 0.01 ? 'exact' : "#{percent_diff}% diff", points: points }
       end
 
       def weight

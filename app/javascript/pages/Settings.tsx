@@ -1,13 +1,23 @@
-import React from 'react';
-import { 
-  User, 
-  Bell, 
-  Shield, 
+import React, { useState } from 'react';
+import {
+  User,
+  Bell,
+  Shield,
   Palette,
   Building2,
-  Send
+  Send,
+  Mail,
+  Loader2,
+  AlertCircle,
+  XCircle
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useGmailStatus, useGmailConnections } from '../queries';
+import { useGmailManager } from '../hooks/useGmailManager';
+import { GmailConnectionCard } from '../components/gmail/GmailConnectionCard';
+import { GmailInfoBox } from '../components/gmail/GmailInfoBox';
+import { GmailConfigWarning } from '../components/gmail/GmailConfigWarning';
+import { GmailConnectButton } from '../components/gmail/GmailConnectButton';
 
 const settingsSections = [
   {
@@ -16,6 +26,13 @@ const settingsSections = [
     description: 'Manage your account details',
     icon: User,
     color: 'from-violet-500 to-purple-500',
+  },
+  {
+    id: 'gmail',
+    title: 'Gmail Integration',
+    description: 'Auto-import invoices from email',
+    icon: Mail,
+    color: 'from-red-500 to-orange-500',
   },
   {
     id: 'ca',
@@ -55,7 +72,7 @@ const settingsSections = [
 ];
 
 export function Settings() {
-  const [activeSection, setActiveSection] = React.useState('ca');
+  const [activeSection, setActiveSection] = useState('gmail');
 
   return (
     <div className="space-y-8">
@@ -97,6 +114,7 @@ export function Settings() {
 
         {/* Content */}
         <div className="lg:col-span-3">
+          {activeSection === 'gmail' && <GmailSettings />}
           {activeSection === 'ca' && <CASettings />}
           {activeSection === 'profile' && <ProfileSettings />}
           {activeSection === 'banks' && <BankSettings />}
@@ -105,6 +123,105 @@ export function Settings() {
           {activeSection === 'appearance' && <AppearanceSettings />}
         </div>
       </div>
+    </div>
+  );
+}
+
+function GmailSettings() {
+  const { data: status, isLoading: statusLoading } = useGmailStatus();
+  const {
+    data: connections,
+    isLoading: connectionsLoading,
+    refetch,
+  } = useGmailConnections();
+  const {
+    handleConnect,
+    handleSync,
+    handleToggleSync,
+    handleDisconnect,
+    disconnectingId,
+    error,
+    clearError,
+  } = useGmailManager(refetch);
+
+  if (statusLoading || connectionsLoading) {
+    return (
+      <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+        <div
+          className="flex items-center justify-center py-12"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+          <span className="sr-only">Loading Gmail settings...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!status?.configured) {
+    return <GmailConfigWarning />;
+  }
+
+  const hasConnections = connections && connections.length > 0;
+
+  return (
+    <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold mb-2">Gmail Integration</h2>
+        <p className="text-slate-400">
+          Automatically import invoice PDFs from your Gmail inbox. We scan for
+          emails with invoice attachments from common vendors.
+        </p>
+      </div>
+
+      {error && (
+        <div
+          className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start justify-between gap-3"
+          role="alert"
+        >
+          <div className="flex items-start gap-3">
+            <AlertCircle
+              className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="text-sm text-red-200 font-medium">Error</p>
+              <p className="text-sm text-red-200/70 mt-1">{error}</p>
+            </div>
+          </div>
+          <button
+            onClick={clearError}
+            className="p-1 rounded hover:bg-red-500/20 text-red-400 transition-colors"
+            aria-label="Dismiss error"
+          >
+            <XCircle className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      <GmailInfoBox />
+
+      {hasConnections && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-slate-300">
+            Connected Accounts
+          </h3>
+          {connections.map((connection) => (
+            <GmailConnectionCard
+              key={connection.id}
+              connection={connection}
+              onSync={handleSync}
+              onToggleSync={handleToggleSync}
+              onDisconnect={handleDisconnect}
+              isSyncing={false}
+              isDisconnecting={disconnectingId === connection.id}
+            />
+          ))}
+        </div>
+      )}
+
+      <GmailConnectButton onClick={handleConnect} isLoading={false} />
     </div>
   );
 }

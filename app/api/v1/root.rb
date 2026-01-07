@@ -16,6 +16,7 @@ module V1
     mount V1::Transactions
     mount V1::Invoices
     mount V1::Uploads
+    mount V1::Gmail
 
     # Swagger documentation
     add_swagger_documentation(
