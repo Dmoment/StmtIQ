@@ -391,20 +391,17 @@ export function Transactions() {
                         </div>
                       )}
                       <div className="flex flex-col items-start min-w-0 overflow-visible">
-                        <div className="flex items-center gap-1 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span
-                            className="text-sm capitalize group-hover:text-slate-900"
+                            className="text-sm font-medium capitalize group-hover:text-slate-900"
                             style={colorInfo.hasCustomColor && colorInfo.customColor ? { color: colorInfo.customColor } : {}}
                           >
                             {category?.name || 'Other'}
                           </span>
                           {tx.subcategory && (
-                            <>
-                              <ChevronRight className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                              <span className="text-xs text-slate-500">
-                                {tx.subcategory.name}
-                              </span>
-                            </>
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-100 text-xs text-slate-600 font-medium">
+                              {tx.subcategory.name}
+                            </span>
                           )}
                         </div>
                         {tx.counterparty_name && tx.tx_kind?.startsWith('transfer') && (

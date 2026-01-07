@@ -219,9 +219,9 @@ export const useTransactionFeedback = () => {
   return useMutation<
     FeedbackResult,
     Error,
-    { transactionId: number; categoryId: number; applyToSimilar?: boolean }
+    { transactionId: number; categoryId: number; subcategoryId?: number; applyToSimilar?: boolean }
   >({
-    mutationFn: async ({ transactionId, categoryId, applyToSimilar = false }) => {
+    mutationFn: async ({ transactionId, categoryId, subcategoryId, applyToSimilar = false }) => {
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -236,6 +236,7 @@ export const useTransactionFeedback = () => {
         headers,
         body: JSON.stringify({
           category_id: categoryId,
+          subcategory_id: subcategoryId,
           apply_to_similar: applyToSimilar,
         }),
       });

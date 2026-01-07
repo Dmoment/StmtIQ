@@ -296,6 +296,54 @@ ALTER SEQUENCE public.global_patterns_id_seq OWNED BY public.global_patterns.id;
 
 
 --
+-- Name: invoices; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.invoices (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    account_id bigint,
+    source character varying DEFAULT 'upload'::character varying NOT NULL,
+    gmail_message_id character varying,
+    vendor_name character varying,
+    vendor_gstin character varying(20),
+    invoice_number character varying(100),
+    invoice_date date,
+    total_amount numeric(15,2),
+    currency character varying(3) DEFAULT 'INR'::character varying,
+    extracted_data jsonb DEFAULT '{}'::jsonb,
+    extraction_method character varying(20),
+    extraction_confidence numeric(3,2),
+    status character varying DEFAULT 'pending'::character varying NOT NULL,
+    matched_transaction_id bigint,
+    match_confidence numeric(3,2),
+    matched_at timestamp(6) without time zone,
+    matched_by character varying(20),
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.invoices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.invoices_id_seq OWNED BY public.invoices.id;
+
+
+--
 -- Name: labeled_examples; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -311,7 +359,8 @@ CREATE TABLE public.labeled_examples (
     transaction_type character varying,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    embedding public.vector
+    embedding public.vector,
+    subcategory_id bigint
 );
 
 
@@ -492,7 +541,8 @@ CREATE TABLE public.transactions (
     embedding_generated_at timestamp(6) without time zone,
     subcategory_id bigint,
     counterparty_name character varying,
-    tx_kind character varying
+    tx_kind character varying,
+    invoice_id bigint
 );
 
 
@@ -535,7 +585,8 @@ CREATE TABLE public.user_rules (
     source_transaction_id bigint,
     source character varying DEFAULT 'manual'::character varying,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    subcategory_id bigint
 );
 
 
@@ -646,6 +697,13 @@ ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.c
 --
 
 ALTER TABLE ONLY public.global_patterns ALTER COLUMN id SET DEFAULT nextval('public.global_patterns_id_seq'::regclass);
+
+
+--
+-- Name: invoices id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoices ALTER COLUMN id SET DEFAULT nextval('public.invoices_id_seq'::regclass);
 
 
 --
@@ -762,6 +820,14 @@ ALTER TABLE ONLY public.global_patterns
 
 
 --
+-- Name: invoices invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT invoices_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: labeled_examples labeled_examples_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -861,6 +927,13 @@ CREATE INDEX idx_transactions_user_embedding_status ON public.transactions USING
 
 
 --
+-- Name: idx_user_rules_category_subcategory; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_user_rules_category_subcategory ON public.user_rules USING btree (category_id, subcategory_id);
+
+
+--
 -- Name: idx_user_rules_lookup; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -952,10 +1025,66 @@ CREATE UNIQUE INDEX index_global_patterns_on_pattern_and_category_id ON public.g
 
 
 --
+-- Name: index_invoices_on_account_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_account_id ON public.invoices USING btree (account_id);
+
+
+--
+-- Name: index_invoices_on_gmail_message_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_gmail_message_id ON public.invoices USING btree (gmail_message_id) WHERE (gmail_message_id IS NOT NULL);
+
+
+--
+-- Name: index_invoices_on_matched_transaction_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_invoices_on_matched_transaction_id ON public.invoices USING btree (matched_transaction_id) WHERE (matched_transaction_id IS NOT NULL);
+
+
+--
+-- Name: index_invoices_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_user_id ON public.invoices USING btree (user_id);
+
+
+--
+-- Name: index_invoices_on_user_id_and_invoice_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_user_id_and_invoice_date ON public.invoices USING btree (user_id, invoice_date);
+
+
+--
+-- Name: index_invoices_on_user_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_user_id_and_status ON public.invoices USING btree (user_id, status);
+
+
+--
+-- Name: index_invoices_on_user_id_and_total_amount; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_user_id_and_total_amount ON public.invoices USING btree (user_id, total_amount);
+
+
+--
 -- Name: index_labeled_examples_on_category_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_labeled_examples_on_category_id ON public.labeled_examples USING btree (category_id);
+
+
+--
+-- Name: index_labeled_examples_on_subcategory_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_labeled_examples_on_subcategory_id ON public.labeled_examples USING btree (subcategory_id);
 
 
 --
@@ -1064,6 +1193,13 @@ CREATE INDEX index_transactions_on_category_id ON public.transactions USING btre
 
 
 --
+-- Name: index_transactions_on_invoice_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_transactions_on_invoice_id ON public.transactions USING btree (invoice_id);
+
+
+--
 -- Name: index_transactions_on_statement_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1131,6 +1267,13 @@ CREATE INDEX index_transactions_on_user_id_and_transaction_type ON public.transa
 --
 
 CREATE INDEX index_user_rules_on_category_id ON public.user_rules USING btree (category_id);
+
+
+--
+-- Name: index_user_rules_on_subcategory_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_user_rules_on_subcategory_id ON public.user_rules USING btree (subcategory_id);
 
 
 --
@@ -1218,6 +1361,14 @@ ALTER TABLE ONLY public.subcategories
 
 
 --
+-- Name: invoices fk_rails_3d1522a0d8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT fk_rails_3d1522a0d8 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: transactions fk_rails_498dcead48; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1242,6 +1393,14 @@ ALTER TABLE ONLY public.global_patterns
 
 
 --
+-- Name: transactions fk_rails_6b611ee905; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT fk_rails_6b611ee905 FOREIGN KEY (invoice_id) REFERENCES public.invoices(id) ON DELETE SET NULL;
+
+
+--
 -- Name: transactions fk_rails_77364e6416; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1255,6 +1414,14 @@ ALTER TABLE ONLY public.transactions
 
 ALTER TABLE ONLY public.statements
     ADD CONSTRAINT fk_rails_820ad8a5f2 FOREIGN KEY (bank_template_id) REFERENCES public.bank_templates(id);
+
+
+--
+-- Name: labeled_examples fk_rails_828bad4e4d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.labeled_examples
+    ADD CONSTRAINT fk_rails_828bad4e4d FOREIGN KEY (subcategory_id) REFERENCES public.subcategories(id);
 
 
 --
@@ -1274,11 +1441,27 @@ ALTER TABLE ONLY public.active_storage_variant_records
 
 
 --
+-- Name: invoices fk_rails_a142a0908a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT fk_rails_a142a0908a FOREIGN KEY (matched_transaction_id) REFERENCES public.transactions(id) ON DELETE SET NULL;
+
+
+--
 -- Name: labeled_examples fk_rails_a66953f4e1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.labeled_examples
     ADD CONSTRAINT fk_rails_a66953f4e1 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: invoices fk_rails_afb4b1e584; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT fk_rails_afb4b1e584 FOREIGN KEY (account_id) REFERENCES public.accounts(id) ON DELETE SET NULL;
 
 
 --
@@ -1314,12 +1497,22 @@ ALTER TABLE ONLY public.active_storage_attachments
 
 
 --
+-- Name: user_rules fk_rails_d25e6ddd6c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_rules
+    ADD CONSTRAINT fk_rails_d25e6ddd6c FOREIGN KEY (subcategory_id) REFERENCES public.subcategories(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260107103522'),
+('20260106180000'),
 ('20260105165646'),
 ('20260105160036'),
 ('20260105135242'),

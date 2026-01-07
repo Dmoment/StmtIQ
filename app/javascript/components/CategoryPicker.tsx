@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { 
-  Search, 
-  Plus, 
-  Check, 
-  X, 
+import {
+  Search,
+  Plus,
+  Check,
+  X,
   Loader2,
   ShoppingBag,
   Utensils,
@@ -20,11 +20,13 @@ import {
   Wallet,
   Gamepad2,
   Tag,
-  Palette
+  Palette,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCategories, useCreateCategory, useUpdateTransaction, useTransactionFeedback } from '../queries';
-import type { Category, Transaction } from '../types/api';
+import type { Category, Transaction, Subcategory } from '../types/api';
 
 // Icon mapping
 const categoryIcons: Record<string, React.ElementType> = {
@@ -86,18 +88,19 @@ interface CategoryPickerProps {
   anchorPosition?: { top: number; left: number };
 }
 
-export function CategoryPicker({ 
-  transaction, 
-  isOpen, 
-  onClose, 
+export function CategoryPicker({
+  transaction,
+  isOpen,
+  onClose,
   onSuccess,
-  anchorPosition 
+  anchorPosition
 }: CategoryPickerProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedColor, setSelectedColor] = useState(colorPalette[0].value);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -121,6 +124,7 @@ export function CategoryPicker({
       setNewCategoryName('');
       setSelectedColor(colorPalette[0].value);
       setShowColorPicker(false);
+      setSelectedCategory(null);
     }
   }, [isOpen]);
 
@@ -178,13 +182,26 @@ export function CategoryPicker({
     return slugToIcon[slug] || Tag;
   };
 
-  // Handle category selection - uses feedback endpoint to create UserRules for learning
-  const handleSelect = async (categoryId: number) => {
+  // Handle category selection - shows subcategories if available, otherwise assigns directly
+  const handleCategoryClick = (category: Category) => {
+    // If category has subcategories, show them first
+    if (category.subcategories && category.subcategories.length > 0) {
+      setSelectedCategory(category);
+      setSearchQuery('');
+    } else {
+      // No subcategories, assign directly
+      handleSelect(category.id);
+    }
+  };
+
+  // Handle final selection - uses feedback endpoint to create UserRules for learning
+  const handleSelect = async (categoryId: number, subcategoryId?: number) => {
     try {
       // Use feedback endpoint to teach the system (creates UserRule + LabeledExample)
       const result = await transactionFeedback.mutateAsync({
         transactionId: transaction.id,
         categoryId: categoryId,
+        subcategoryId: subcategoryId,
         applyToSimilar: false,
       });
       onSuccess?.(result.transaction);
@@ -192,6 +209,26 @@ export function CategoryPicker({
     } catch (error) {
       console.error('Failed to update category:', error);
     }
+  };
+
+  // Handle subcategory selection
+  const handleSubcategorySelect = (subcategory: Subcategory) => {
+    if (selectedCategory) {
+      handleSelect(selectedCategory.id, subcategory.id);
+    }
+  };
+
+  // Skip subcategory and use just the category
+  const handleSkipSubcategory = () => {
+    if (selectedCategory) {
+      handleSelect(selectedCategory.id);
+    }
+  };
+
+  // Go back to category list
+  const handleBackToCategories = () => {
+    setSelectedCategory(null);
+    setSearchQuery('');
   };
 
   // Handle create new category
@@ -387,47 +424,127 @@ export function CategoryPicker({
         </div>
       )}
 
-      {/* Categories List */}
+      {/* Categories List OR Subcategories List */}
       <div className="max-h-64 overflow-y-auto bg-white">
         {categoriesLoading ? (
           <div className="p-4 flex items-center justify-center">
             <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
           </div>
+        ) : selectedCategory ? (
+          // Subcategories view
+          <>
+            {/* Back button and category header */}
+            <div className="p-2 border-b border-slate-100 bg-slate-50">
+              <button
+                onClick={handleBackToCategories}
+                className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Back to categories</span>
+              </button>
+              <div className="mt-2 flex items-center gap-2">
+                {(() => {
+                  const Icon = getIcon(selectedCategory);
+                  return (
+                    <>
+                      <div
+                        className="w-6 h-6 rounded-md flex items-center justify-center"
+                        style={{ backgroundColor: `${selectedCategory.color}15` }}
+                      >
+                        <Icon
+                          className="w-3 h-3"
+                          style={{ color: selectedCategory.color || '#64748b' }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-slate-900">{selectedCategory.name}</span>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Skip subcategory option */}
+            <button
+              onClick={handleSkipSubcategory}
+              disabled={isUpdating}
+              className="w-full p-3 flex items-center gap-3 hover:bg-slate-50 text-slate-600 border-b border-slate-100 transition-colors"
+            >
+              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                <Tag className="w-4 h-4 text-slate-500" />
+              </div>
+              <span className="text-sm">Use "{selectedCategory.name}" only (no subcategory)</span>
+            </button>
+
+            {/* Subcategories list */}
+            {selectedCategory.subcategories?.map((subcategory) => {
+              const isSelected = transaction.subcategory?.id === subcategory.id;
+
+              return (
+                <button
+                  key={subcategory.id}
+                  onClick={() => handleSubcategorySelect(subcategory)}
+                  disabled={isUpdating}
+                  className={clsx(
+                    "w-full p-3 flex items-center gap-3 transition-colors",
+                    isSelected
+                      ? "bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500"
+                      : "hover:bg-slate-50 text-slate-700",
+                    isUpdating && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <Tag className="w-4 h-4 text-slate-500" />
+                  </div>
+                  <span className="text-sm font-medium flex-1 text-left">
+                    {subcategory.name}
+                  </span>
+                  {isSelected && (
+                    <Check className="w-4 h-4 text-emerald-600" />
+                  )}
+                </button>
+              );
+            })}
+          </>
         ) : filteredCategories.length === 0 ? (
           <div className="p-4 text-center text-sm text-slate-500">
             {searchQuery ? 'No categories found' : 'No categories available'}
           </div>
         ) : (
+          // Categories list
           filteredCategories.map((category) => {
             const Icon = getIcon(category);
             const isSelected = currentCategory?.id === category.id;
-            
+            const hasSubcategories = category.subcategories && category.subcategories.length > 0;
+
             return (
               <button
                 key={category.id}
-                onClick={() => handleSelect(category.id)}
+                onClick={() => handleCategoryClick(category)}
                 disabled={isUpdating}
                 className={clsx(
                   "w-full p-3 flex items-center gap-3 transition-colors",
-                  isSelected 
-                    ? "bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500" 
+                  isSelected
+                    ? "bg-emerald-50 text-emerald-700 border-l-2 border-emerald-500"
                     : "hover:bg-slate-50 text-slate-700",
                   isUpdating && "opacity-50 cursor-not-allowed"
                 )}
               >
-                <div 
+                <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: `${category.color}15` }}
                 >
-                  <Icon 
-                    className="w-4 h-4" 
-                    style={{ color: category.color || '#64748b' }} 
+                  <Icon
+                    className="w-4 h-4"
+                    style={{ color: category.color || '#64748b' }}
                   />
                 </div>
                 <span className="text-sm font-medium flex-1 text-left">
                   {category.name}
                 </span>
-                {isSelected && (
+                {hasSubcategories && (
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                )}
+                {isSelected && !hasSubcategories && (
                   <Check className="w-4 h-4 text-emerald-600" />
                 )}
               </button>

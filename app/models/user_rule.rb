@@ -4,6 +4,7 @@ class UserRule < ApplicationRecord
   # Associations
   belongs_to :user
   belongs_to :category
+  belongs_to :subcategory, optional: true
   belongs_to :source_transaction, class_name: 'Transaction', optional: true
 
   # Validations
@@ -47,8 +48,8 @@ class UserRule < ApplicationRecord
     update_column(:last_matched_at, Time.current)
   end
 
-  # Create a rule from user feedback (when they correct a category)
-  def self.create_from_feedback!(user:, transaction:, category:)
+  # Create a rule from user feedback (when they correct a category/subcategory)
+  def self.create_from_feedback!(user:, transaction:, category:, subcategory: nil)
     # Use normalized description as the pattern
     normalized = ML::NormalizationService.normalize(
       transaction.description || transaction.original_description || ''
@@ -63,6 +64,7 @@ class UserRule < ApplicationRecord
     rule = find_or_initialize_by(user: user, pattern: pattern)
     rule.assign_attributes(
       category: category,
+      subcategory: subcategory,
       pattern_type: 'keyword',
       match_field: 'normalized',
       source_transaction: transaction,
@@ -74,7 +76,7 @@ class UserRule < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique
     # Rule already exists, update it
     rule = find_by(user: user, pattern: pattern)
-    rule&.update!(category: category, source: 'feedback', is_active: true)
+    rule&.update!(category: category, subcategory: subcategory, source: 'feedback', is_active: true)
     rule
   end
 

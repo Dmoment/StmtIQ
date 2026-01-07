@@ -4,6 +4,7 @@ class LabeledExample < ApplicationRecord
   # Associations
   belongs_to :user
   belongs_to :category
+  belongs_to :subcategory, optional: true
   belongs_to :source_transaction, class_name: 'Transaction', foreign_key: 'transaction_id', optional: true
 
   # Validations
@@ -19,7 +20,7 @@ class LabeledExample < ApplicationRecord
   scope :for_category, ->(category) { where(category: category) }
 
   # Create a labeled example from user feedback
-  def self.create_from_feedback!(user:, transaction:, category:)
+  def self.create_from_feedback!(user:, transaction:, category:, subcategory: nil)
     normalized = ML::NormalizationService.normalize(
       transaction.description || transaction.original_description || ''
     )
@@ -31,6 +32,7 @@ class LabeledExample < ApplicationRecord
 
     example.assign_attributes(
       category: category,
+      subcategory: subcategory,
       source_transaction: transaction,
       description: transaction.description || transaction.original_description,
       amount: transaction.amount,
@@ -46,9 +48,9 @@ class LabeledExample < ApplicationRecord
     example.save!
     example
   rescue ActiveRecord::RecordNotUnique
-    # Already exists, update category
+    # Already exists, update category and subcategory
     example = find_by(user: user, normalized_description: normalized)
-    example&.update!(category: category, source: 'user_feedback')
+    example&.update!(category: category, subcategory: subcategory, source: 'user_feedback')
     example
   end
 

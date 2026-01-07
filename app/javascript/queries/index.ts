@@ -64,3 +64,18 @@ export {
   useTransactionFeedback,
 } from "./useTransactions";
 
+// Invoice hooks
+export {
+  useInvoices,
+  useInvoice,
+  useInvoiceStats,
+  useInvoiceSuggestions,
+  useCreateInvoice,
+  useUploadInvoice,
+  useUpdateInvoice,
+  useDeleteInvoice,
+  useLinkInvoice,
+  useUnlinkInvoice,
+  useRetryInvoiceExtraction,
+} from "./useInvoices";
+

@@ -19,13 +19,14 @@ module ML
 
     # Process user feedback when they correct a category
     # Returns { success: bool, rule: UserRule?, example: LabeledExample? }
-    def process_correction!(new_category)
+    def process_correction!(new_category, subcategory: nil)
       result = { success: false, rule: nil, example: nil, message: nil }
 
       ActiveRecord::Base.transaction do
         # 1. Update the transaction with user's correction
         @transaction.update!(
           category: new_category,
+          subcategory: subcategory,
           is_reviewed: true,
           metadata: (@transaction.metadata || {}).merge(
             'user_corrected' => true,
@@ -35,11 +36,11 @@ module ML
         )
 
         # 2. Create a user rule for future fast matching
-        rule = create_user_rule(new_category)
+        rule = create_user_rule(new_category, subcategory)
         result[:rule] = rule
 
         # 3. Create a labeled example for embedding similarity
-        example = create_labeled_example(new_category)
+        example = create_labeled_example(new_category, subcategory)
         result[:example] = example
 
         # 4. Enqueue embedding generation for the example
@@ -76,22 +77,24 @@ module ML
 
     private
 
-    def create_user_rule(category)
+    def create_user_rule(category, subcategory = nil)
       UserRule.create_from_feedback!(
         user: @user,
         transaction: @transaction,
-        category: category
+        category: category,
+        subcategory: subcategory
       )
     rescue => e
       Rails.logger.warn("ML::FeedbackService: Failed to create user rule: #{e.message}")
       nil
     end
 
-    def create_labeled_example(category)
+    def create_labeled_example(category, subcategory = nil)
       LabeledExample.create_from_feedback!(
         user: @user,
         transaction: @transaction,
-        category: category
+        category: category,
+        subcategory: subcategory
       )
     rescue => e
       Rails.logger.warn("ML::FeedbackService: Failed to create labeled example: #{e.message}")

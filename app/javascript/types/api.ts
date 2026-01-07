@@ -61,6 +61,7 @@ export interface Category {
   user_id: number | null;
   created_at: string;
   updated_at: string;
+  subcategories?: Subcategory[];
 }
 
 export interface Subcategory {
@@ -193,6 +194,52 @@ export interface PaginatedResponse<T> {
     total_pages: number;
     total_count: number;
     per_page: number;
+  };
+}
+
+// ============================================
+// Invoice Types
+// ============================================
+export type InvoiceStatus = 'pending' | 'processing' | 'extracted' | 'matched' | 'unmatched' | 'failed';
+export type InvoiceSource = 'upload' | 'gmail';
+
+export interface Invoice {
+  id: number;
+  source: InvoiceSource;
+  status: InvoiceStatus;
+  vendor_name: string | null;
+  vendor_gstin: string | null;
+  invoice_number: string | null;
+  invoice_date: string | null;
+  total_amount: string | null;
+  currency: string;
+  extraction_method: string | null;
+  extraction_confidence: string | null;
+  match_confidence: string | null;
+  matched_at: string | null;
+  matched_by: string | null;
+  file_url: string | null;
+  matched_transaction: Transaction | null;
+  extracted_data: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoiceStats {
+  total: number;
+  by_status: Record<InvoiceStatus, number>;
+  by_source: Record<InvoiceSource, number>;
+  matched_amount: string;
+  unmatched_amount: string;
+}
+
+export interface InvoiceSuggestion {
+  transaction: Transaction;
+  score: number;
+  breakdown: {
+    amount_score: number;
+    date_score: number;
+    vendor_score: number;
   };
 }
 

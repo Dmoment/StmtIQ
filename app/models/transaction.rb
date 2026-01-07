@@ -6,14 +6,18 @@ class Transaction < ApplicationRecord
   belongs_to :account, optional: true
   belongs_to :user
   belongs_to :category, optional: true
-  belongs_to :ai_category, class_name: 'Category', optional: true
   belongs_to :subcategory, optional: true
+  belongs_to :ai_category, class_name: 'Category', optional: true
+  belongs_to :invoice, optional: true
+
+  has_one :attached_invoice, class_name: 'Invoice', foreign_key: 'matched_transaction_id'
 
   # Validations
   validates :transaction_date, presence: true
   validates :description, presence: true
   validates :amount, presence: true, numericality: true
   validates :transaction_type, presence: true, inclusion: { in: %w[debit credit] }
+  validate :subcategory_belongs_to_category
 
   # Callbacks
   before_validation :set_defaults
@@ -73,6 +77,7 @@ class Transaction < ApplicationRecord
     cash
   ].freeze
 
+
   # Scopes
   scope :debits, -> { where(transaction_type: 'debit') }
   scope :credits, -> { where(transaction_type: 'credit') }
@@ -86,6 +91,7 @@ class Transaction < ApplicationRecord
   scope :categorization_processing, -> { where(categorization_status: 'processing') }
   scope :categorization_completed, -> { where(categorization_status: 'completed') }
   scope :needs_categorization, -> { where(category_id: nil, ai_category_id: nil, categorization_status: %w[pending failed]) }
+
   scope :by_month, ->(year, month) {
     start_date = Date.new(year, month, 1)
     end_date = start_date.end_of_month
@@ -129,6 +135,7 @@ class Transaction < ApplicationRecord
   def personal_transfer?
     tx_kind == 'transfer_p2p'
   end
+
 
   def high_confidence?
     confidence.present? && confidence >= 0.8
@@ -182,5 +189,16 @@ class Transaction < ApplicationRecord
   def normalize_description
     self.description = description&.strip&.gsub(/\s+/, ' ')
     self.original_description ||= description
+  end
+
+  def subcategory_belongs_to_category
+    return unless subcategory_id.present? && category_id.present?
+
+    # Load subcategory if not already loaded
+    subcat = subcategory_id_changed? ? Subcategory.find_by(id: subcategory_id) : subcategory
+
+    if subcat && subcat.category_id != category_id
+      errors.add(:subcategory, 'must belong to the selected category')
+    end
   end
 end

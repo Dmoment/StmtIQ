@@ -14,6 +14,7 @@ module V1
     mount V1::Accounts
     mount V1::Statements
     mount V1::Transactions
+    mount V1::Invoices
     mount V1::Uploads
 
     # Swagger documentation

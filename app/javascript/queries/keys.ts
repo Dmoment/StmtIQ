@@ -83,3 +83,20 @@ export const transactionKeys = {
   }) => [...transactionKeys.all, "stats", filters] as const,
 };
 
+export const invoiceKeys = {
+  all: ["invoices"] as const,
+  lists: () => [...invoiceKeys.all, "list"] as const,
+  list: (filters?: {
+    page?: number;
+    per_page?: number;
+    status?: string;
+    source?: string;
+    from_date?: string;
+    to_date?: string;
+  }) => [...invoiceKeys.lists(), filters] as const,
+  details: () => [...invoiceKeys.all, "detail"] as const,
+  detail: (id: number) => [...invoiceKeys.details(), id] as const,
+  suggestions: (id: number) => [...invoiceKeys.detail(id), "suggestions"] as const,
+  stats: () => [...invoiceKeys.all, "stats"] as const,
+};
+

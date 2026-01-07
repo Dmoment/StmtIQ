@@ -38,6 +38,7 @@ module V1
       params do
         requires :id, type: Integer
         optional :category_id, type: Integer
+        optional :subcategory_id, type: Integer
         optional :description, type: String
         optional :is_reviewed, type: Boolean
       end
@@ -45,7 +46,23 @@ module V1
         authenticate!
 
         transaction = current_user.transactions.find(params[:id])
-        transaction.update!(declared(params, include_missing: false).except(:id))
+        update_params = declared(params, include_missing: false).except(:id)
+
+        # Validate subcategory belongs to category if subcategory is provided
+        if update_params[:subcategory_id].present?
+          category_id = update_params[:category_id] || transaction.category_id
+
+          begin
+            SubcategoryValidator.validate!(
+              category_id: category_id,
+              subcategory_id: update_params[:subcategory_id]
+            )
+          rescue SubcategoryValidator::ValidationError => e
+            error!({ error: e.message }, 422)
+          end
+        end
+
+        transaction.update!(update_params)
         transaction.reload
 
         present transaction, with: V1::Entities::Transaction
@@ -55,6 +72,7 @@ module V1
       params do
         requires :transaction_ids, type: Array[Integer]
         optional :category_id, type: Integer
+        optional :subcategory_id, type: Integer
         optional :is_reviewed, type: Boolean
       end
       patch :bulk do
@@ -146,6 +164,7 @@ module V1
       params do
         requires :id, type: Integer, desc: 'Transaction ID'
         requires :category_id, type: Integer, desc: 'Correct category ID'
+        optional :subcategory_id, type: Integer, desc: 'Optional subcategory ID'
         optional :apply_to_similar, type: Boolean, default: false, desc: 'Apply to similar uncategorized transactions'
       end
       post ':id/feedback' do
@@ -153,9 +172,23 @@ module V1
 
         transaction = current_user.transactions.find(params[:id])
         category = Category.find(params[:category_id])
+        subcategory = nil
+
+        # Validate and load subcategory if provided
+        if params[:subcategory_id].present?
+          begin
+            SubcategoryValidator.validate!(
+              category_id: category.id,
+              subcategory_id: params[:subcategory_id]
+            )
+            subcategory = Subcategory.find(params[:subcategory_id])
+          rescue SubcategoryValidator::ValidationError => e
+            error!({ error: e.message }, 422)
+          end
+        end
 
         feedback_service = ::ML::FeedbackService.new(transaction, user: current_user)
-        result = feedback_service.process_correction!(category)
+        result = feedback_service.process_correction!(category, subcategory: subcategory)
 
         unless result[:success]
           error!({ error: result[:message] }, 422)

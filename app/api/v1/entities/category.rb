@@ -12,6 +12,10 @@ module V1
       expose :is_system
       expose :parent_id
 
+      expose :subcategories, using: V1::Entities::Subcategory, if: ->(cat, _) {
+        cat.subcategories.any?
+      }
+
       expose :children, using: V1::Entities::Category, if: ->(cat, opts) {
         opts[:full] && cat.children.any?
       }

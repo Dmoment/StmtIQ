@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Upload, 
-  Receipt, 
+import {
+  LayoutDashboard,
+  Upload,
+  Receipt,
+  FileText,
   Settings,
   Wallet,
   Menu,
@@ -24,6 +25,7 @@ const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/upload', icon: Upload, label: 'Upload' },
   { to: '/transactions', icon: Receipt, label: 'Transactions' },
+  { to: '/invoices', icon: FileText, label: 'Invoices' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

@@ -150,6 +150,7 @@ export type postV1StatementsIdReparse = {
  */
 export type patchV1TransactionsId = {
     category_id?: number;
+    subcategory_id?: number;
     description?: string;
     is_reviewed?: boolean;
 };
@@ -160,7 +161,85 @@ export type patchV1TransactionsId = {
 export type patchV1TransactionsBulk = {
     transaction_ids: Array<(number)>;
     category_id?: number;
+    subcategory_id?: number;
     is_reviewed?: boolean;
+};
+
+/**
+ * Categorize uncategorized transactions with ML
+ */
+export type postV1TransactionsCategorize = {
+    /**
+     * Maximum number of transactions to categorize
+     */
+    limit?: number;
+};
+
+/**
+ * Provide feedback on a transaction category (teaches the system)
+ */
+export type postV1TransactionsIdFeedback = {
+    /**
+     * Correct category ID
+     */
+    category_id: number;
+    /**
+     * Optional subcategory ID
+     */
+    subcategory_id?: number;
+    /**
+     * Apply to similar uncategorized transactions
+     */
+    apply_to_similar?: boolean;
+};
+
+/**
+ * Upload a new invoice via presigned URL
+ */
+export type postV1Invoices = {
+    /**
+     * S3 file key from presigned upload
+     */
+    file_key: string;
+    account_id?: number;
+    vendor_name?: string;
+    invoice_date?: string;
+    total_amount?: number;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+};
+
+/**
+ * Upload invoice directly (multipart form)
+ */
+export type postV1InvoicesUpload = {
+    /**
+     * Invoice PDF or image file
+     */
+    file: (Blob | File);
+    account_id?: number;
+    vendor_name?: string;
+    invoice_date?: string;
+    total_amount?: number;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+};
+
+/**
+ * Update invoice (manual correction)
+ */
+export type patchV1InvoicesId = {
+    vendor_name?: string;
+    vendor_gstin?: string;
+    invoice_date?: string;
+    total_amount?: number;
+    invoice_number?: string;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+};
+
+/**
+ * Manually link invoice to transaction
+ */
+export type postV1InvoicesIdLink = {
+    transaction_id: number;
 };
 
 /**
@@ -476,6 +555,101 @@ export type GetV1TransactionsStatsData = {
 };
 
 export type GetV1TransactionsStatsResponse = unknown;
+
+export type GetV1TransactionsCategorizationProgressResponse = unknown;
+
+export type PostV1TransactionsCategorizeData = {
+    requestBody: postV1TransactionsCategorize;
+};
+
+export type PostV1TransactionsCategorizeResponse = unknown;
+
+export type PostV1TransactionsIdFeedbackData = {
+    /**
+     * Transaction ID
+     */
+    id: number;
+    requestBody: postV1TransactionsIdFeedback;
+};
+
+export type PostV1TransactionsIdFeedbackResponse = unknown;
+
+export type GetV1TransactionsRulesResponse = unknown;
+
+export type DeleteV1TransactionsRulesRuleIdData = {
+    ruleId: number;
+};
+
+export type DeleteV1TransactionsRulesRuleIdResponse = void;
+
+export type GetV1InvoicesData = {
+    fromDate?: string;
+    page?: number;
+    perPage?: number;
+    source?: 'upload' | 'gmail';
+    status?: 'pending' | 'processing' | 'extracted' | 'matched' | 'unmatched' | 'failed';
+    toDate?: string;
+};
+
+export type GetV1InvoicesResponse = unknown;
+
+export type PostV1InvoicesData = {
+    requestBody: postV1Invoices;
+};
+
+export type PostV1InvoicesResponse = unknown;
+
+export type PostV1InvoicesUploadData = {
+    requestBody: postV1InvoicesUpload;
+};
+
+export type PostV1InvoicesUploadResponse = unknown;
+
+export type GetV1InvoicesIdData = {
+    id: number;
+};
+
+export type GetV1InvoicesIdResponse = unknown;
+
+export type PatchV1InvoicesIdData = {
+    id: number;
+    requestBody: patchV1InvoicesId;
+};
+
+export type PatchV1InvoicesIdResponse = unknown;
+
+export type DeleteV1InvoicesIdData = {
+    id: number;
+};
+
+export type DeleteV1InvoicesIdResponse = void;
+
+export type GetV1InvoicesIdSuggestionsData = {
+    id: number;
+};
+
+export type GetV1InvoicesIdSuggestionsResponse = unknown;
+
+export type PostV1InvoicesIdLinkData = {
+    id: number;
+    requestBody: postV1InvoicesIdLink;
+};
+
+export type PostV1InvoicesIdLinkResponse = unknown;
+
+export type PostV1InvoicesIdUnlinkData = {
+    id: number;
+};
+
+export type PostV1InvoicesIdUnlinkResponse = unknown;
+
+export type PostV1InvoicesIdRetryData = {
+    id: number;
+};
+
+export type PostV1InvoicesIdRetryResponse = unknown;
+
+export type GetV1InvoicesStatsResponse = unknown;
 
 export type PostV1UploadsPresignData = {
     requestBody: postV1UploadsPresign;
@@ -924,6 +1098,210 @@ export type $OpenApiTs = {
             res: {
                 /**
                  * Get transaction statistics
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/transactions/categorization/progress': {
+        get: {
+            res: {
+                /**
+                 * Get categorization progress
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/transactions/categorize': {
+        post: {
+            req: {
+                requestBody: postV1TransactionsCategorize;
+            };
+            res: {
+                /**
+                 * Categorize uncategorized transactions with ML
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/transactions/{id}/feedback': {
+        post: {
+            req: {
+                /**
+                 * Transaction ID
+                 */
+                id: number;
+                requestBody: postV1TransactionsIdFeedback;
+            };
+            res: {
+                /**
+                 * Provide feedback on a transaction category (teaches the system)
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/transactions/rules': {
+        get: {
+            res: {
+                /**
+                 * Get user rules for transaction categorization
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/transactions/rules/{rule_id}': {
+        delete: {
+            req: {
+                ruleId: number;
+            };
+            res: {
+                /**
+                 * Delete a user rule
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/invoices': {
+        get: {
+            req: {
+                fromDate?: string;
+                page?: number;
+                perPage?: number;
+                source?: 'upload' | 'gmail';
+                status?: 'pending' | 'processing' | 'extracted' | 'matched' | 'unmatched' | 'failed';
+                toDate?: string;
+            };
+            res: {
+                /**
+                 * List user invoices with filtering and pagination
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1Invoices;
+            };
+            res: {
+                /**
+                 * Upload a new invoice via presigned URL
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/invoices/upload': {
+        post: {
+            req: {
+                requestBody: postV1InvoicesUpload;
+            };
+            res: {
+                /**
+                 * Upload invoice directly (multipart form)
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/invoices/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get invoice details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1InvoicesId;
+            };
+            res: {
+                /**
+                 * Update invoice (manual correction)
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete invoice
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/invoices/{id}/suggestions': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get match suggestions for invoice
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/invoices/{id}/link': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1InvoicesIdLink;
+            };
+            res: {
+                /**
+                 * Manually link invoice to transaction
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/invoices/{id}/unlink': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Unlink invoice from transaction
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/invoices/{id}/retry': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Retry extraction for failed invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/invoices/stats': {
+        get: {
+            res: {
+                /**
+                 * Get invoice statistics
                  */
                 200: unknown;
             };

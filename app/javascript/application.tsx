@@ -7,6 +7,7 @@ import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Upload } from './pages/Upload';
 import { Transactions } from './pages/Transactions';
+import { Invoices } from './pages/Invoices';
 import { Settings } from './pages/Settings';
 
 const queryClient = new QueryClient({
@@ -27,6 +28,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="upload" element={<Upload />} />
             <Route path="transactions" element={<Transactions />} />
+            <Route path="invoices" element={<Invoices />} />
             <Route path="settings" element={<Settings />} />
           </Route>
           {/* Catch all - redirect to home */}

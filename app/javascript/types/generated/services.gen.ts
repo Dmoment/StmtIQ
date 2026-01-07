@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1StatementsIdProgressData, GetV1StatementsIdProgressResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsData, GetV1TransactionsStatsResponse, PostV1UploadsPresignData, PostV1UploadsPresignResponse, PostV1UploadsConfirmData, PostV1UploadsConfirmResponse } from './types.gen';
+import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1StatementsIdProgressData, GetV1StatementsIdProgressResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsData, GetV1TransactionsStatsResponse, GetV1TransactionsCategorizationProgressResponse, PostV1TransactionsCategorizeData, PostV1TransactionsCategorizeResponse, PostV1TransactionsIdFeedbackData, PostV1TransactionsIdFeedbackResponse, GetV1TransactionsRulesResponse, DeleteV1TransactionsRulesRuleIdData, DeleteV1TransactionsRulesRuleIdResponse, GetV1InvoicesData, GetV1InvoicesResponse, PostV1InvoicesData, PostV1InvoicesResponse, PostV1InvoicesUploadData, PostV1InvoicesUploadResponse, GetV1InvoicesIdData, GetV1InvoicesIdResponse, PatchV1InvoicesIdData, PatchV1InvoicesIdResponse, DeleteV1InvoicesIdData, DeleteV1InvoicesIdResponse, GetV1InvoicesIdSuggestionsData, GetV1InvoicesIdSuggestionsResponse, PostV1InvoicesIdLinkData, PostV1InvoicesIdLinkResponse, PostV1InvoicesIdUnlinkData, PostV1InvoicesIdUnlinkResponse, PostV1InvoicesIdRetryData, PostV1InvoicesIdRetryResponse, GetV1InvoicesStatsResponse, PostV1UploadsPresignData, PostV1UploadsPresignResponse, PostV1UploadsConfirmData, PostV1UploadsConfirmResponse } from './types.gen';
 
 export class AuthService {
     /**
@@ -607,6 +607,282 @@ export class TransactionsService {
                 detailed: data.detailed,
                 statement_id: data.statementId
             }
+        });
+    }
+    
+    /**
+     * Get categorization progress
+     * @returns unknown Get categorization progress
+     * @throws ApiError
+     */
+    public static getV1TransactionsCategorizationProgress(): CancelablePromise<GetV1TransactionsCategorizationProgressResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/transactions/categorization/progress'
+        });
+    }
+    
+    /**
+     * Categorize uncategorized transactions with ML
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Categorize uncategorized transactions with ML
+     * @throws ApiError
+     */
+    public static postV1TransactionsCategorize(data: PostV1TransactionsCategorizeData): CancelablePromise<PostV1TransactionsCategorizeResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/transactions/categorize',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Provide feedback on a transaction category (teaches the system)
+     * @param data The data for the request.
+     * @param data.id Transaction ID
+     * @param data.requestBody
+     * @returns unknown Provide feedback on a transaction category (teaches the system)
+     * @throws ApiError
+     */
+    public static postV1TransactionsIdFeedback(data: PostV1TransactionsIdFeedbackData): CancelablePromise<PostV1TransactionsIdFeedbackResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/transactions/{id}/feedback',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get user rules for transaction categorization
+     * @returns unknown Get user rules for transaction categorization
+     * @throws ApiError
+     */
+    public static getV1TransactionsRules(): CancelablePromise<GetV1TransactionsRulesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/transactions/rules'
+        });
+    }
+    
+    /**
+     * Delete a user rule
+     * @param data The data for the request.
+     * @param data.ruleId
+     * @returns void Delete a user rule
+     * @throws ApiError
+     */
+    public static deleteV1TransactionsRulesRuleId(data: DeleteV1TransactionsRulesRuleIdData): CancelablePromise<DeleteV1TransactionsRulesRuleIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/transactions/rules/{rule_id}',
+            path: {
+                rule_id: data.ruleId
+            }
+        });
+    }
+    
+}
+
+export class InvoicesService {
+    /**
+     * List user invoices with filtering and pagination
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @param data.status
+     * @param data.source
+     * @param data.fromDate
+     * @param data.toDate
+     * @returns unknown List user invoices with filtering and pagination
+     * @throws ApiError
+     */
+    public static getV1Invoices(data: GetV1InvoicesData = {}): CancelablePromise<GetV1InvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/invoices',
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                status: data.status,
+                source: data.source,
+                from_date: data.fromDate,
+                to_date: data.toDate
+            }
+        });
+    }
+    
+    /**
+     * Upload a new invoice via presigned URL
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Upload a new invoice via presigned URL
+     * @throws ApiError
+     */
+    public static postV1Invoices(data: PostV1InvoicesData): CancelablePromise<PostV1InvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/invoices',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Upload invoice directly (multipart form)
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Upload invoice directly (multipart form)
+     * @throws ApiError
+     */
+    public static postV1InvoicesUpload(data: PostV1InvoicesUploadData): CancelablePromise<PostV1InvoicesUploadResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/invoices/upload',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get invoice details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get invoice details
+     * @throws ApiError
+     */
+    public static getV1InvoicesId(data: GetV1InvoicesIdData): CancelablePromise<GetV1InvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/invoices/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update invoice (manual correction)
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update invoice (manual correction)
+     * @throws ApiError
+     */
+    public static patchV1InvoicesId(data: PatchV1InvoicesIdData): CancelablePromise<PatchV1InvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/invoices/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete invoice
+     * @throws ApiError
+     */
+    public static deleteV1InvoicesId(data: DeleteV1InvoicesIdData): CancelablePromise<DeleteV1InvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/invoices/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Get match suggestions for invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get match suggestions for invoice
+     * @throws ApiError
+     */
+    public static getV1InvoicesIdSuggestions(data: GetV1InvoicesIdSuggestionsData): CancelablePromise<GetV1InvoicesIdSuggestionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/invoices/{id}/suggestions',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Manually link invoice to transaction
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Manually link invoice to transaction
+     * @throws ApiError
+     */
+    public static postV1InvoicesIdLink(data: PostV1InvoicesIdLinkData): CancelablePromise<PostV1InvoicesIdLinkResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/invoices/{id}/link',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Unlink invoice from transaction
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Unlink invoice from transaction
+     * @throws ApiError
+     */
+    public static postV1InvoicesIdUnlink(data: PostV1InvoicesIdUnlinkData): CancelablePromise<PostV1InvoicesIdUnlinkResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/invoices/{id}/unlink',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Retry extraction for failed invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Retry extraction for failed invoice
+     * @throws ApiError
+     */
+    public static postV1InvoicesIdRetry(data: PostV1InvoicesIdRetryData): CancelablePromise<PostV1InvoicesIdRetryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/invoices/{id}/retry',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Get invoice statistics
+     * @returns unknown Get invoice statistics
+     * @throws ApiError
+     */
+    public static getV1InvoicesStats(): CancelablePromise<GetV1InvoicesStatsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/invoices/stats'
         });
     }
     

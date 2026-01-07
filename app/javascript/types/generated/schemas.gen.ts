@@ -209,6 +209,10 @@ export const $patchV1TransactionsId = {
             type: 'integer',
             format: 'int32'
         },
+        subcategory_id: {
+            type: 'integer',
+            format: 'int32'
+        },
         description: {
             type: 'string'
         },
@@ -233,12 +237,157 @@ export const $patchV1TransactionsBulk = {
             type: 'integer',
             format: 'int32'
         },
+        subcategory_id: {
+            type: 'integer',
+            format: 'int32'
+        },
         is_reviewed: {
             type: 'boolean'
         }
     },
     required: ['transaction_ids'],
     description: 'Bulk update transactions'
+} as const;
+
+export const $postV1TransactionsCategorize = {
+    type: 'object',
+    properties: {
+        limit: {
+            type: 'integer',
+            format: 'int32',
+            description: 'Maximum number of transactions to categorize',
+            default: 100
+        }
+    },
+    description: 'Categorize uncategorized transactions with ML'
+} as const;
+
+export const $postV1TransactionsIdFeedback = {
+    type: 'object',
+    properties: {
+        category_id: {
+            type: 'integer',
+            format: 'int32',
+            description: 'Correct category ID'
+        },
+        subcategory_id: {
+            type: 'integer',
+            format: 'int32',
+            description: 'Optional subcategory ID'
+        },
+        apply_to_similar: {
+            type: 'boolean',
+            description: 'Apply to similar uncategorized transactions',
+            default: false
+        }
+    },
+    required: ['category_id'],
+    description: 'Provide feedback on a transaction category (teaches the system)'
+} as const;
+
+export const $postV1Invoices = {
+    type: 'object',
+    properties: {
+        file_key: {
+            type: 'string',
+            description: 'S3 file key from presigned upload'
+        },
+        account_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        vendor_name: {
+            type: 'string'
+        },
+        invoice_date: {
+            type: 'string',
+            format: 'date'
+        },
+        total_amount: {
+            type: 'number',
+            format: 'float'
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP'],
+            default: 'INR'
+        }
+    },
+    required: ['file_key'],
+    description: 'Upload a new invoice via presigned URL'
+} as const;
+
+export const $postV1InvoicesUpload = {
+    type: 'object',
+    properties: {
+        file: {
+            type: 'string',
+            description: 'Invoice PDF or image file',
+            format: 'binary'
+        },
+        account_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        vendor_name: {
+            type: 'string'
+        },
+        invoice_date: {
+            type: 'string',
+            format: 'date'
+        },
+        total_amount: {
+            type: 'number',
+            format: 'float'
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP'],
+            default: 'INR'
+        }
+    },
+    required: ['file'],
+    description: 'Upload invoice directly (multipart form)'
+} as const;
+
+export const $patchV1InvoicesId = {
+    type: 'object',
+    properties: {
+        vendor_name: {
+            type: 'string'
+        },
+        vendor_gstin: {
+            type: 'string'
+        },
+        invoice_date: {
+            type: 'string',
+            format: 'date'
+        },
+        total_amount: {
+            type: 'number',
+            format: 'float'
+        },
+        invoice_number: {
+            type: 'string'
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP']
+        }
+    },
+    description: 'Update invoice (manual correction)'
+} as const;
+
+export const $postV1InvoicesIdLink = {
+    type: 'object',
+    properties: {
+        transaction_id: {
+            type: 'integer',
+            format: 'int32'
+        }
+    },
+    required: ['transaction_id'],
+    description: 'Manually link invoice to transaction'
 } as const;
 
 export const $postV1UploadsPresign = {

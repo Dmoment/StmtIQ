@@ -42,6 +42,10 @@
             "description": "Operations about transactions"
         },
         {
+            "name": "invoices",
+            "description": "Operations about invoices"
+        },
+        {
             "name": "uploads",
             "description": "Operations about uploads"
         }
@@ -932,6 +936,454 @@
                 "operationId": "getV1TransactionsStats"
             }
         },
+        "/v1/transactions/categorization/progress": {
+            "get": {
+                "description": "Get categorization progress",
+                "responses": {
+                    "200": {
+                        "description": "Get categorization progress"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "getV1TransactionsCategorizationProgress"
+            }
+        },
+        "/v1/transactions/categorize": {
+            "post": {
+                "description": "Categorize uncategorized transactions with ML",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1TransactionsCategorize"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Categorize uncategorized transactions with ML"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "postV1TransactionsCategorize"
+            }
+        },
+        "/v1/transactions/{id}/feedback": {
+            "post": {
+                "description": "Provide feedback on a transaction category (teaches the system)",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Transaction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1TransactionsIdFeedback"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Provide feedback on a transaction category (teaches the system)"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "postV1TransactionsIdFeedback"
+            }
+        },
+        "/v1/transactions/rules": {
+            "get": {
+                "description": "Get user rules for transaction categorization",
+                "responses": {
+                    "200": {
+                        "description": "Get user rules for transaction categorization"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "getV1TransactionsRules"
+            }
+        },
+        "/v1/transactions/rules/{rule_id}": {
+            "delete": {
+                "description": "Delete a user rule",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "rule_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a user rule"
+                    }
+                },
+                "tags": [
+                    "transactions"
+                ],
+                "operationId": "deleteV1TransactionsRulesRuleId"
+            }
+        },
+        "/v1/invoices": {
+            "get": {
+                "description": "List user invoices with filtering and pagination",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 20
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "processing",
+                                "extracted",
+                                "matched",
+                                "unmatched",
+                                "failed"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "source",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "upload",
+                                "gmail"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "from_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "to_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List user invoices with filtering and pagination"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "getV1Invoices"
+            },
+            "post": {
+                "description": "Upload a new invoice via presigned URL",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Invoices"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upload a new invoice via presigned URL"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "postV1Invoices"
+            }
+        },
+        "/v1/invoices/upload": {
+            "post": {
+                "description": "Upload invoice directly (multipart form)",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1InvoicesUpload"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upload invoice directly (multipart form)"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "postV1InvoicesUpload"
+            }
+        },
+        "/v1/invoices/{id}": {
+            "get": {
+                "description": "Get invoice details",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get invoice details"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "getV1InvoicesId"
+            },
+            "patch": {
+                "description": "Update invoice (manual correction)",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1InvoicesId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update invoice (manual correction)"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "patchV1InvoicesId"
+            },
+            "delete": {
+                "description": "Delete invoice",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete invoice"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "deleteV1InvoicesId"
+            }
+        },
+        "/v1/invoices/{id}/suggestions": {
+            "get": {
+                "description": "Get match suggestions for invoice",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get match suggestions for invoice"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "getV1InvoicesIdSuggestions"
+            }
+        },
+        "/v1/invoices/{id}/link": {
+            "post": {
+                "description": "Manually link invoice to transaction",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1InvoicesIdLink"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Manually link invoice to transaction"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "postV1InvoicesIdLink"
+            }
+        },
+        "/v1/invoices/{id}/unlink": {
+            "post": {
+                "description": "Unlink invoice from transaction",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Unlink invoice from transaction"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "postV1InvoicesIdUnlink"
+            }
+        },
+        "/v1/invoices/{id}/retry": {
+            "post": {
+                "description": "Retry extraction for failed invoice",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Retry extraction for failed invoice"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "postV1InvoicesIdRetry"
+            }
+        },
+        "/v1/invoices/stats": {
+            "get": {
+                "description": "Get invoice statistics",
+                "responses": {
+                    "200": {
+                        "description": "Get invoice statistics"
+                    }
+                },
+                "tags": [
+                    "invoices"
+                ],
+                "operationId": "getV1InvoicesStats"
+            }
+        },
         "/v1/uploads/presign": {
             "post": {
                 "description": "Get presigned URL for direct S3 upload",
@@ -1242,6 +1694,10 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "subcategory_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
                     "description": {
                         "type": "string"
                     },
@@ -1265,6 +1721,10 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "subcategory_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
                     "is_reviewed": {
                         "type": "boolean"
                     }
@@ -1273,6 +1733,164 @@
                     "transaction_ids"
                 ],
                 "description": "Bulk update transactions"
+            },
+            "postV1TransactionsCategorize": {
+                "type": "object",
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Maximum number of transactions to categorize",
+                        "default": 100
+                    }
+                },
+                "description": "Categorize uncategorized transactions with ML"
+            },
+            "postV1TransactionsIdFeedback": {
+                "type": "object",
+                "properties": {
+                    "category_id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Correct category ID"
+                    },
+                    "subcategory_id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Optional subcategory ID"
+                    },
+                    "apply_to_similar": {
+                        "type": "boolean",
+                        "description": "Apply to similar uncategorized transactions",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "category_id"
+                ],
+                "description": "Provide feedback on a transaction category (teaches the system)"
+            },
+            "postV1Invoices": {
+                "type": "object",
+                "properties": {
+                    "file_key": {
+                        "type": "string",
+                        "description": "S3 file key from presigned upload"
+                    },
+                    "account_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "vendor_name": {
+                        "type": "string"
+                    },
+                    "invoice_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_amount": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "enum": [
+                            "INR",
+                            "USD",
+                            "EUR",
+                            "GBP"
+                        ],
+                        "default": "INR"
+                    }
+                },
+                "required": [
+                    "file_key"
+                ],
+                "description": "Upload a new invoice via presigned URL"
+            },
+            "postV1InvoicesUpload": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "description": "Invoice PDF or image file",
+                        "format": "binary"
+                    },
+                    "account_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "vendor_name": {
+                        "type": "string"
+                    },
+                    "invoice_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_amount": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "enum": [
+                            "INR",
+                            "USD",
+                            "EUR",
+                            "GBP"
+                        ],
+                        "default": "INR"
+                    }
+                },
+                "required": [
+                    "file"
+                ],
+                "description": "Upload invoice directly (multipart form)"
+            },
+            "patchV1InvoicesId": {
+                "type": "object",
+                "properties": {
+                    "vendor_name": {
+                        "type": "string"
+                    },
+                    "vendor_gstin": {
+                        "type": "string"
+                    },
+                    "invoice_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_amount": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "invoice_number": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "enum": [
+                            "INR",
+                            "USD",
+                            "EUR",
+                            "GBP"
+                        ]
+                    }
+                },
+                "description": "Update invoice (manual correction)"
+            },
+            "postV1InvoicesIdLink": {
+                "type": "object",
+                "properties": {
+                    "transaction_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "required": [
+                    "transaction_id"
+                ],
+                "description": "Manually link invoice to transaction"
             },
             "postV1UploadsPresign": {
                 "type": "object",
