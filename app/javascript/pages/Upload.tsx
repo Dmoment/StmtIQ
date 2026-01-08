@@ -428,8 +428,23 @@ export function Upload() {
               </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="flex items-center gap-3 text-xs font-medium text-orange-800">
+            {/* Quick Stats with Priority indicator */}
+            <div className="flex items-center gap-4 text-xs font-medium text-orange-800">
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-12 bg-orange-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-orange-500 rounded-full"
+                    style={{ width: `${([step1Complete, step2Complete, step3Complete].filter(Boolean).length / 3) * 100}%` }}
+                  />
+                </div>
+                <span>
+                  {[step1Complete, step2Complete, step3Complete].filter(Boolean).length === 0
+                    ? 'Priority: High'
+                    : [step1Complete, step2Complete, step3Complete].filter(Boolean).length < 3
+                      ? 'Priority: Medium'
+                      : 'Priority: Low'}
+                </span>
+              </div>
               {successCount > 0 && (
                 <div className="flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -840,15 +855,15 @@ export function Upload() {
             <div className="mt-6 flex items-center justify-center gap-2">
               <div className={clsx(
                 "w-2.5 h-2.5 rounded-full transition-colors",
-                step1Complete ? "bg-emerald-500" : "bg-slate-300"
+                step1Complete ? "bg-orange-500" : "bg-slate-300"
               )} />
               <div className={clsx(
                 "w-2.5 h-2.5 rounded-full transition-colors",
-                step2Complete ? "bg-emerald-500" : "bg-slate-300"
+                step2Complete ? "bg-orange-500" : "bg-slate-300"
               )} />
               <div className={clsx(
                 "w-2.5 h-2.5 rounded-full transition-colors",
-                step3Complete ? "bg-emerald-500" : "bg-slate-300"
+                step3Complete ? "bg-orange-500" : "bg-slate-300"
               )} />
             </div>
           </div>
@@ -956,9 +971,9 @@ export function Upload() {
 
                   {file.status === 'uploading' && (
                     <div className="flex items-center gap-2">
-                      <div className="w-24 h-2 rounded-full bg-amber-100 overflow-hidden">
+                      <div className="w-24 h-1.5 rounded-full bg-orange-200 overflow-hidden">
                         <div
-                          className="h-full bg-amber-300 rounded-full transition-all duration-300"
+                          className="h-full bg-orange-500 rounded-full transition-all duration-300"
                           style={{ width: `${file.progress}%` }}
                         />
                       </div>

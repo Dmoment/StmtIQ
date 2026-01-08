@@ -312,9 +312,16 @@ export function Invoices() {
                 </button>
                 <div className="flex items-center gap-2 text-xs font-medium text-orange-800">
                   <div className="h-1.5 w-12 bg-orange-200 rounded-full overflow-hidden">
-                    <div className="h-full w-1/3 bg-orange-500 rounded-full"></div>
+                    <div
+                      className="h-full bg-orange-500 rounded-full"
+                      style={{ width: `${stats.total > 0 ? ((stats.by_status?.matched || 0) / stats.total * 100) : 0}%` }}
+                    />
                   </div>
-                  Priority: Medium
+                  {stats.total > 0 && ((stats.by_status?.matched || 0) / stats.total * 100) < 30
+                    ? 'Priority: High'
+                    : ((stats.by_status?.matched || 0) / stats.total * 100) < 70
+                      ? 'Priority: Medium'
+                      : 'Priority: Low'}
                 </div>
               </div>
             </div>

@@ -171,8 +171,8 @@ module ML
       return unless example
       return if example.embedding.present?
 
-      # Queue embedding generation
-      GenerateEmbeddingJob.perform_later(example.id, 'LabeledExample')
+      # Queue embedding generation for labeled example
+      GenerateLabeledExampleEmbeddingJob.perform_later(example.id)
     rescue => e
       Rails.logger.warn("ML::LlmAutoLearnService: Failed to queue embedding: #{e.message}")
     end

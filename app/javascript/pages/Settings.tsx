@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   User,
   Bell,
@@ -17,6 +17,7 @@ import {
   Trash2,
   ToggleLeft,
   ToggleRight,
+  Sparkles,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useGmailStatus, useGmailConnections } from '../queries';
@@ -89,64 +90,62 @@ export function Settings() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar Navigation */}
-        <nav className="lg:w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-sm">
-            {settingsSections.map((section, index) => (
-              <button
-                key={section.id}
-                onClick={() => section.available && setActiveSection(section.id)}
-                disabled={!section.available}
-                className={clsx(
-                  'w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all',
-                  index !== 0 && 'border-t border-slate-100',
-                  activeSection === section.id
-                    ? 'bg-slate-50 border-l-2 border-l-slate-900'
-                    : 'hover:bg-slate-50/50 border-l-2 border-l-transparent',
-                  !section.available && 'opacity-50 cursor-not-allowed'
-                )}
-                aria-label={section.title}
-              >
-                <div
-                  className={clsx(
-                    'w-9 h-9 rounded-xl flex items-center justify-center',
-                    activeSection === section.id
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 text-slate-500'
-                  )}
-                >
-                  <section.icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p
+        <nav className="lg:w-72 flex-shrink-0">
+          <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900">Settings</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Manage your preferences</p>
+            </div>
+            <div className="p-2">
+              {settingsSections.map((section) => {
+                const Icon = section.icon;
+                const isActive = activeSection === section.id;
+
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => section.available && setActiveSection(section.id)}
+                    disabled={!section.available}
                     className={clsx(
-                      'font-medium text-sm truncate',
-                      activeSection === section.id
-                        ? 'text-slate-900'
-                        : 'text-slate-700'
+                      'w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all mb-1',
+                      isActive
+                        ? 'bg-amber-200 text-slate-900'
+                        : 'hover:bg-slate-50 text-slate-600',
+                      !section.available && 'opacity-50 cursor-not-allowed'
                     )}
+                    aria-label={section.title}
                   >
-                    {section.title}
-                  </p>
-                  <p className="text-xs text-slate-400 truncate">
-                    {section.description}
-                  </p>
-                </div>
-                {section.available ? (
-                  <ChevronRight
-                    className={clsx(
-                      'w-4 h-4',
-                      activeSection === section.id
-                        ? 'text-slate-900'
-                        : 'text-slate-300'
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                      <Icon className={clsx(
+                        'w-5 h-5',
+                        isActive ? 'text-amber-600' : 'text-amber-500'
+                      )} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={clsx(
+                        'font-medium text-sm truncate',
+                        isActive ? 'text-slate-900' : 'text-slate-700'
+                      )}>
+                        {section.title}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {section.description}
+                      </p>
+                    </div>
+                    {section.available ? (
+                      <ChevronRight className={clsx(
+                        'w-4 h-4 flex-shrink-0',
+                        isActive ? 'text-amber-600' : 'text-slate-300'
+                      )} />
+                    ) : (
+                      <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg flex-shrink-0">
+                        Soon
+                      </span>
                     )}
-                  />
-                ) : (
-                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">
-                    Soon
-                  </span>
-                )}
-              </button>
-            ))}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </nav>
 
@@ -154,13 +153,11 @@ export function Settings() {
         <main className="flex-1 min-w-0">
           {activeSection === 'gmail' && <GmailSettings />}
           {activeSection === 'ca' && <CASettings />}
-          {activeSection === 'profile' && <ComingSoon title="Profile" />}
-          {activeSection === 'banks' && <ComingSoon title="Bank Accounts" />}
-          {activeSection === 'notifications' && (
-            <ComingSoon title="Notifications" />
-          )}
-          {activeSection === 'security' && <ComingSoon title="Security" />}
-          {activeSection === 'appearance' && <ComingSoon title="Appearance" />}
+          {activeSection === 'profile' && <ComingSoon title="Profile" icon={User} />}
+          {activeSection === 'banks' && <ComingSoon title="Bank Accounts" icon={Building2} />}
+          {activeSection === 'notifications' && <ComingSoon title="Notifications" icon={Bell} />}
+          {activeSection === 'security' && <ComingSoon title="Security" icon={Shield} />}
+          {activeSection === 'appearance' && <ComingSoon title="Appearance" icon={Palette} />}
         </main>
       </div>
     </div>
@@ -186,13 +183,11 @@ function GmailSettings() {
 
   if (statusLoading || connectionsLoading) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200/80 p-12 shadow-sm">
-        <div
-          className="flex flex-col items-center justify-center"
-          role="status"
-          aria-live="polite"
-        >
-          <Loader2 className="w-8 h-8 text-slate-300 animate-spin mb-4" />
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-12 shadow-sm">
+        <div className="flex flex-col items-center justify-center" role="status" aria-live="polite">
+          <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mb-4">
+            <Loader2 className="w-6 h-6 text-orange-600 animate-spin" />
+          </div>
           <p className="text-sm text-slate-500">Loading Gmail settings...</p>
         </div>
       </div>
@@ -201,14 +196,13 @@ function GmailSettings() {
 
   if (!status?.configured) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200/80 p-8 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-8 shadow-sm">
         <div className="flex items-start gap-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-amber-800">Gmail not configured</p>
             <p className="text-sm text-amber-700 mt-1">
-              Google OAuth credentials are not set up. Please contact support to
-              enable Gmail integration.
+              Google OAuth credentials are not set up. Please contact support to enable Gmail integration.
             </p>
           </div>
         </div>
@@ -221,28 +215,25 @@ function GmailSettings() {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center shadow-sm">
-            <Mail className="w-6 h-6 text-white" />
+      <div className="relative overflow-hidden bg-gradient-to-r from-orange-50 to-amber-50/30 border border-orange-100 rounded-2xl p-6">
+        <div className="relative z-10 flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-white border border-orange-200 flex items-center justify-center shadow-sm">
+            <Mail className="w-6 h-6 text-orange-500" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold text-slate-900">
-              Gmail Integration
-            </h2>
-            <p className="text-slate-500 mt-1">
+            <h2 className="text-xl font-semibold text-slate-900">Gmail Integration</h2>
+            <p className="text-slate-600 mt-1">
               Automatically import invoice PDFs from your Gmail inbox
             </p>
           </div>
         </div>
+        {/* Decorative element */}
+        <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-orange-100/50" aria-hidden="true" />
       </div>
 
       {/* Error Alert */}
       {error && (
-        <div
-          className="flex items-start justify-between gap-4 p-4 bg-red-50 border border-red-200 rounded-xl"
-          role="alert"
-        >
+        <div className="flex items-start justify-between gap-4 p-4 bg-red-50 border border-red-200 rounded-xl" role="alert">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -261,31 +252,31 @@ function GmailSettings() {
       )}
 
       {/* Info Box */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 rounded-xl p-5">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
         <div className="flex gap-4">
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Mail className="w-5 h-5 text-blue-600" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-amber-500" />
           </div>
           <div>
-            <h3 className="font-medium text-slate-900 mb-2">How it works</h3>
-            <ul className="space-y-2 text-sm text-slate-600">
-              <li className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span>
-                  We scan for emails with PDF attachments from common vendors
-                </span>
+            <h3 className="font-semibold text-slate-900 mb-3">How it works</h3>
+            <ul className="space-y-3 text-sm text-slate-600">
+              <li className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 text-emerald-600" />
+                </div>
+                <span>We scan for emails with PDF attachments from common vendors</span>
               </li>
-              <li className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span>
-                  Invoice PDFs are extracted and matched with your transactions
-                </span>
+              <li className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 text-emerald-600" />
+                </div>
+                <span>Invoice PDFs are extracted and matched with your transactions</span>
               </li>
-              <li className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span>
-                  Read-only access &mdash; we never modify or delete your emails
-                </span>
+              <li className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 text-emerald-600" />
+                </div>
+                <span>Read-only access — we never modify or delete your emails</span>
               </li>
             </ul>
           </div>
@@ -294,7 +285,7 @@ function GmailSettings() {
 
       {/* Connected Accounts */}
       {hasConnections && (
-        <div className="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
             <h3 className="font-semibold text-slate-900">Connected Accounts</h3>
           </div>
@@ -314,10 +305,10 @@ function GmailSettings() {
       )}
 
       {/* Connect Button */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
         <button
           onClick={handleConnect}
-          className="w-full flex items-center justify-center gap-3 h-12 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 shadow-sm"
+          className="w-full flex items-center justify-center gap-3 h-12 bg-amber-200 text-slate-900 font-medium rounded-lg hover:bg-amber-300 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2"
           aria-label="Connect Gmail account"
         >
           <Mail className="w-5 h-5" />
@@ -325,8 +316,7 @@ function GmailSettings() {
           <ExternalLink className="w-4 h-4 opacity-60" />
         </button>
         <p className="text-xs text-slate-400 text-center mt-3">
-          We only request read-only access. Your data is encrypted and never
-          shared.
+          We only request read-only access. Your data is encrypted and never shared.
         </p>
       </div>
     </div>
@@ -379,26 +369,21 @@ function GmailConnectionRow({
     <div className="px-6 py-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Mail className="w-5 h-5 text-slate-500" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Mail className="w-5 h-5 text-amber-500" />
           </div>
           <div className="min-w-0">
-            <p className="font-medium text-slate-900 truncate">
-              {connection.email}
-            </p>
+            <p className="font-medium text-slate-900 truncate">{connection.email}</p>
             <div className="flex items-center gap-2 mt-1">
-              <span
-                className={clsx(
-                  'text-xs px-2 py-0.5 rounded-lg font-medium border',
-                  statusColor
-                )}
-              >
+              <span className={clsx(
+                'text-xs px-2 py-0.5 rounded-lg font-medium border capitalize',
+                statusColor
+              )}>
                 {connection.status}
               </span>
               {connection.last_sync_at && (
                 <span className="text-xs text-slate-400">
-                  Last sync:{' '}
-                  {new Date(connection.last_sync_at).toLocaleDateString()}
+                  Last sync: {new Date(connection.last_sync_at).toLocaleDateString()}
                 </span>
               )}
             </div>
@@ -409,7 +394,7 @@ function GmailConnectionRow({
           {/* Toggle Sync */}
           <button
             onClick={() => onToggleSync(connection.id, !connection.sync_enabled)}
-            className="h-9 w-9 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center"
+            className="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center"
             title={connection.sync_enabled ? 'Disable sync' : 'Enable sync'}
             aria-label={connection.sync_enabled ? 'Disable sync' : 'Enable sync'}
           >
@@ -424,23 +409,21 @@ function GmailConnectionRow({
           <button
             onClick={handleSyncClick}
             disabled={isSyncing || !connection.sync_enabled}
-            className="h-9 w-9 rounded-xl hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             title="Sync now"
             aria-label="Sync now"
           >
-            <RefreshCw
-              className={clsx(
-                'w-5 h-5 text-slate-500',
-                isSyncing && 'animate-spin'
-              )}
-            />
+            <RefreshCw className={clsx(
+              'w-5 h-5 text-slate-500',
+              isSyncing && 'animate-spin'
+            )} />
           </button>
 
           {/* Disconnect */}
           <button
             onClick={() => onDisconnect(connection.id)}
             disabled={isDisconnecting}
-            className="h-9 w-9 rounded-xl hover:bg-red-50 transition-colors text-slate-400 hover:text-red-600 disabled:opacity-50 flex items-center justify-center"
+            className="h-9 w-9 rounded-xl bg-slate-100 hover:bg-red-50 transition-colors text-slate-400 hover:text-red-600 disabled:opacity-50 flex items-center justify-center"
             title="Disconnect"
             aria-label="Disconnect account"
           >
@@ -457,10 +440,7 @@ function GmailConnectionRow({
       {connection.invoices_imported > 0 && (
         <div className="mt-3 pt-3 border-t border-slate-100">
           <p className="text-sm text-slate-500">
-            <span className="font-semibold text-slate-700">
-              {connection.invoices_imported}
-            </span>{' '}
-            invoices imported
+            <span className="font-semibold text-slate-700">{connection.invoices_imported}</span> invoices imported
           </p>
         </div>
       )}
@@ -472,37 +452,35 @@ function CASettings() {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-sm">
-            <Send className="w-6 h-6 text-white" />
+      <div className="relative overflow-hidden bg-gradient-to-r from-orange-50 to-amber-50/30 border border-orange-100 rounded-2xl p-6">
+        <div className="relative z-10 flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-white border border-orange-200 flex items-center justify-center shadow-sm">
+            <Send className="w-6 h-6 text-orange-500" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold text-slate-900">
-              CA Integration
-            </h2>
-            <p className="text-slate-500 mt-1">
-              Automatically send monthly expense summaries to your CA via
-              WhatsApp
+            <h2 className="text-xl font-semibold text-slate-900">CA Integration</h2>
+            <p className="text-slate-600 mt-1">
+              Automatically send monthly expense summaries to your CA via WhatsApp
             </p>
           </div>
         </div>
+        {/* Decorative element */}
+        <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-orange-100/50" aria-hidden="true" />
       </div>
 
-      {/* Warning */}
+      {/* Coming Soon Notice */}
       <div className="flex items-start gap-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
         <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
         <div>
           <p className="font-medium text-amber-800">Coming Soon</p>
           <p className="text-sm text-amber-700 mt-1">
-            This feature requires WhatsApp Business API access and is currently
-            in development.
+            This feature requires WhatsApp Business API access and is currently in development.
           </p>
         </div>
       </div>
 
       {/* Settings Preview */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-6 opacity-60 pointer-events-none shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 opacity-60 pointer-events-none shadow-sm">
         <div className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -531,9 +509,7 @@ function CASettings() {
           <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200">
             <div>
               <p className="font-medium text-slate-400">Auto-send enabled</p>
-              <p className="text-sm text-slate-300">
-                Automatically send summary on schedule
-              </p>
+              <p className="text-sm text-slate-300">Automatically send summary on schedule</p>
             </div>
             <ToggleLeft className="w-6 h-6 text-slate-300" />
           </div>
@@ -545,20 +521,26 @@ function CASettings() {
 
 interface ComingSoonProps {
   title: string;
+  icon: React.ElementType;
 }
 
-function ComingSoon({ title }: ComingSoonProps) {
+function ComingSoon({ title, icon: Icon }: ComingSoonProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-12 shadow-sm">
+    <div className="bg-white rounded-2xl border border-slate-200/80 p-12 shadow-sm">
       <div className="text-center">
-        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚧</span>
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Icon className="w-8 h-8 text-amber-500" />
         </div>
         <h2 className="text-xl font-semibold text-slate-900 mb-2">{title}</h2>
-        <p className="text-slate-500">
-          This section is coming soon. We're working hard to bring you more
-          features.
+        <p className="text-slate-500 max-w-sm mx-auto">
+          This section is coming soon. We're working hard to bring you more features.
         </p>
+        <div className="mt-6">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm font-medium">
+            <Sparkles className="w-4 h-4" />
+            Coming Soon
+          </span>
+        </div>
       </div>
     </div>
   );

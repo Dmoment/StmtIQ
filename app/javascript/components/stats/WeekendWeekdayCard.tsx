@@ -22,8 +22,8 @@ export function WeekendWeekdayCard({ data }: WeekendWeekdayCardProps) {
     <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
-            <Clock className="w-5 h-5 text-cyan-600" strokeWidth={2} fill="none" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+            <Clock className="w-5 h-5 text-amber-500" strokeWidth={2} fill="none" />
           </div>
           <div>
             <h3 className="font-semibold text-slate-900">Weekend vs Weekday</h3>

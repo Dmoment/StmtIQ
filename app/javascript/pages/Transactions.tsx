@@ -274,8 +274,23 @@ export function Transactions() {
                   </div>
                 )}
 
-                {/* Stats */}
-                <div className="flex items-center gap-3 text-xs font-medium text-orange-800">
+                {/* Stats with Priority indicator */}
+                <div className="flex items-center gap-4 text-xs font-medium text-orange-800">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-12 bg-orange-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-orange-500 rounded-full"
+                        style={{ width: `${categorizationProgress.progress_percent}%` }}
+                      />
+                    </div>
+                    <span>
+                      {categorizationProgress.progress_percent < 30
+                        ? 'Priority: High'
+                        : categorizationProgress.progress_percent < 70
+                          ? 'Priority: Medium'
+                          : 'Priority: Low'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>{categorizationProgress.categorized} done</span>
