@@ -3,42 +3,22 @@
 require 'google/apis/gmail_v1'
 
 module Gmail
-  # Syncs invoice emails from Gmail and creates Invoice records
-  # SOLID: Single Responsibility - Only handles email sync operations
+  # SOLID: Single Responsibility - Orchestrates Gmail sync workflow
+  # SOLID: Dependency Inversion - Dependencies injected, not hardcoded
   class SyncService
-    # Search query for finding invoice emails
-    # Customize based on common invoice email patterns
-    INVOICE_SEARCH_QUERIES = [
-      'subject:(invoice OR receipt OR bill OR order confirmation) has:attachment filename:pdf',
-      'from:(noreply@amazon.in OR auto-confirm@amazon.in) has:attachment',
-      'from:(noreply@flipkart.com) subject:invoice',
-      'from:(noreply@swiggy.in OR noreply@swiggy.com) subject:(invoice OR order)',
-      'from:(no-reply@zomato.com) subject:(invoice OR order)',
-      'from:(*@uber.com) subject:(receipt OR invoice)',
-      'from:(*@spicejet.com OR *@airindia.in OR *@goindigo.in) subject:invoice',
-      'from:(*@makemytrip.com OR *@goibibo.com) subject:(invoice OR booking)',
-      'subject:GST invoice has:attachment'
-    ].freeze
-
-    # Known invoice sender domains for prioritization
-    INVOICE_SENDERS = %w[
-      amazon.in flipkart.com swiggy.in swiggy.com zomato.com uber.com ola.com
-      makemytrip.com goibibo.com irctc.co.in redbus.in spicejet.com airindia.in
-      goindigo.in bookmyshow.com nykaa.com myntra.com bigbasket.com blinkit.in
-      zepto.com dunzo.com urbancompany.com practo.com
-    ].freeze
-
-    # Max emails to process per sync
     MAX_EMAILS_PER_SYNC = 50
-
-    # Max attachment size (10MB)
-    MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
 
     attr_reader :connection, :gmail_service, :stats
 
-    def initialize(connection)
+    # SOLID: Dependency Inversion - Accept dependencies as parameters
+    def initialize(connection, query_builder: QueryBuilder.new,
+                   pdf_filter: PdfFilter.new, invoice_creator: InvoiceCreator.new)
       @connection = connection
+      @query_builder = query_builder
+      @pdf_filter = pdf_filter
+      @invoice_creator = invoice_creator
       @stats = { emails_found: 0, attachments_processed: 0, invoices_created: 0, errors: [] }
+      @last_history_id = nil # PERFORMANCE: Cache history_id
     end
 
     def call
@@ -92,19 +72,31 @@ module Gmail
     end
 
     def process_invoice_emails
-      # Build combined search query
-      query = build_search_query
+      user = connection.user
 
-      Rails.logger.info("Searching Gmail with query: #{query}")
+      # SOLID: Delegate to QueryBuilder (Single Responsibility)
+      date_range = @query_builder.transaction_date_range(user)
+      vendor_keywords = @query_builder.extract_vendor_keywords(user)
 
-      # Search for emails
-      messages = search_emails(query)
-      @stats[:emails_found] = messages.size
+      Rails.logger.info("Transaction date range: #{date_range[:start]} to #{date_range[:end]}")
+      Rails.logger.info("Found #{vendor_keywords.size} vendor keywords: #{vendor_keywords.first(10).join(', ')}")
 
-      Rails.logger.info("Found #{messages.size} potential invoice emails")
+      queries = @query_builder.build_queries(
+        date_range: date_range,
+        vendor_keywords: vendor_keywords,
+        exclude_message_ids: connection.synced_message_ids
+      )
+
+      Rails.logger.info("Running #{queries.size} targeted Gmail searches")
+
+      # Search and collect unique messages
+      all_messages = search_all_queries(queries)
+
+      @stats[:emails_found] = all_messages.size
+      Rails.logger.info("Found #{all_messages.size} potential invoice emails")
 
       # Process each email
-      messages.each do |message_stub|
+      all_messages.values.first(MAX_EMAILS_PER_SYNC).each do |message_stub|
         process_email(message_stub.id)
       rescue StandardError => e
         @stats[:errors] << { message_id: message_stub.id, error: e.message }
@@ -112,23 +104,27 @@ module Gmail
       end
     end
 
-    def build_search_query
-      # Combine all invoice queries with OR
-      base_query = INVOICE_SEARCH_QUERIES.map { |q| "(#{q})" }.join(' OR ')
+    # SOLID: Extracted method (Single Responsibility)
+    def search_all_queries(queries)
+      all_messages = {}
 
-      # Add date filter - only emails from last 90 days
-      date_filter = "after:#{90.days.ago.strftime('%Y/%m/%d')}"
+      queries.each do |query|
+        Rails.logger.debug("Searching Gmail: #{query}")
+        messages = search_emails(query)
+        messages.each { |msg| all_messages[msg.id] = msg }
 
-      # Exclude already processed emails
-      processed_ids = connection.synced_message_ids
-      exclude_filter = processed_ids.any? ? "-{#{processed_ids.first(100).join(' ')}}" : ''
+        break if all_messages.size >= MAX_EMAILS_PER_SYNC
+      end
 
-      "#{base_query} #{date_filter} #{exclude_filter}".strip
+      all_messages
     end
 
     def search_emails(query)
       messages = []
       page_token = nil
+
+      # PERFORMANCE: Fetch profile only once per sync (cached in @last_history_id)
+      fetch_history_id_once!
 
       loop do
         result = gmail_service.list_user_messages(
@@ -139,7 +135,6 @@ module Gmail
         )
 
         messages.concat(result.messages || [])
-        @last_history_id = result.history_id
 
         page_token = result.next_page_token
         break if page_token.nil? || messages.size >= MAX_EMAILS_PER_SYNC
@@ -148,22 +143,40 @@ module Gmail
       messages.first(MAX_EMAILS_PER_SYNC)
     end
 
+    # PERFORMANCE: Cache history_id to avoid multiple profile fetches
+    def fetch_history_id_once!
+      return if @last_history_id
+
+      profile = gmail_service.get_user_profile('me')
+      @last_history_id = profile.history_id
+    end
+
     def process_email(message_id)
       # Skip if already processed
-      return if Invoice.exists?(user: connection.user, gmail_message_id: message_id)
+      if Invoice.exists?(user: connection.user, gmail_message_id: message_id)
+        Rails.logger.debug("Skipping already processed message: #{message_id}")
+        return
+      end
 
-      # Fetch full message
-      message = gmail_service.get_user_message('me', message_id)
+      # Fetch full message with explicit format to ensure we get attachments
+      message = gmail_service.get_user_message('me', message_id, format: 'full')
 
       # Extract email metadata
       email_data = extract_email_data(message)
 
-      Rails.logger.debug("Processing email: #{email_data[:subject]} from #{email_data[:from]}")
+      Rails.logger.info("Processing email: #{email_data[:subject]} from #{email_data[:from]}")
+      Rails.logger.debug("Message payload present: #{message.payload.present?}")
+      Rails.logger.debug("Message payload parts count: #{message.payload&.parts&.size || 0}")
 
       # Find PDF attachments
       pdf_attachments = find_pdf_attachments(message)
 
-      return if pdf_attachments.empty?
+      Rails.logger.info("Found #{pdf_attachments.size} PDF attachments in message #{message_id}")
+
+      if pdf_attachments.empty?
+        Rails.logger.debug("No PDF attachments found, skipping message")
+        return
+      end
 
       # Process each PDF attachment as an invoice
       pdf_attachments.each do |attachment|
@@ -200,63 +213,70 @@ module Gmail
       attachments
     end
 
-    def find_pdf_parts(part, attachments)
+    def find_pdf_parts(part, attachments, depth = 0)
       return unless part
+
+      indent = '  ' * depth
+      Rails.logger.debug("#{indent}Checking part: mime=#{part.mime_type}, filename=#{part.filename.inspect}")
 
       # Check if this part is a PDF attachment
       if part.filename.present? && part.filename.downcase.end_with?('.pdf')
-        if part.body&.attachment_id.present?
+        filename = part.filename
+        size = part.body&.size || 0
+
+        # SOLID: Delegate filtering to PdfFilter (Single Responsibility)
+        skip_reason = @pdf_filter.should_skip?(filename: filename, size: size)
+
+        if skip_reason
+          Rails.logger.info("#{indent}  -> Skipping PDF '#{filename}': #{skip_reason}")
+        elsif part.body&.attachment_id.present?
+          Rails.logger.debug("#{indent}  -> PDF accepted: #{filename} (#{size} bytes)")
           attachments << {
-            filename: part.filename,
+            filename: filename,
             attachment_id: part.body.attachment_id,
-            size: part.body.size || 0
+            size: size
           }
         elsif part.body&.data.present?
-          # Inline attachment
+          Rails.logger.debug("#{indent}  -> PDF accepted (inline): #{filename} (#{size} bytes)")
           attachments << {
-            filename: part.filename,
+            filename: filename,
             data: part.body.data,
-            size: part.body.size || 0
+            size: size
           }
+        else
+          Rails.logger.debug("#{indent}  -> PDF has no attachment_id or data, skipping")
         end
       end
 
       # Recursively check nested parts
-      part.parts&.each do |nested_part|
-        find_pdf_parts(nested_part, attachments)
+      if part.parts.present?
+        Rails.logger.debug("#{indent}  -> Has #{part.parts.size} nested parts")
+        part.parts.each do |nested_part|
+          find_pdf_parts(nested_part, attachments, depth + 1)
+        end
       end
     end
 
     def create_invoice_from_attachment(message_id, email_data, attachment)
-      # Skip large attachments
-      if attachment[:size] > MAX_ATTACHMENT_SIZE
-        Rails.logger.warn("Skipping large attachment: #{attachment[:filename]} (#{attachment[:size]} bytes)")
-        return
-      end
-
-      # Download attachment content
       content = download_attachment(message_id, attachment)
       return unless content
 
+      # SOLID: Delegate page validation to PdfFilter (Single Responsibility)
+      unless @pdf_filter.valid_page_count?(content)
+        page_count = @pdf_filter.pdf_page_count(content)
+        Rails.logger.info("Skipping PDF '#{attachment[:filename]}': #{page_count} pages exceeds limit")
+        return
+      end
+
       @stats[:attachments_processed] += 1
 
-      # Create invoice record
-      invoice = connection.user.invoices.create!(
-        source: 'gmail',
-        gmail_message_id: message_id,
-        status: 'pending',
-        currency: 'INR'
+      # SOLID: Delegate invoice creation to InvoiceCreator (Single Responsibility)
+      invoice = @invoice_creator.create_from_pdf(
+        user: connection.user,
+        message_id: message_id,
+        content: content,
+        filename: attachment[:filename]
       )
-
-      # Attach the PDF file
-      invoice.file.attach(
-        io: StringIO.new(content),
-        filename: sanitize_filename(attachment[:filename]),
-        content_type: 'application/pdf'
-      )
-
-      # Queue extraction job
-      InvoiceExtractionJob.perform_later(invoice.id)
 
       @stats[:invoices_created] += 1
 
@@ -267,24 +287,25 @@ module Gmail
 
     def download_attachment(message_id, attachment)
       if attachment[:data]
-        # Inline attachment - decode base64
-        Base64.urlsafe_decode64(attachment[:data])
+        # Inline attachment - the Gmail API Ruby client returns raw data
+        # that may need decoding if it's base64 encoded
+        data = attachment[:data]
+        # Check if it looks like base64 (no binary chars in first 100 bytes)
+        if data[0..99]&.match?(/\A[A-Za-z0-9+\/_=-]*\z/)
+          Base64.urlsafe_decode64(data)
+        else
+          data
+        end
       elsif attachment[:attachment_id]
         # External attachment - fetch from Gmail
+        # The Gmail API Ruby client automatically decodes the base64 data
         att = gmail_service.get_user_message_attachment('me', message_id, attachment[:attachment_id])
-        Base64.urlsafe_decode64(att.data)
+        att.data
       end
     rescue StandardError => e
       Rails.logger.error("Failed to download attachment: #{e.message}")
+      Rails.logger.error(e.backtrace.first(3).join("\n"))
       nil
-    end
-
-    def sanitize_filename(filename)
-      # Remove path separators and limit length
-      name = File.basename(filename.to_s)
-      name = name.gsub(/[^\w\s\-\.]/, '_')
-      name = "invoice_#{Time.current.to_i}.pdf" if name.blank?
-      name[0..100]
     end
 
     def handle_token_error(error)

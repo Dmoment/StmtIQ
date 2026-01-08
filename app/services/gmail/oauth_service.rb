@@ -21,13 +21,18 @@ module Gmail
       def authorization_url(state: nil)
         validate_configuration!
 
-        client = build_client
-        client.authorization_uri(
-          access_type: 'offline',       # Get refresh token
-          prompt: 'consent',            # Always show consent (ensures refresh token)
-          state: state,                 # CSRF protection
-          include_granted_scopes: true
-        ).to_s
+        # Build URL manually to ensure scopes are included correctly
+        params = {
+          client_id: ENV['GOOGLE_CLIENT_ID'],
+          redirect_uri: ENV.fetch('GOOGLE_REDIRECT_URI', default_redirect_uri),
+          response_type: 'code',
+          scope: SCOPES.join(' '),
+          access_type: 'offline',
+          prompt: 'consent',
+          state: state
+        }.compact
+
+        "https://accounts.google.com/o/oauth2/auth?#{params.to_query}"
       end
 
       # Exchange authorization code for tokens
@@ -102,7 +107,7 @@ module Gmail
           authorization_uri: 'https://accounts.google.com/o/oauth2/auth',
           token_credential_uri: 'https://oauth2.googleapis.com/token',
           redirect_uri: ENV.fetch('GOOGLE_REDIRECT_URI', default_redirect_uri),
-          scope: SCOPES
+          scope: SCOPES.join(' ')  # Signet requires space-separated string
         )
       end
 
