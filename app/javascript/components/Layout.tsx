@@ -143,12 +143,12 @@ export function Layout() {
               end={to === '/'}
               className={({ isActive }) =>
                 clsx(
-                  'flex items-center rounded-xl text-sm font-medium transition-all duration-150',
+                  'flex items-center rounded-lg text-sm font-medium transition-all duration-150',
                   sidebarCollapsed
                     ? 'justify-center px-3 py-3'
                     : 'gap-3 px-4 py-3',
                   isActive
-                    ? 'bg-slate-900 text-white shadow-sm'
+                    ? 'bg-amber-200 text-slate-900'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 )
               }
@@ -263,7 +263,7 @@ export function Layout() {
             {/* Primary Action */}
             <button
               onClick={() => navigate('/upload')}
-              className="h-10 px-4 bg-slate-900 text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+              className="h-10 px-4 bg-amber-200 text-slate-900 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">New Upload</span>

@@ -752,7 +752,7 @@ export function Upload() {
             "relative overflow-hidden rounded-xl border-2 border-dashed p-8 text-center transition-all duration-300 shadow-sm",
             isDragging
               ? "border-emerald-500 bg-gradient-to-br from-emerald-50 via-emerald-50/50 to-white scale-[1.01]"
-              : "border-slate-300 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 hover:border-slate-400 hover:from-slate-100"
+              : "border-orange-200 bg-gradient-to-br from-orange-50/30 via-white to-orange-50/20 hover:border-orange-300 hover:from-orange-50/50"
           )}
         >
           <input
@@ -766,10 +766,10 @@ export function Upload() {
           />
 
           {/* Decorative background pattern */}
-          <div className="absolute inset-0 opacity-[0.03]" aria-hidden="true">
-            <div className="absolute top-4 left-4 w-32 h-32 border-2 border-slate-900 rounded-full" />
-            <div className="absolute bottom-4 right-4 w-24 h-24 border-2 border-slate-900 rounded-full" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-slate-900 rounded-full" />
+          <div className="absolute inset-0 opacity-[0.08]" aria-hidden="true">
+            <div className="absolute top-4 left-4 w-32 h-32 border-2 border-orange-300 rounded-full" />
+            <div className="absolute bottom-4 right-4 w-24 h-24 border-2 border-orange-300 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-orange-300 rounded-full" />
           </div>
 
           <div className="relative z-0">
@@ -778,11 +778,11 @@ export function Upload() {
               "w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-all duration-300",
               isDragging
                 ? "bg-emerald-100 border-2 border-emerald-300 scale-110 shadow-lg shadow-emerald-100"
-                : "bg-white border-2 border-dashed border-slate-300 hover:border-slate-400"
+                : "bg-orange-50 border-2 border-dashed border-orange-200 hover:border-orange-300"
             )}>
               <UploadIcon className={clsx(
                 "w-10 h-10 transition-colors duration-300",
-                isDragging ? "text-emerald-600" : "text-slate-500"
+                isDragging ? "text-emerald-600" : "text-orange-500"
               )} aria-hidden="true" />
             </div>
 
@@ -794,22 +794,22 @@ export function Upload() {
             </h3>
 
             <p className="text-slate-600 mb-4">
-              or <span className="text-slate-900 font-medium underline underline-offset-2">click to browse</span> from your computer
+              or <span className="text-orange-600 font-medium underline underline-offset-2 hover:text-orange-700">click to browse</span> from your computer
             </p>
 
             {/* Selected format badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm">
-              <FileText className="w-4 h-4 text-slate-500" aria-hidden="true" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-orange-200 shadow-sm">
+              <FileText className="w-4 h-4 text-orange-500" aria-hidden="true" />
               <span className="text-sm text-slate-600">
-                <strong className="text-slate-900">{selectedTemplate.file_format.toUpperCase()}</strong>
+                <strong className="text-orange-700">{selectedTemplate.file_format.toUpperCase()}</strong>
                 {' '}files for{' '}
                 <strong className="text-slate-900">{selectedBank?.bank_name}</strong>
               </span>
             </div>
 
             {/* Supported format indicator */}
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-orange-600">
+              <CheckCircle2 className="w-3.5 h-3.5 text-orange-500" aria-hidden="true" />
               <span>Ready to accept {selectedTemplate.file_format.toUpperCase()} files</span>
             </div>
           </div>
@@ -818,16 +818,16 @@ export function Upload() {
 
       {/* Incomplete selection message */}
       {!allStepsComplete && !loadingTemplates && (
-        <div className="relative overflow-hidden p-10 rounded-xl border-2 border-dashed border-slate-300 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 text-center shadow-sm">
+        <div className="relative overflow-hidden p-10 rounded-xl border-2 border-dashed border-orange-200 bg-gradient-to-br from-orange-50/30 via-white to-orange-50/20 text-center shadow-sm">
           {/* Decorative background pattern */}
-          <div className="absolute inset-0 opacity-[0.02]" aria-hidden="true">
-            <div className="absolute top-4 right-4 w-32 h-32 border-2 border-slate-900 rounded-full" />
-            <div className="absolute bottom-4 left-4 w-24 h-24 border-2 border-slate-900 rounded-full" />
+          <div className="absolute inset-0 opacity-[0.03]" aria-hidden="true">
+            <div className="absolute top-4 right-4 w-32 h-32 border-2 border-orange-300 rounded-full" />
+            <div className="absolute bottom-4 left-4 w-24 h-24 border-2 border-orange-300 rounded-full" />
           </div>
 
           <div className="relative z-10">
-            <div className="w-20 h-20 rounded-2xl bg-white border-2 border-dashed border-slate-300 flex items-center justify-center mx-auto mb-5">
-              <UploadIcon className="w-10 h-10 text-slate-400" aria-hidden="true" />
+            <div className="w-20 h-20 rounded-2xl bg-orange-50 border-2 border-dashed border-orange-200 flex items-center justify-center mx-auto mb-5">
+              <UploadIcon className="w-10 h-10 text-orange-400" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-2">
               Complete the steps above to upload
@@ -873,7 +873,7 @@ export function Upload() {
           </div>
           <a
             href="/transactions"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm font-medium"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-amber-200 text-slate-900 hover:bg-amber-300 transition-colors font-medium"
           >
             View Transactions
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -891,10 +891,10 @@ export function Upload() {
                 onClick={uploadAllFiles}
                 disabled={isUploading || !selectedTemplate}
                 className={clsx(
-                  "px-4 py-2 rounded-xl font-medium transition-all shadow-sm",
+                  "px-5 py-2.5 rounded-lg font-medium transition-all",
                   isUploading || !selectedTemplate
-                    ? "bg-slate-200 text-slate-500 cursor-not-allowed"
-                    : "bg-slate-900 text-white hover:bg-slate-800"
+                    ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                    : "bg-amber-200 text-slate-900 hover:bg-amber-300"
                 )}
               >
                 {isUploading ? 'Uploading...' : 'Upload All'}
@@ -941,14 +941,13 @@ export function Upload() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   {file.status === 'idle' && (
                     <>
-                      <span className="text-sm text-slate-500 font-medium">Ready</span>
                       <button
                         onClick={() => uploadFile(index)}
                         disabled={isUploading || !selectedTemplate}
-                        className="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-sm hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-50"
+                        className="px-4 py-2 rounded-lg bg-amber-200 text-slate-900 text-sm font-medium hover:bg-amber-300 transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                       >
                         Upload
                       </button>
@@ -957,9 +956,9 @@ export function Upload() {
 
                   {file.status === 'uploading' && (
                     <div className="flex items-center gap-2">
-                      <div className="w-24 h-2 rounded-full bg-slate-200 overflow-hidden">
+                      <div className="w-24 h-2 rounded-full bg-amber-100 overflow-hidden">
                         <div
-                          className="h-full bg-slate-800 rounded-full transition-all duration-300"
+                          className="h-full bg-amber-300 rounded-full transition-all duration-300"
                           style={{ width: `${file.progress}%` }}
                         />
                       </div>
@@ -982,7 +981,7 @@ export function Upload() {
                   )}
 
                   {file.status === 'error' && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <div className="flex items-center gap-2 text-red-600">
                         <AlertCircle className="w-5 h-5" aria-hidden="true" />
                         <span className="text-sm max-w-[150px] truncate" title={file.error}>
@@ -992,7 +991,7 @@ export function Upload() {
                       <button
                         onClick={() => retryFile(index)}
                         aria-label="Retry upload"
-                        className="p-1.5 hover:bg-red-100 rounded-lg text-red-600 hover:text-red-700 transition-colors"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
                       >
                         <RefreshCw className="w-4 h-4" />
                       </button>
@@ -1003,7 +1002,7 @@ export function Upload() {
                     <button
                       onClick={() => removeFile(index)}
                       aria-label="Remove file"
-                      className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                      className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>

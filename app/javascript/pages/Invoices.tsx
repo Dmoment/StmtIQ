@@ -203,7 +203,7 @@ export function Invoices() {
         </div>
         <button
           onClick={() => setShowUploadModal(true)}
-          className="h-10 inline-flex items-center gap-2 px-4 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors shadow-sm text-sm"
+          className="h-10 inline-flex items-center gap-2 px-5 rounded-lg bg-amber-200 text-slate-900 font-medium hover:bg-amber-300 transition-colors text-sm"
         >
           <Upload className="w-4 h-4" />
           Upload Invoice
@@ -303,7 +303,7 @@ export function Invoices() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setStatusFilter('extracted')}
-                  className="px-4 py-2 bg-white border border-orange-200 text-orange-900 rounded-xl text-sm font-medium hover:bg-orange-50 transition-colors shadow-sm"
+                  className="px-5 py-2.5 bg-amber-200 text-slate-900 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors"
                 >
                   <span className="flex items-center gap-2">
                     <ArrowRight className="w-4 h-4" />
@@ -433,7 +433,7 @@ export function Invoices() {
             <button
               onClick={() => setShowUploadModal(true)}
               aria-label="Upload your first invoice"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-200 text-slate-900 font-medium hover:bg-amber-300 transition-colors"
             >
               <Upload className="w-4 h-4" aria-hidden="true" />
               Upload Invoice
@@ -479,13 +479,8 @@ export function Invoices() {
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={clsx(
-                              'w-11 h-11 rounded-xl flex items-center justify-center',
-                              status.bgColor
-                            )}
-                          >
-                            <FileText className={clsx('w-5 h-5', status.color)} />
+                          <div className="w-11 h-11 rounded-xl flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-amber-500" />
                           </div>
                           <div>
                             <p className="font-medium text-slate-900">

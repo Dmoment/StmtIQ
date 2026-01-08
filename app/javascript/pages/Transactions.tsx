@@ -32,12 +32,14 @@ import {
   CheckCircle2,
   AlertCircle,
   Play,
-  MoreHorizontal,
+  FileText,
+  Link2,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CategoryPicker } from '../components/CategoryPicker';
 import { TransactionStats } from '../components/TransactionStats';
 import { InvoiceBadge } from '../components/InvoiceBadge';
+import { TransactionLinkInvoiceModal } from '../components/TransactionLinkInvoiceModal';
 import {
   useTransactions,
   useTransactionStats,
@@ -81,6 +83,9 @@ export function Transactions() {
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+
+  // Invoice linking state
+  const [transactionToLink, setTransactionToLink] = useState<Transaction | null>(null);
 
   const {
     data: transactions = [],
@@ -199,12 +204,12 @@ export function Transactions() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => refetch()}
-            className="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm text-sm font-medium"
+            className="h-10 w-10 sm:w-auto sm:px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors text-sm font-medium"
           >
             <RefreshCw className="w-4 h-4" />
             <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button className="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm text-sm font-medium">
+          <button className="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium">
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Export</span>
           </button>
@@ -254,7 +259,7 @@ export function Transactions() {
                 {hasUncategorized && !isCategorizationRunning && (
                   <button
                     onClick={handleStartCategorization}
-                    className="px-4 py-2 bg-white border border-orange-200 text-orange-900 rounded-xl text-sm font-medium hover:bg-orange-50 transition-colors shadow-sm"
+                    className="px-5 py-2.5 bg-amber-200 text-slate-900 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors"
                   >
                     <span className="flex items-center gap-2">
                       <Play className="w-4 h-4" />
@@ -263,7 +268,7 @@ export function Transactions() {
                   </button>
                 )}
                 {isCategorizationRunning && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-200 text-orange-700 rounded-xl text-sm font-medium">
+                  <div className="flex items-center gap-2 px-5 py-2.5 bg-amber-100 text-amber-700 rounded-xl text-sm font-medium">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Processing...
                   </div>
@@ -368,7 +373,7 @@ export function Transactions() {
           {transactions.length === 0 && (
             <a
               href="/upload"
-              className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-lg bg-amber-200 text-slate-900 font-medium hover:bg-amber-300 transition-colors"
             >
               Upload Statement
             </a>
@@ -437,7 +442,7 @@ export function Transactions() {
                 <div
                   key={tx.id}
                   className={clsx(
-                    'grid grid-cols-12 gap-4 p-4 items-center transition-colors relative',
+                    'grid grid-cols-12 gap-4 p-4 items-center transition-colors relative group',
                     hasInvoice
                       ? 'bg-gradient-to-r from-emerald-50/50 to-transparent hover:from-emerald-50 border-l-2 border-l-emerald-400'
                       : 'hover:bg-slate-50/50'
@@ -460,6 +465,16 @@ export function Transactions() {
                         {tx.description}
                       </p>
                       {tx.invoice && <InvoiceBadge invoice={tx.invoice} />}
+                      {!tx.invoice && tx.transaction_type === 'debit' && (
+                        <button
+                          onClick={() => setTransactionToLink(tx)}
+                          className="opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-100 text-amber-700 text-xs font-medium hover:bg-amber-200 transition-all"
+                          title="Link an invoice to this transaction"
+                        >
+                          <FileText className="w-3 h-3" />
+                          <Link2 className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                     {tx.ai_explanation && (
                       <p
@@ -473,7 +488,7 @@ export function Transactions() {
                   <div className="col-span-6 sm:col-span-3">
                     <button
                       onClick={(e) => handleCategoryClick(tx, e)}
-                      className="group inline-flex items-center gap-1.5 hover:bg-slate-100 rounded-xl p-1.5 -m-1.5 transition-colors"
+                      className="group/cat inline-flex items-center gap-1.5 hover:bg-slate-100 rounded-xl p-1.5 -m-1.5 transition-colors"
                     >
                       {colorInfo.hasCustomColor && colorInfo.customColor ? (
                         <div
@@ -502,7 +517,7 @@ export function Transactions() {
                       <div className="flex flex-col items-start min-w-0 overflow-visible">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span
-                            className="text-sm font-medium capitalize group-hover:text-slate-900"
+                            className="text-sm font-medium capitalize group-hover/cat:text-slate-900"
                             style={
                               colorInfo.hasCustomColor && colorInfo.customColor
                                 ? { color: colorInfo.customColor }
@@ -524,7 +539,7 @@ export function Transactions() {
                             </span>
                           )}
                       </div>
-                      <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                      <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover/cat:opacity-100 transition-opacity flex-shrink-0" />
                     </button>
                   </div>
                   <div
@@ -652,6 +667,14 @@ export function Transactions() {
           }}
           onSuccess={handleCategoryUpdate}
           anchorPosition={pickerPosition}
+        />
+      )}
+
+      {/* Invoice Linking Modal */}
+      {transactionToLink && (
+        <TransactionLinkInvoiceModal
+          transaction={transactionToLink}
+          onClose={() => setTransactionToLink(null)}
         />
       )}
     </div>

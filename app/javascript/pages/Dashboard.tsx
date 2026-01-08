@@ -287,7 +287,7 @@ export function Dashboard() {
             <div className="flex items-center gap-4">
               <a
                 href="/transactions"
-                className="px-4 py-2 bg-white border border-orange-200 text-orange-900 rounded-xl text-sm font-medium hover:bg-orange-50 transition-colors shadow-sm"
+                className="px-5 py-2.5 bg-amber-200 text-slate-900 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors"
               >
                 Review Now
               </a>
@@ -317,12 +317,12 @@ export function Dashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="p-2 text-slate-500 hover:text-slate-700 hover:bg-white rounded-xl transition-colors">
+              <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors">
                 <MoreHorizontal className="h-4 w-4" />
               </button>
               <a
                 href="/upload"
-                className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-medium shadow-sm hover:bg-slate-800 transition-colors"
+                className="px-5 py-2.5 bg-amber-200 text-slate-900 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors"
               >
                 Upload New
               </a>
@@ -390,7 +390,7 @@ export function Dashboard() {
                               prev === statement.id ? null : statement.id
                             );
                           }}
-                          className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                          className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
                           title={isExpanded ? 'Hide summary' : 'View summary'}
                         >
                           {isExpanded ? (
@@ -408,7 +408,7 @@ export function Dashboard() {
                             <button
                               onClick={() => handleDeleteStatement(statement.id)}
                               disabled={deleteStatementMutation.isPending}
-                              className="px-3 py-1.5 text-xs rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition-colors disabled:opacity-50 border border-red-200 font-medium"
+                              className="px-4 py-2 text-sm rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 font-medium"
                             >
                               {deleteStatementMutation.isPending ? (
                                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -418,7 +418,7 @@ export function Dashboard() {
                             </button>
                             <button
                               onClick={() => setShowDeleteConfirm(null)}
-                              className="px-3 py-1.5 text-xs rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors font-medium"
+                              className="px-4 py-2 text-sm rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors font-medium"
                             >
                               Cancel
                             </button>
@@ -429,7 +429,7 @@ export function Dashboard() {
                               e.stopPropagation();
                               setShowDeleteConfirm(statement.id);
                             }}
-                            className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                             title="Delete statement"
                           >
                             <Trash2 className="w-5 h-5" />
@@ -474,7 +474,7 @@ export function Dashboard() {
           </p>
           <a
             href="/upload"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-200 text-slate-900 font-medium hover:bg-amber-300 transition-colors"
           >
             <Upload className="w-5 h-5" />
             Upload Statement

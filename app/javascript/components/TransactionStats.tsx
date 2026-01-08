@@ -140,7 +140,7 @@ export function TransactionStats({ stats, isLoading }: TransactionStatsProps) {
             aria-expanded={isExpanded}
             aria-controls="detailed-analysis"
             aria-label={isExpanded ? 'Hide detailed analysis' : 'Show detailed analysis'}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-amber-200 text-slate-900 hover:bg-amber-300 transition-colors"
           >
             <Sparkles className="w-4 h-4" aria-hidden="true" />
             <span>{isExpanded ? 'Hide' : 'Show'} Analysis</span>
