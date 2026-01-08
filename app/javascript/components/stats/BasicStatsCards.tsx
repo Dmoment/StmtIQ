@@ -20,60 +20,52 @@ const formatAmountForCard = (amount: number) => {
 
 export function BasicStatsCards({ totalDebits, totalCredits, netFlow }: BasicStatsCardsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {/* Total Debits */}
-      <div className="group relative p-6 rounded-xl bg-gradient-to-br from-red-50/50 to-white border border-red-200/80 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-        <div className="relative">
-          <div className="mb-4">
-            <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-1">Total Debits</p>
-            <p className="text-4xl font-bold text-slate-900 tracking-tight">₹{formatAmountForCard(totalDebits)}</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
+      <div className="relative p-5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-slate-500">Total Debits</p>
+          <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
             <TrendingDown className="w-4 h-4 text-red-600" />
-            <span className="text-red-700 font-semibold">Expenses</span>
           </div>
         </div>
+        <p className="text-2xl font-bold text-slate-900">₹{formatAmountForCard(totalDebits)}</p>
+        <p className="text-xs text-red-600 font-medium mt-1">Expenses</p>
       </div>
 
       {/* Total Credits */}
-      <div className="group relative p-6 rounded-xl bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-200/80 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-        <div className="relative">
-          <div className="mb-4">
-            <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-1">Total Credits</p>
-            <p className="text-4xl font-bold text-slate-900 tracking-tight">₹{formatAmountForCard(totalCredits)}</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
+      <div className="relative p-5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-slate-500">Total Credits</p>
+          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
             <TrendingUp className="w-4 h-4 text-emerald-600" />
-            <span className="text-emerald-700 font-semibold">Income</span>
           </div>
         </div>
+        <p className="text-2xl font-bold text-slate-900">₹{formatAmountForCard(totalCredits)}</p>
+        <p className="text-xs text-emerald-600 font-medium mt-1">Income</p>
       </div>
 
       {/* Net Flow */}
-      <div className={clsx(
-        "group relative p-6 rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden",
-        netFlow >= 0 
-          ? "bg-gradient-to-br from-blue-50/50 to-white border-blue-200/80"
-          : "bg-gradient-to-br from-red-50/50 to-white border-red-200/80"
-      )}>
-        <div className="relative">
-          <div className="mb-4">
-            <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-1">Net Flow</p>
-            <p className="text-4xl font-bold text-slate-900 tracking-tight">₹{formatAmountForCard(Math.abs(netFlow))}</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
+      <div className="relative p-5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-slate-500">Net Flow</p>
+          <div className={clsx(
+            "w-8 h-8 rounded-lg flex items-center justify-center",
+            netFlow >= 0 ? "bg-blue-100" : "bg-red-100"
+          )}>
             <ArrowRightLeft className={clsx(
               "w-4 h-4",
               netFlow >= 0 ? "text-blue-600" : "text-red-600"
             )} />
-            <span className={clsx(
-              "font-semibold",
-              netFlow >= 0 ? "text-blue-700" : "text-red-700"
-            )}>
-              {netFlow >= 0 ? 'Positive' : 'Negative'}
-            </span>
           </div>
         </div>
+        <p className="text-2xl font-bold text-slate-900">₹{formatAmountForCard(Math.abs(netFlow))}</p>
+        <p className={clsx(
+          "text-xs font-medium mt-1",
+          netFlow >= 0 ? "text-blue-600" : "text-red-600"
+        )}>
+          {netFlow >= 0 ? 'Positive' : 'Negative'}
+        </p>
       </div>
     </div>
   );

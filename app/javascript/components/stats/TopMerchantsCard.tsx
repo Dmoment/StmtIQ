@@ -14,14 +14,14 @@ export function TopMerchantsCard({ merchants }: TopMerchantsCardProps) {
   if (!merchants || merchants.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
+    <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg border border-slate-200 bg-slate-50">
-            <Building2 className="w-5 h-5 text-slate-700" strokeWidth={2} fill="none" />
+          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-blue-600" strokeWidth={2} fill="none" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Top Merchants</h3>
+            <h3 className="font-semibold text-slate-900">Top Merchants</h3>
             <p className="text-xs text-slate-500 mt-0.5">By total spend ({merchants.length})</p>
           </div>
         </div>
@@ -33,11 +33,11 @@ export function TopMerchantsCard({ merchants }: TopMerchantsCardProps) {
           return (
             <div 
               key={idx} 
-              className="relative flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors group cursor-pointer"
+              className="relative flex items-center justify-between p-3 rounded-xl border border-slate-200/80 hover:bg-slate-50 transition-colors group cursor-pointer"
             >
               <div className="flex items-center gap-3 flex-[1.5] min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-5 h-5 text-blue-600" />
+                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="w-4 h-4 text-slate-600" />
                 </div>
                 <div className="flex-1 min-w-0 pr-4">
                   <p className="font-medium text-slate-900 truncate text-sm mb-0.5">{merchant.name}</p>

@@ -13,19 +13,19 @@ export function LargestExpenseCard({ expense }: LargestExpenseCardProps) {
   if (!expense) return null;
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
+    <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg border border-slate-200 bg-slate-50">
-            <Zap className="w-5 h-5 text-slate-700" strokeWidth={2} fill="none" />
+          <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+            <Zap className="w-5 h-5 text-orange-600" strokeWidth={2} fill="none" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Largest Single Expense</h3>
+            <h3 className="font-semibold text-slate-900">Largest Single Expense</h3>
             <p className="text-xs text-slate-500 mt-0.5">Your biggest spend</p>
           </div>
         </div>
       </div>
-      <div className="p-4 rounded-lg bg-orange-50 border border-orange-200">
+      <div className="p-4 rounded-xl bg-orange-50 border border-orange-200/80">
         <div className="mb-3">
           <p className="text-2xl font-semibold text-orange-900 mb-2">
             ₹{expense.amount.toLocaleString('en-IN')}

@@ -16,21 +16,21 @@ export function SilentDrainsCard({ drains }: SilentDrainsCardProps) {
   if (!drains || drains.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
+    <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg border border-slate-200 bg-slate-50">
-            <AlertCircle className="w-5 h-5 text-slate-700" strokeWidth={2} fill="none" />
+          <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-red-600" strokeWidth={2} fill="none" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Silent Drains</h3>
+            <h3 className="font-semibold text-slate-900">Silent Drains</h3>
             <p className="text-xs text-slate-500 mt-0.5">Small but frequent expenses</p>
           </div>
         </div>
       </div>
       <div className="space-y-2">
         {drains.map((drain, idx) => (
-          <div key={idx} className="p-3 rounded-lg bg-red-50 border border-red-200">
+          <div key={idx} className="p-3 rounded-xl bg-red-50 border border-red-200/80">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-semibold text-red-900 uppercase tracking-wide">{drain.label}</p>
               <p className="text-base font-semibold text-red-700">₹{drain.total_amount.toLocaleString('en-IN')}</p>

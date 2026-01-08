@@ -14,14 +14,14 @@ export function IncomeExpenseRatioCard({ ratio }: IncomeExpenseRatioCardProps) {
   if (!ratio) return null;
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
+    <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg border border-slate-200 bg-slate-50">
-            <DollarSign className="w-5 h-5 text-slate-700" strokeWidth={2} fill="none" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+            <DollarSign className="w-5 h-5 text-emerald-600" strokeWidth={2} fill="none" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Income vs Expense Ratio</h3>
+            <h3 className="font-semibold text-slate-900">Income vs Expense Ratio</h3>
             <p className="text-xs text-slate-500 mt-0.5">Financial health check</p>
           </div>
         </div>

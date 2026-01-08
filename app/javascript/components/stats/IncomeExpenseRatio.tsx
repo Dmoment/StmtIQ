@@ -40,7 +40,7 @@ export function IncomeExpenseRatio({ ratio }: IncomeExpenseRatioProps) {
 
   return (
     <div className="space-y-6">
-      <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
         <p className="text-xs text-slate-600 leading-relaxed">
           <span className="font-semibold text-slate-700">What this means:</span> This shows how much of your total money flow comes from income (money coming in) versus expenses (money going out). A higher income percentage means you're saving more.
         </p>
