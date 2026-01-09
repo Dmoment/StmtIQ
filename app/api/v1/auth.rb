@@ -144,10 +144,12 @@ module V1
 
         {
           id: current_user.id,
+          clerk_id: current_user.clerk_id,
           phone_number: current_user.phone_display,
           name: current_user.name,
           email: current_user.email,
           phone_verified: current_user.phone_verified,
+          onboarded_at: current_user.onboarded_at,
           settings: current_user.settings
         }
       end

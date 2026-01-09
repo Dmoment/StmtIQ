@@ -71,11 +71,6 @@ const formatConfig: Record<string, { icon: React.ElementType; label: string; des
   pdf: { icon: File, label: 'PDF', description: 'Portable document format' },
 };
 
-function getCsrfToken(): string {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute('content') || '';
-}
-
 export function Upload() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -325,7 +320,6 @@ export function Upload() {
         xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
 
         xhr.open('POST', '/api/v1/statements');
-        xhr.setRequestHeader('X-CSRF-Token', getCsrfToken());
         xhr.send(formData);
       });
 

@@ -3,6 +3,8 @@
 module V1
   class Transactions < Grape::API
     resource :transactions do
+      before { authenticate! }
+
       desc 'List all transactions with filtering and pagination'
       params do
         optional :page, type: Integer, default: 1
@@ -11,9 +13,9 @@ module V1
         optional :q, type: Hash, desc: 'Ransack query params'
       end
       get do
-        authenticate!
+        require_workspace!
 
-        transactions = current_user.transactions.includes(:category, :ai_category, :subcategory, :account, :attached_invoice).recent
+        transactions = policy_scope(Transaction).includes(:category, :ai_category, :subcategory, :account, :attached_invoice).recent
 
         # Security: Validate ransack params against whitelisted attributes only
         if params[:q].present?
@@ -30,9 +32,10 @@ module V1
         requires :id, type: Integer
       end
       get ':id' do
-        authenticate!
+        require_workspace!
 
-        transaction = current_user.transactions.find(params[:id])
+        transaction = policy_scope(Transaction).find(params[:id])
+        authorize transaction, :show?
         present transaction, with: V1::Entities::Transaction, full: true
       end
 
@@ -45,9 +48,10 @@ module V1
         optional :is_reviewed, type: Boolean
       end
       patch ':id' do
-        authenticate!
+        require_workspace!
 
-        transaction = current_user.transactions.find(params[:id])
+        transaction = policy_scope(Transaction).find(params[:id])
+        authorize transaction, :update?
         update_params = declared(params, include_missing: false).except(:id)
 
         # Validate subcategory belongs to category if subcategory is provided
@@ -78,9 +82,9 @@ module V1
         optional :is_reviewed, type: Boolean
       end
       patch :bulk do
-        authenticate!
+        require_workspace!
 
-        transactions = current_user.transactions.where(id: params[:transaction_ids])
+        transactions = policy_scope(Transaction).where(id: params[:transaction_ids])
         update_params = declared(params, include_missing: false).except(:transaction_ids)
 
         transactions.update_all(update_params)
@@ -95,9 +99,9 @@ module V1
         optional :statement_id, type: Integer, desc: 'Get analytics for specific statement', documentation: { in: 'query', type: 'integer', format: 'int32' }
       end
       get :stats do
-        authenticate!
+        require_workspace!
 
-        transactions = current_user.transactions
+        transactions = policy_scope(Transaction)
 
         if params[:q].present?
           transactions = transactions.ransack(params[:q]).result(distinct: true)
@@ -114,14 +118,15 @@ module V1
 
       desc 'Get categorization progress'
       get 'categorization/progress' do
-        authenticate!
+        require_workspace!
 
-        total = current_user.transactions.count
-        pending = current_user.transactions.where(categorization_status: 'pending').count
-        processing = current_user.transactions.where(categorization_status: 'processing').count
-        completed = current_user.transactions.where(categorization_status: 'completed').count
+        scope = policy_scope(Transaction)
+        total = scope.count
+        pending = scope.where(categorization_status: 'pending').count
+        processing = scope.where(categorization_status: 'processing').count
+        completed = scope.where(categorization_status: 'completed').count
 
-        categorized = current_user.transactions.where.not(ai_category_id: nil).count
+        categorized = scope.where.not(ai_category_id: nil).count
 
         {
           total: total,
@@ -139,10 +144,10 @@ module V1
         optional :limit, type: Integer, default: 100, desc: 'Maximum number of transactions to categorize'
       end
       post :categorize do
-        authenticate!
+        require_workspace!
 
         # Find transactions that need categorization
-        transactions = current_user.transactions.needs_categorization.limit(params[:limit])
+        transactions = policy_scope(Transaction).needs_categorization.limit(params[:limit])
 
         if transactions.empty?
           return { message: 'No transactions need categorization', queued: 0 }
@@ -170,9 +175,10 @@ module V1
         optional :apply_to_similar, type: Boolean, default: false, desc: 'Apply to similar uncategorized transactions'
       end
       post ':id/feedback' do
-        authenticate!
+        require_workspace!
 
-        transaction = current_user.transactions.find(params[:id])
+        transaction = policy_scope(Transaction).find(params[:id])
+        authorize transaction, :update?
         category = Category.find(params[:category_id])
         subcategory = nil
 
@@ -214,9 +220,9 @@ module V1
 
       desc 'Get user rules for transaction categorization'
       get :rules do
-        authenticate!
+        require_workspace!
 
-        rules = UserRule.for_user(current_user)
+        rules = policy_scope(UserRule).active.by_priority
         rules.map do |rule|
           {
             id: rule.id,
@@ -235,9 +241,9 @@ module V1
         requires :rule_id, type: Integer
       end
       delete 'rules/:rule_id' do
-        authenticate!
+        require_workspace!
 
-        rule = UserRule.find_by!(id: params[:rule_id], user: current_user)
+        rule = policy_scope(UserRule).find(params[:rule_id])
         rule.destroy!
 
         { success: true, message: 'Rule deleted' }

@@ -221,7 +221,7 @@ GEM
     jsbundling-rails (1.3.1)
       railties (>= 6.0.0)
     json (2.18.0)
-    jwt (3.1.2)
+    jwt (2.10.2)
       base64
     kamal (2.10.1)
       activesupport (>= 7.0)
@@ -571,6 +571,7 @@ DEPENDENCIES
   grape-swagger-entity (~> 0.5)
   hashie
   jsbundling-rails
+  jwt (~> 2.7)
   kamal
   kaminari (~> 1.2)
   oj

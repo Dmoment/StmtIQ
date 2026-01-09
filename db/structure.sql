@@ -42,7 +42,8 @@ CREATE TABLE public.accounts (
     currency character varying,
     is_active boolean,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    workspace_id bigint
 );
 
 
@@ -312,7 +313,8 @@ CREATE TABLE public.gmail_connections (
     status character varying DEFAULT 'pending'::character varying NOT NULL,
     error_message text,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    workspace_id bigint
 );
 
 
@@ -360,7 +362,8 @@ CREATE TABLE public.invoices (
     matched_at timestamp(6) without time zone,
     matched_by character varying(20),
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    workspace_id bigint
 );
 
 
@@ -400,7 +403,8 @@ CREATE TABLE public.labeled_examples (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     embedding public.vector,
-    subcategory_id bigint
+    subcategory_id bigint,
+    workspace_id bigint
 );
 
 
@@ -491,7 +495,8 @@ CREATE TABLE public.statements (
     metadata jsonb,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    bank_template_id bigint
+    bank_template_id bigint,
+    workspace_id bigint
 );
 
 
@@ -582,7 +587,8 @@ CREATE TABLE public.transactions (
     subcategory_id bigint,
     counterparty_name character varying,
     tx_kind character varying,
-    invoice_id bigint
+    invoice_id bigint,
+    workspace_id bigint
 );
 
 
@@ -626,7 +632,8 @@ CREATE TABLE public.user_rules (
     source character varying DEFAULT 'manual'::character varying,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
-    subcategory_id bigint
+    subcategory_id bigint,
+    workspace_id bigint
 );
 
 
@@ -667,7 +674,11 @@ CREATE TABLE public.users (
     otp_expires_at timestamp(6) without time zone,
     session_token character varying,
     session_expires_at timestamp(6) without time zone,
-    last_login_at timestamp(6) without time zone
+    last_login_at timestamp(6) without time zone,
+    current_workspace_id bigint,
+    clerk_id character varying,
+    auth_provider character varying DEFAULT 'clerk'::character varying,
+    onboarded_at timestamp(6) without time zone
 );
 
 
@@ -688,6 +699,122 @@ CREATE SEQUENCE public.users_id_seq
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: workspace_invitations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workspace_invitations (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    invited_by_id bigint NOT NULL,
+    email character varying,
+    phone_number character varying,
+    role character varying NOT NULL,
+    token character varying NOT NULL,
+    status character varying DEFAULT 'pending'::character varying,
+    expires_at timestamp(6) without time zone NOT NULL,
+    accepted_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workspace_invitations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workspace_invitations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workspace_invitations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workspace_invitations_id_seq OWNED BY public.workspace_invitations.id;
+
+
+--
+-- Name: workspace_memberships; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workspace_memberships (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    role character varying NOT NULL,
+    status character varying DEFAULT 'active'::character varying,
+    permissions jsonb DEFAULT '{}'::jsonb,
+    joined_at timestamp(6) without time zone,
+    last_accessed_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workspace_memberships_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workspace_memberships_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workspace_memberships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workspace_memberships_id_seq OWNED BY public.workspace_memberships.id;
+
+
+--
+-- Name: workspaces; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workspaces (
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    slug character varying NOT NULL,
+    workspace_type character varying NOT NULL,
+    owner_id bigint NOT NULL,
+    plan character varying DEFAULT 'free'::character varying,
+    settings jsonb DEFAULT '{}'::jsonb,
+    logo_url character varying,
+    description text,
+    is_active boolean DEFAULT true,
+    deleted_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workspaces_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workspaces_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workspaces_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workspaces_id_seq OWNED BY public.workspaces.id;
 
 
 --
@@ -800,6 +927,27 @@ ALTER TABLE ONLY public.user_rules ALTER COLUMN id SET DEFAULT nextval('public.u
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: workspace_invitations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_invitations ALTER COLUMN id SET DEFAULT nextval('public.workspace_invitations_id_seq'::regclass);
+
+
+--
+-- Name: workspace_memberships id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_memberships ALTER COLUMN id SET DEFAULT nextval('public.workspace_memberships_id_seq'::regclass);
+
+
+--
+-- Name: workspaces id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspaces ALTER COLUMN id SET DEFAULT nextval('public.workspaces_id_seq'::regclass);
 
 
 --
@@ -947,6 +1095,30 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: workspace_invitations workspace_invitations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_invitations
+    ADD CONSTRAINT workspace_invitations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: workspace_memberships workspace_memberships_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_memberships
+    ADD CONSTRAINT workspace_memberships_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: workspaces workspaces_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspaces
+    ADD CONSTRAINT workspaces_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: idx_bank_templates_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1007,6 +1179,20 @@ CREATE UNIQUE INDEX idx_user_rules_unique_pattern ON public.user_rules USING btr
 --
 
 CREATE INDEX index_accounts_on_user_id ON public.accounts USING btree (user_id);
+
+
+--
+-- Name: index_accounts_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_accounts_on_workspace_id ON public.accounts USING btree (workspace_id);
+
+
+--
+-- Name: index_accounts_on_workspace_id_and_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_accounts_on_workspace_id_and_user_id ON public.accounts USING btree (workspace_id, user_id);
 
 
 --
@@ -1115,6 +1301,13 @@ CREATE UNIQUE INDEX index_gmail_connections_on_user_id_and_email ON public.gmail
 
 
 --
+-- Name: index_gmail_connections_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_gmail_connections_on_workspace_id ON public.gmail_connections USING btree (workspace_id);
+
+
+--
 -- Name: index_invoices_on_account_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1164,6 +1357,20 @@ CREATE INDEX index_invoices_on_user_id_and_total_amount ON public.invoices USING
 
 
 --
+-- Name: index_invoices_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_workspace_id ON public.invoices USING btree (workspace_id);
+
+
+--
+-- Name: index_invoices_on_workspace_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoices_on_workspace_id_and_status ON public.invoices USING btree (workspace_id, status);
+
+
+--
 -- Name: index_labeled_examples_on_category_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1189,6 +1396,13 @@ CREATE INDEX index_labeled_examples_on_transaction_id ON public.labeled_examples
 --
 
 CREATE INDEX index_labeled_examples_on_user_id ON public.labeled_examples USING btree (user_id);
+
+
+--
+-- Name: index_labeled_examples_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_labeled_examples_on_workspace_id ON public.labeled_examples USING btree (workspace_id);
 
 
 --
@@ -1231,6 +1445,13 @@ CREATE INDEX index_statements_on_bank_template_id ON public.statements USING btr
 --
 
 CREATE INDEX index_statements_on_user_id ON public.statements USING btree (user_id);
+
+
+--
+-- Name: index_statements_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_statements_on_workspace_id ON public.statements USING btree (workspace_id);
 
 
 --
@@ -1353,6 +1574,27 @@ CREATE INDEX index_transactions_on_user_id_and_transaction_type ON public.transa
 
 
 --
+-- Name: index_transactions_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_transactions_on_workspace_id ON public.transactions USING btree (workspace_id);
+
+
+--
+-- Name: index_transactions_on_workspace_id_and_category_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_transactions_on_workspace_id_and_category_id ON public.transactions USING btree (workspace_id, category_id);
+
+
+--
+-- Name: index_transactions_on_workspace_id_and_transaction_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_transactions_on_workspace_id_and_transaction_date ON public.transactions USING btree (workspace_id, transaction_date);
+
+
+--
 -- Name: index_user_rules_on_category_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1374,6 +1616,27 @@ CREATE INDEX index_user_rules_on_user_id ON public.user_rules USING btree (user_
 
 
 --
+-- Name: index_user_rules_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_user_rules_on_workspace_id ON public.user_rules USING btree (workspace_id);
+
+
+--
+-- Name: index_users_on_clerk_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_clerk_id ON public.users USING btree (clerk_id) WHERE (clerk_id IS NOT NULL);
+
+
+--
+-- Name: index_users_on_current_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_users_on_current_workspace_id ON public.users USING btree (current_workspace_id);
+
+
+--
 -- Name: index_users_on_email; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1384,7 +1647,7 @@ CREATE UNIQUE INDEX index_users_on_email ON public.users USING btree (email) WHE
 -- Name: index_users_on_phone_number; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX index_users_on_phone_number ON public.users USING btree (phone_number);
+CREATE UNIQUE INDEX index_users_on_phone_number ON public.users USING btree (phone_number) WHERE (phone_number IS NOT NULL);
 
 
 --
@@ -1392,6 +1655,111 @@ CREATE UNIQUE INDEX index_users_on_phone_number ON public.users USING btree (pho
 --
 
 CREATE UNIQUE INDEX index_users_on_session_token ON public.users USING btree (session_token);
+
+
+--
+-- Name: index_workspace_invitations_on_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_invitations_on_email ON public.workspace_invitations USING btree (email);
+
+
+--
+-- Name: index_workspace_invitations_on_expires_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_invitations_on_expires_at ON public.workspace_invitations USING btree (expires_at);
+
+
+--
+-- Name: index_workspace_invitations_on_phone_number; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_invitations_on_phone_number ON public.workspace_invitations USING btree (phone_number);
+
+
+--
+-- Name: index_workspace_invitations_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_invitations_on_status ON public.workspace_invitations USING btree (status);
+
+
+--
+-- Name: index_workspace_invitations_on_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_workspace_invitations_on_token ON public.workspace_invitations USING btree (token);
+
+
+--
+-- Name: index_workspace_invitations_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_invitations_on_workspace_id ON public.workspace_invitations USING btree (workspace_id);
+
+
+--
+-- Name: index_workspace_memberships_on_role; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_memberships_on_role ON public.workspace_memberships USING btree (role);
+
+
+--
+-- Name: index_workspace_memberships_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_memberships_on_status ON public.workspace_memberships USING btree (status);
+
+
+--
+-- Name: index_workspace_memberships_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_memberships_on_user_id ON public.workspace_memberships USING btree (user_id);
+
+
+--
+-- Name: index_workspace_memberships_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspace_memberships_on_workspace_id ON public.workspace_memberships USING btree (workspace_id);
+
+
+--
+-- Name: index_workspace_memberships_on_workspace_id_and_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_workspace_memberships_on_workspace_id_and_user_id ON public.workspace_memberships USING btree (workspace_id, user_id);
+
+
+--
+-- Name: index_workspaces_on_deleted_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspaces_on_deleted_at ON public.workspaces USING btree (deleted_at);
+
+
+--
+-- Name: index_workspaces_on_owner_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspaces_on_owner_id ON public.workspaces USING btree (owner_id);
+
+
+--
+-- Name: index_workspaces_on_slug; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_workspaces_on_slug ON public.workspaces USING btree (slug);
+
+
+--
+-- Name: index_workspaces_on_workspace_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workspaces_on_workspace_type ON public.workspaces USING btree (workspace_type);
 
 
 --
@@ -1424,6 +1792,30 @@ ALTER TABLE ONLY public.gmail_connections
 
 ALTER TABLE ONLY public.statements
     ADD CONSTRAINT fk_rails_1e0d2f384b FOREIGN KEY (account_id) REFERENCES public.accounts(id);
+
+
+--
+-- Name: invoices fk_rails_2013e671f4; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoices
+    ADD CONSTRAINT fk_rails_2013e671f4 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: users fk_rails_22595f83be; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT fk_rails_22595f83be FOREIGN KEY (current_workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: workspace_memberships fk_rails_26c4c0bd41; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_memberships
+    ADD CONSTRAINT fk_rails_26c4c0bd41 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
 
 
 --
@@ -1483,6 +1875,30 @@ ALTER TABLE ONLY public.labeled_examples
 
 
 --
+-- Name: workspaces fk_rails_5506b4b37e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspaces
+    ADD CONSTRAINT fk_rails_5506b4b37e FOREIGN KEY (owner_id) REFERENCES public.users(id);
+
+
+--
+-- Name: statements fk_rails_5bcb3b85af; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.statements
+    ADD CONSTRAINT fk_rails_5bcb3b85af FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: workspace_invitations fk_rails_627a78e220; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_invitations
+    ADD CONSTRAINT fk_rails_627a78e220 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
 -- Name: global_patterns fk_rails_64078cc42b; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1496,6 +1912,22 @@ ALTER TABLE ONLY public.global_patterns
 
 ALTER TABLE ONLY public.transactions
     ADD CONSTRAINT fk_rails_6b611ee905 FOREIGN KEY (invoice_id) REFERENCES public.invoices(id) ON DELETE SET NULL;
+
+
+--
+-- Name: labeled_examples fk_rails_6c3f84f3f1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.labeled_examples
+    ADD CONSTRAINT fk_rails_6c3f84f3f1 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: workspace_invitations fk_rails_759aefbfd2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_invitations
+    ADD CONSTRAINT fk_rails_759aefbfd2 FOREIGN KEY (invited_by_id) REFERENCES public.users(id);
 
 
 --
@@ -1547,11 +1979,27 @@ ALTER TABLE ONLY public.invoices
 
 
 --
+-- Name: gmail_connections fk_rails_a343a4adb5; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gmail_connections
+    ADD CONSTRAINT fk_rails_a343a4adb5 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
 -- Name: labeled_examples fk_rails_a66953f4e1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.labeled_examples
     ADD CONSTRAINT fk_rails_a66953f4e1 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: workspace_memberships fk_rails_aca847b4f5; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workspace_memberships
+    ADD CONSTRAINT fk_rails_aca847b4f5 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1571,11 +2019,27 @@ ALTER TABLE ONLY public.accounts
 
 
 --
+-- Name: accounts fk_rails_bac5365c2c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.accounts
+    ADD CONSTRAINT fk_rails_bac5365c2c FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
 -- Name: user_rules fk_rails_bdc8651a4e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_rules
     ADD CONSTRAINT fk_rails_bdc8651a4e FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: user_rules fk_rails_beae143186; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_rules
+    ADD CONSTRAINT fk_rails_beae143186 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
 
 
 --
@@ -1603,12 +2067,26 @@ ALTER TABLE ONLY public.user_rules
 
 
 --
+-- Name: transactions fk_rails_f9235709da; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT fk_rails_f9235709da FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260109110758'),
+('20260109100636'),
+('20260109081541'),
+('20260109081516'),
+('20260109081453'),
+('20260109081430'),
 ('20260107190617'),
 ('20260107103522'),
 ('20260106180000'),

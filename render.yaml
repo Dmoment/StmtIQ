@@ -2,7 +2,7 @@ databases:
   - name: stmtiq-db
     databaseName: stmt_iq_production
     user: stmt_iq
-    plan: starter
+    plan: basic-256mb
     region: singapore
 
 services:

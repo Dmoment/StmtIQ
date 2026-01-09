@@ -20,6 +20,11 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+
+    <script>
+      window.CLERK_PUBLISHABLE_KEY = "<%= ENV['CLERK_PUBLISHABLE_KEY'] || '' %>";
+    </script>
+
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 

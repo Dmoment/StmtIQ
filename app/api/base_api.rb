@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'helpers/workspace_helpers'
+
 class BaseAPI < Grape::API
   format :json
   default_format :json
@@ -31,13 +33,15 @@ class BaseAPI < Grape::API
     end
   end
 
+  helpers WorkspaceHelpers
+
   helpers do
     # ============================================
-    # Authentication
+    # Authentication (Clerk JWT)
     # ============================================
 
     def current_user
-      @current_user ||= find_or_create_dev_user
+      @current_user ||= authenticate_with_clerk
     end
 
     def authenticated?
@@ -100,12 +104,36 @@ class BaseAPI < Grape::API
 
     private
 
-    def find_or_create_dev_user
-      User.find_or_create_by!(phone_number: '9999999999') do |user|
+    def authenticate_with_clerk
+      token = extract_bearer_token
+
+      # Development fallback when no token provided
+      if token.blank?
+        return dev_user_fallback if Rails.env.development? && ENV['BYPASS_AUTH'] == 'true'
+        return nil
+      end
+
+      # Verify Clerk JWT
+      payload = Clerk::JwtVerifier.verify(token)
+      return nil unless payload
+
+      # Find or create user from Clerk data
+      Clerk::UserSync.new(payload).find_or_create_user
+    end
+
+    def extract_bearer_token
+      auth_header = headers['Authorization'] || headers['authorization']
+      return nil unless auth_header&.start_with?('Bearer ')
+
+      auth_header.split(' ').last
+    end
+
+    def dev_user_fallback
+      User.find_or_create_by!(clerk_id: 'dev_clerk_user') do |user|
         user.name = 'Dev User'
+        user.phone_number = '9999999999'
         user.phone_verified = true
-        user.session_token = 'dev_session_token'
-        user.session_expires_at = 1.year.from_now
+        user.auth_provider = 'development'
       end
     end
   end

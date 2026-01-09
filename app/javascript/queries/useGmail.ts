@@ -9,11 +9,6 @@ import { gmailKeys, invoiceKeys } from "./keys";
 // ============================================
 // API Helper
 // ============================================
-function getCsrfToken(): string {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute("content") || "";
-}
-
 async function gmailFetch<T>(
   endpoint: string,
   options?: RequestInit
@@ -22,7 +17,6 @@ async function gmailFetch<T>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      "X-CSRF-Token": getCsrfToken(),
       ...options?.headers,
     },
   });

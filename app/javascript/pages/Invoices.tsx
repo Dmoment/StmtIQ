@@ -12,8 +12,7 @@ import {
   Unlink,
   Trash2,
   RefreshCw,
-  Eye,
-  X,
+  Expand,
   ChevronDown,
   IndianRupee,
   Calendar,
@@ -21,7 +20,6 @@ import {
   FileCheck,
   FileX,
   ArrowRight,
-  MoreHorizontal,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import {
@@ -145,7 +143,7 @@ export function Invoices() {
     });
   }, []);
 
-  const handleViewInvoice = useCallback((invoice: Invoice) => {
+  const handleOpenInvoice = useCallback((invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setShowDetailModal(true);
   }, []);
@@ -544,13 +542,14 @@ export function Invoices() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1">
-                          {/* View */}
+                          {/* Open Details */}
                           <button
-                            onClick={() => handleViewInvoice(invoice)}
+                            onClick={() => handleOpenInvoice(invoice)}
                             className="h-9 w-9 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors flex items-center justify-center"
-                            title="View Details"
+                            title="Open Details"
+                            aria-label="Open invoice details"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Expand className="w-4 h-4" />
                           </button>
 
                           {/* Match/Unlink */}

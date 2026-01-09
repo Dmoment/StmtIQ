@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class LabeledExample < ApplicationRecord
+  include WorkspaceScoped
+
   # Associations
   belongs_to :user
   belongs_to :category

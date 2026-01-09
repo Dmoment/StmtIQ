@@ -8,6 +8,7 @@ module V1
       expose :name
       expose :avatar_url
       expose :settings
+      expose :onboarded_at
       expose :created_at
       expose :updated_at
     end

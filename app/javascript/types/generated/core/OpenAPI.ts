@@ -24,11 +24,6 @@ export class Interceptors<T> {
 }
 
 
-function getCsrfToken(): string {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute('content') || '';
-}
-
 export type OpenAPIConfig = {
 	BASE: string;
 	CREDENTIALS: 'include' | 'omit' | 'same-origin';
@@ -50,7 +45,6 @@ export const OpenAPI: OpenAPIConfig = {
 	CREDENTIALS: 'include',
 	ENCODE_PATH: undefined,
 	HEADERS: {
-		'X-CSRF-Token': getCsrfToken(),
 		'Content-Type': 'application/json',
 	},
 	PASSWORD: undefined,

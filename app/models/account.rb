@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Account < ApplicationRecord
+  include WorkspaceScoped
+
   # Associations
   belongs_to :user
   has_many :statements, dependent: :destroy

@@ -9,6 +9,8 @@ module V1
     mount V1::Auth
     mount V1::Health
     mount V1::Users
+    mount V1::Onboarding
+    mount V1::Workspaces
     mount V1::BankTemplates
     mount V1::Categories
     mount V1::Accounts

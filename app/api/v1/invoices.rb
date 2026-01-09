@@ -3,6 +3,8 @@
 module V1
   class Invoices < Grape::API
     resource :invoices do
+      before { authenticate! }
+
       desc 'List user invoices with filtering and pagination'
       params do
         optional :page, type: Integer, default: 1
@@ -13,10 +15,10 @@ module V1
         optional :to_date, type: Date
       end
       get do
-        authenticate!
+        require_workspace!
 
         # Performance: Preload associations to avoid N+1
-        invoices = current_user.invoices
+        invoices = policy_scope(Invoice)
           .includes(:matched_transaction, :account)
           .recent
 
@@ -45,7 +47,8 @@ module V1
         optional :currency, type: String, values: %w[INR USD EUR GBP], default: 'INR'
       end
       post do
-        authenticate!
+        require_workspace!
+        authorize Invoice, :create?
 
         invoice = current_user.invoices.create!(
           source: 'upload',
@@ -54,6 +57,7 @@ module V1
           invoice_date: params[:invoice_date],
           total_amount: params[:total_amount],
           currency: params[:currency],
+          workspace: current_workspace,
           status: 'pending'
         )
 
@@ -76,7 +80,8 @@ module V1
         optional :currency, type: String, values: %w[INR USD EUR GBP], default: 'INR'
       end
       post :upload do
-        authenticate!
+        require_workspace!
+        authorize Invoice, :create?
 
         uploaded_file = params[:file]
         filename = uploaded_file[:filename]
@@ -100,6 +105,7 @@ module V1
           invoice_date: params[:invoice_date],
           total_amount: params[:total_amount],
           currency: params[:currency],
+          workspace: current_workspace,
           status: 'pending'
         )
 
@@ -121,9 +127,10 @@ module V1
         requires :id, type: Integer
       end
       get ':id' do
-        authenticate!
+        require_workspace!
 
-        invoice = current_user.invoices.find(params[:id])
+        invoice = policy_scope(Invoice).find(params[:id])
+        authorize invoice, :show?
         present invoice, with: V1::Entities::Invoice, full: true
       end
 
@@ -138,9 +145,10 @@ module V1
         optional :currency, type: String, values: %w[INR USD EUR GBP]
       end
       patch ':id' do
-        authenticate!
+        require_workspace!
 
-        invoice = current_user.invoices.find(params[:id])
+        invoice = policy_scope(Invoice).find(params[:id])
+        authorize invoice, :update?
         update_params = declared(params, include_missing: false).except(:id)
 
         invoice.update!(update_params)
@@ -160,9 +168,10 @@ module V1
         requires :id, type: Integer
       end
       delete ':id' do
-        authenticate!
+        require_workspace!
 
-        invoice = current_user.invoices.find(params[:id])
+        invoice = policy_scope(Invoice).find(params[:id])
+        authorize invoice, :destroy?
 
         # Unlink from transaction first
         invoice.matched_transaction&.update!(invoice_id: nil)
@@ -180,9 +189,10 @@ module V1
         requires :id, type: Integer
       end
       get ':id/suggestions' do
-        authenticate!
+        require_workspace!
 
-        invoice = current_user.invoices.find(params[:id])
+        invoice = policy_scope(Invoice).find(params[:id])
+        authorize invoice, :show?
 
         unless invoice.total_amount
           error!({ error: 'Invoice has no amount - cannot find suggestions' }, 422)
@@ -209,10 +219,11 @@ module V1
         requires :transaction_id, type: Integer
       end
       post ':id/link' do
-        authenticate!
+        require_workspace!
 
-        invoice = current_user.invoices.find(params[:id])
-        transaction = current_user.transactions.find(params[:transaction_id])
+        invoice = policy_scope(Invoice).find(params[:id])
+        authorize invoice, :match?
+        transaction = policy_scope(Transaction).find(params[:transaction_id])
 
         # Check transaction not already linked
         if transaction.invoice_id.present? && transaction.invoice_id != invoice.id
@@ -229,9 +240,10 @@ module V1
         requires :id, type: Integer
       end
       post ':id/unlink' do
-        authenticate!
+        require_workspace!
 
-        invoice = current_user.invoices.find(params[:id])
+        invoice = policy_scope(Invoice).find(params[:id])
+        authorize invoice, :unlink?
 
         unless invoice.matched?
           error!({ error: 'Invoice is not linked to any transaction' }, 422)
@@ -247,9 +259,10 @@ module V1
         requires :id, type: Integer
       end
       post ':id/retry' do
-        authenticate!
+        require_workspace!
 
-        invoice = current_user.invoices.find(params[:id])
+        invoice = policy_scope(Invoice).find(params[:id])
+        authorize invoice, :update?
 
         unless invoice.failed?
           error!({ error: 'Only failed invoices can be retried' }, 422)
@@ -267,10 +280,10 @@ module V1
 
       desc 'Get invoice statistics'
       get :stats do
-        authenticate!
+        require_workspace!
 
         # Performance: Use single query with group by instead of multiple queries
-        invoices = current_user.invoices
+        invoices = policy_scope(Invoice)
 
         status_counts = invoices.group(:status).count
         source_counts = invoices.group(:source).count
@@ -298,10 +311,5 @@ module V1
       end
     end
 
-    helpers do
-      def authenticate!
-        require_authentication!
-      end
-    end
   end
 end

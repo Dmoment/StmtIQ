@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Invoice < ApplicationRecord
+  include WorkspaceScoped
+
   belongs_to :user
   belongs_to :account, optional: true
   belongs_to :matched_transaction, class_name: 'Transaction', optional: true

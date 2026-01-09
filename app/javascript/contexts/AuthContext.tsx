@@ -1,85 +1,123 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  ReactNode,
+} from 'react';
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/clerk-react';
 
 interface User {
   id: number;
-  phone_number: string;
+  clerk_id: string;
+  phone_number: string | null;
   name: string | null;
   email: string | null;
   phone_verified: boolean;
+  onboarded_at: string | null;
+  settings?: Record<string, unknown>;
 }
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
+  isOnboarded: boolean;
   isLoading: boolean;
-  login: (token: string, user: User) => void;
+  getToken: () => Promise<string | null>;
   logout: () => Promise<void>;
-  updateUser: (user: User) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const TOKEN_KEY = 'stmtiq_session_token';
-const USER_KEY = 'stmtiq_user';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const { isLoaded, isSignedIn, getToken: clerkGetToken, signOut } = useClerkAuth();
+  const { user: clerkUser, isLoaded: userLoaded } = useClerkUser();
+  const [backendUser, setBackendUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load auth state from localStorage on mount
-  useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
-    const storedUser = localStorage.getItem(USER_KEY);
-
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+  // Sync with backend when Clerk user changes
+  const syncWithBackend = useCallback(async () => {
+    if (!isSignedIn || !clerkUser) {
+      setBackendUser(null);
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
-  }, []);
 
-  const login = useCallback((newToken: string, newUser: User) => {
-    setToken(newToken);
-    setUser(newUser);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(newUser));
-  }, []);
+    try {
+      const token = await clerkGetToken();
+      const response = await fetch('/api/v1/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setBackendUser(userData);
+      } else if (response.status === 401) {
+        // User not found in backend yet - create temporary user from Clerk data
+        // Backend will create the user on next authenticated API call
+        setBackendUser({
+          id: 0,
+          clerk_id: clerkUser.id,
+          phone_number: clerkUser.primaryPhoneNumber?.phoneNumber?.replace(/^\+91/, '') || null,
+          name: clerkUser.fullName || clerkUser.firstName || null,
+          email: clerkUser.primaryEmailAddress?.emailAddress || null,
+          phone_verified: clerkUser.primaryPhoneNumber?.verification?.status === 'verified',
+          onboarded_at: null,
+        });
+      } else {
+        console.error('Failed to sync with backend:', response.status);
+        setBackendUser(null);
+      }
+    } catch (error) {
+      console.error('Failed to sync with backend:', error);
+      setBackendUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isSignedIn, clerkUser, clerkGetToken]);
+
+  useEffect(() => {
+    if (isLoaded && userLoaded) {
+      syncWithBackend();
+    }
+  }, [isLoaded, userLoaded, isSignedIn, syncWithBackend]);
+
+  const getToken = useCallback(async (): Promise<string | null> => {
+    if (!isSignedIn) return null;
+    try {
+      return await clerkGetToken();
+    } catch (error) {
+      console.error('Failed to get token:', error);
+      return null;
+    }
+  }, [isSignedIn, clerkGetToken]);
 
   const logout = useCallback(async () => {
     try {
-      if (token) {
-        await fetch('/api/v1/auth/logout', {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-      }
+      await signOut();
+      setBackendUser(null);
     } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setToken(null);
-      setUser(null);
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      console.error('Failed to sign out:', error);
     }
-  }, [token]);
+  }, [signOut]);
 
-  const updateUser = useCallback((updatedUser: User) => {
-    setUser(updatedUser);
-    localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
-  }, []);
+  const refreshUser = useCallback(async () => {
+    await syncWithBackend();
+  }, [syncWithBackend]);
 
   const value: AuthContextType = {
-    user,
-    token,
-    isAuthenticated: !!token && !!user,
-    isLoading,
-    login,
+    user: backendUser,
+    isAuthenticated: isSignedIn === true && backendUser !== null,
+    isOnboarded: !!backendUser?.onboarded_at,
+    isLoading: !isLoaded || !userLoaded || isLoading,
+    getToken,
     logout,
-    updateUser,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -93,3 +131,8 @@ export function useAuth() {
   return context;
 }
 
+// Legacy export for backwards compatibility with useCurrentUser
+export function useCurrentUser() {
+  const { user, isLoading } = useAuth();
+  return { data: user, isLoading };
+}

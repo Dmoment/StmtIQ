@@ -34,14 +34,6 @@ export * from "../types/api";
 // ============================================
 
 /**
- * Get CSRF token from meta tag
- */
-export function getCsrfToken(): string {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute('content') || '';
-}
-
-/**
  * Get auth token from localStorage
  */
 export function getAuthToken(): string | null {
@@ -54,4 +46,52 @@ export function getAuthToken(): string | null {
 export function getAuthHeaders(): Record<string, string> {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/**
+ * Get current workspace ID from localStorage
+ */
+export function getCurrentWorkspaceId(): number | null {
+  const id = localStorage.getItem('stmtiq_current_workspace_id');
+  return id ? parseInt(id, 10) : null;
+}
+
+/**
+ * Get headers with auth and workspace context
+ */
+export function getApiHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...getAuthHeaders(),
+  };
+
+  const workspaceId = getCurrentWorkspaceId();
+  if (workspaceId) {
+    headers['X-Workspace-Id'] = workspaceId.toString();
+  }
+
+  return headers;
+}
+
+/**
+ * API fetch wrapper with auth and workspace headers
+ */
+export async function apiFetch<T>(
+  url: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...getApiHeaders(),
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || error.detail || 'Request failed');
+  }
+
+  return response.json();
 }

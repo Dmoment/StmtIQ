@@ -21,6 +21,10 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCurrentUser } from '../queries/useAuth';
+import { useAuth } from '../contexts/AuthContext';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
+import { OnboardingModal } from './onboarding/OnboardingModal';
+import { CreateWorkspaceModal } from './CreateWorkspaceModal';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -34,9 +38,11 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [createWorkspaceOpen, setCreateWorkspaceOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { data: user } = useCurrentUser();
+  const { logout, isOnboarded } = useAuth();
 
   const userName = user?.name || 'User';
   const userEmail = user?.email || 'user@example.com';
@@ -220,7 +226,14 @@ export function Layout() {
               </button>
             </div>
             <div className="p-1 border-t border-slate-100">
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+              <button
+                onClick={async () => {
+                  setUserMenuOpen(false);
+                  await logout();
+                  window.location.href = '/app/login';
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </button>
@@ -253,7 +266,7 @@ export function Layout() {
             </h1>
 
             {/* Search Bar */}
-            <div className="hidden md:flex h-10 items-center rounded-xl bg-slate-100 px-4 text-sm text-slate-500 w-64 hover:bg-slate-200/70 transition-colors cursor-pointer">
+            <div className="hidden lg:flex h-10 items-center rounded-xl bg-slate-100 px-4 text-sm text-slate-500 w-56 hover:bg-slate-200/70 transition-colors cursor-pointer">
               <Search className="mr-2 h-4 w-4" />
               <span>Search...</span>
               <kbd className="ml-auto text-xs bg-white px-1.5 py-0.5 rounded border border-slate-200">
@@ -262,7 +275,15 @@ export function Layout() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Workspace Switcher */}
+            <WorkspaceSwitcher
+              onCreateWorkspace={() => setCreateWorkspaceOpen(true)}
+            />
+
+            {/* Divider */}
+            <div className="hidden sm:block h-6 w-px bg-slate-200" />
+
             {/* Notifications */}
             <button className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors relative">
               <Bell className="h-5 w-5 text-slate-500" />
@@ -285,6 +306,15 @@ export function Layout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Onboarding Modal - shown when user hasn't completed onboarding */}
+      {!isOnboarded && <OnboardingModal />}
+
+      {/* Create Workspace Modal */}
+      <CreateWorkspaceModal
+        isOpen={createWorkspaceOpen}
+        onClose={() => setCreateWorkspaceOpen(false)}
+      />
     </div>
   );
 }

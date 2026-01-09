@@ -13,6 +13,7 @@
     "watch:api": "chokidar 'app/api/**/*.rb' 'config/bank_templates/**/*.yml' -c 'bun run generate:api'"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.25.0",
     "@tanstack/react-query": "^5.90.12",
     "autoprefixer": "^10.4.23",
     "clsx": "^2.1.1",

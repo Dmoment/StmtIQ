@@ -8,12 +8,6 @@ interface UploadStatementData {
   account_id?: number;
 }
 
-// Helper to get CSRF token
-function getCsrfToken(): string {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute('content') || '';
-}
-
 // Helper to get auth token
 function getAuthToken(): string | null {
   return localStorage.getItem("stmtiq_session_token");
@@ -36,10 +30,8 @@ export const useUploadStatement = () => {
         formData.append("account_id", account_id.toString());
       }
 
-      const headers: Record<string, string> = {
-        'X-CSRF-Token': getCsrfToken(),
-      };
-      
+      const headers: Record<string, string> = {};
+
       const token = getAuthToken();
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;

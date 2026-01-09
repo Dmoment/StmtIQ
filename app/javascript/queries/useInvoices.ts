@@ -132,9 +132,6 @@ export const useUploadInvoice = () => {
       const response = await fetch('/api/v1/invoices/upload', {
         method: 'POST',
         body: formData,
-        headers: {
-          'X-CSRF-Token': getCsrfToken(),
-        },
       });
 
       if (!response.ok) {
@@ -278,10 +275,3 @@ export const useRetryInvoiceExtraction = () => {
   });
 };
 
-// ============================================
-// Helpers
-// ============================================
-function getCsrfToken(): string {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute('content') || '';
-}

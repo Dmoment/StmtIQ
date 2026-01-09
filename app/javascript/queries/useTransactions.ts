@@ -209,7 +209,6 @@ export const useCategorizeTransactions = () => {
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'X-CSRF-Token': getCsrfToken(),
       };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -245,11 +244,6 @@ export const useCategorizeTransactions = () => {
   });
 };
 
-function getCsrfToken(): string {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute('content') || '';
-}
-
 // ============================================
 // Feedback (for learning user corrections)
 // ============================================
@@ -280,7 +274,6 @@ export const useTransactionFeedback = () => {
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'X-CSRF-Token': getCsrfToken(),
       };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
