@@ -9,18 +9,15 @@ class StatementParserJob < ApplicationJob
   def perform(statement_id)
     statement = Statement.find(statement_id)
 
-    # Set tenant context for acts_as_tenant
-    ActsAsTenant.with_tenant(statement.workspace) do
-      Rails.logger.info("Starting to parse statement ##{statement_id} (#{format_file_size(statement)})")
+    Rails.logger.info("Starting to parse statement ##{statement_id} (#{format_file_size(statement)})")
 
-      parser = Parsing::StreamingParser.new(statement)
-      result = parser.parse!
+    parser = Parsing::StreamingParser.new(statement)
+    result = parser.parse!
 
-      Rails.logger.info(
-        "Successfully parsed statement ##{statement_id}: " \
-        "#{result[:transaction_count]} transactions"
-      )
-    end
+    Rails.logger.info(
+      "Successfully parsed statement ##{statement_id}: " \
+      "#{result[:transaction_count]} transactions"
+    )
   rescue StandardError => e
     Rails.logger.error(
       "Statement parser job failed for ##{statement_id}: #{e.message}\n" \
