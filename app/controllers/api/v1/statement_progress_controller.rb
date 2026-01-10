@@ -14,7 +14,7 @@ module Api
     # Closes connection when parsing completes or fails.
     class StatementProgressController < ApplicationController
       include ActionController::Live
-      include ::ApiAuthentication
+      include ::APIAuthentication
 
       before_action :set_statement
 

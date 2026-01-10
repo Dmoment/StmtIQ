@@ -2,7 +2,7 @@
 
 # Shared authentication concern for API controllers
 # Provides the same authentication logic used in Grape API
-module ApiAuthentication
+module APIAuthentication
   extend ActiveSupport::Concern
 
   included do
