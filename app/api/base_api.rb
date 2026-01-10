@@ -31,7 +31,7 @@ class BaseAPI < Grape::API
     end
   end
 
-  helpers Helpers::WorkspaceHelpers
+  helpers ::Helpers::WorkspaceHelpers
 
   helpers do
     # ============================================
