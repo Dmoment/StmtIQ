@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Statement < ApplicationRecord
-  acts_as_tenant :workspace
+  include WorkspaceScoped
 
   # Associations
   belongs_to :user
