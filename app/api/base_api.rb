@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'helpers/workspace_helpers'
-
 class BaseAPI < Grape::API
   format :json
   default_format :json
@@ -33,7 +31,7 @@ class BaseAPI < Grape::API
     end
   end
 
-  helpers WorkspaceHelpers
+  helpers Helpers::WorkspaceHelpers
 
   helpers do
     # ============================================

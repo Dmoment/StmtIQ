@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-module WorkspaceHelpers
-  extend Grape::API::Helpers
+module Helpers
+  module WorkspaceHelpers
+    extend Grape::API::Helpers
 
   # Get current workspace from header, params, or user's current workspace
   def current_workspace
@@ -105,5 +106,6 @@ module WorkspaceHelpers
     [Account, Statement, Transaction, Invoice, UserRule, LabeledExample, GmailConnection].each do |model|
       model.current_workspace = nil
     end
+  end
   end
 end
