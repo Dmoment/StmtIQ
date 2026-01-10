@@ -11,8 +11,11 @@
 #   ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
 #   ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
 
-Rails.application.configure do
-  config.active_record.encryption.primary_key = ENV.fetch('ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY')
-  config.active_record.encryption.deterministic_key = ENV.fetch('ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY')
-  config.active_record.encryption.key_derivation_salt = ENV.fetch('ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT')
+# Skip during asset precompilation (SECRET_KEY_BASE_DUMMY is set by Rails during build)
+unless ENV['SECRET_KEY_BASE_DUMMY'].present?
+  Rails.application.configure do
+    config.active_record.encryption.primary_key = ENV.fetch('ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY')
+    config.active_record.encryption.deterministic_key = ENV.fetch('ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY')
+    config.active_record.encryption.key_derivation_salt = ENV.fetch('ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT')
+  end
 end
