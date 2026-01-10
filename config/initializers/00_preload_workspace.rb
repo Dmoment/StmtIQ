@@ -6,6 +6,8 @@
 # Since models load alphabetically, Account loads before Workspace,
 # causing a NameError.
 
-Rails.application.config.before_eager_load do
-  require Rails.root.join('app/models/workspace')
+# Define Workspace constant early to satisfy acts_as_tenant
+# The real model will be properly loaded later and take precedence
+unless defined?(Workspace)
+  autoload :Workspace, Rails.root.join('app/models/workspace').to_s
 end
