@@ -387,7 +387,7 @@ export function Transactions() {
           </p>
           {transactions.length === 0 && (
             <a
-              href="/upload"
+              href="/app/upload"
               className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-lg bg-amber-200 text-slate-900 font-medium hover:bg-amber-300 transition-colors"
             >
               Upload Statement

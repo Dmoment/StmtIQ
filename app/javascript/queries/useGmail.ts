@@ -5,28 +5,13 @@ import type {
   GmailStatusResponse,
 } from "../types/api";
 import { gmailKeys, invoiceKeys } from "./keys";
+import { apiFetch } from "../lib/api";
 
 // ============================================
 // API Helper
 // ============================================
-async function gmailFetch<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const response = await fetch(`/api/v1/gmail${endpoint}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Request failed");
-  }
-
-  return response.json();
+function gmailFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  return apiFetch<T>(`/api/v1/gmail${endpoint}`, options);
 }
 
 // ============================================

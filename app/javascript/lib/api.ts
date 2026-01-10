@@ -33,18 +33,15 @@ export * from "../types/api";
 // Helper Functions
 // ============================================
 
-/**
- * Get auth token from localStorage
- */
-export function getAuthToken(): string | null {
-  return localStorage.getItem("stmtiq_session_token");
-}
+// Re-export getClerkToken for use in components that need manual token access
+export { getClerkToken as getAuthToken } from "../types/generated/core/OpenAPI";
 
 /**
  * Get auth headers with Bearer token
  */
-export function getAuthHeaders(): Record<string, string> {
-  const token = getAuthToken();
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { getClerkToken } = await import("../types/generated/core/OpenAPI");
+  const token = await getClerkToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -59,10 +56,11 @@ export function getCurrentWorkspaceId(): number | null {
 /**
  * Get headers with auth and workspace context
  */
-export function getApiHeaders(): Record<string, string> {
+export async function getApiHeaders(): Promise<Record<string, string>> {
+  const authHeaders = await getAuthHeaders();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...getAuthHeaders(),
+    ...authHeaders,
   };
 
   const workspaceId = getCurrentWorkspaceId();
@@ -80,10 +78,11 @@ export async function apiFetch<T>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const apiHeaders = await getApiHeaders();
   const response = await fetch(url, {
     ...options,
     headers: {
-      ...getApiHeaders(),
+      ...apiHeaders,
       ...options.headers,
     },
   });

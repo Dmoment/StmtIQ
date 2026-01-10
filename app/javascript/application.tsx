@@ -14,6 +14,7 @@ import { Invoices } from './pages/Invoices';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { SSOCallback } from './pages/SSOCallback';
+import { GmailCallback } from './pages/GmailCallback';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -56,6 +57,16 @@ function App() {
                 <Route path="/sso-callback" element={<SSOCallback />} />
 
                 {/* Protected routes - Onboarding handled via modal in Layout */}
+                {/* Gmail OAuth callback - protected but outside Layout */}
+                <Route
+                  path="/gmail/callback"
+                  element={
+                    <ProtectedRoute>
+                      <GmailCallback />
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route
                   path="/"
                   element={

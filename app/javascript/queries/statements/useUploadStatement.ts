@@ -1,16 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Statement } from "../../types/api";
 import { statementKeys } from "../keys";
+import { getAuthToken } from "../../lib/api";
 
 interface UploadStatementData {
   file: File;
   template_id: number;
   account_id?: number;
-}
-
-// Helper to get auth token
-function getAuthToken(): string | null {
-  return localStorage.getItem("stmtiq_session_token");
 }
 
 /**
@@ -32,7 +28,7 @@ export const useUploadStatement = () => {
 
       const headers: Record<string, string> = {};
 
-      const token = getAuthToken();
+      const token = await getAuthToken();
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }

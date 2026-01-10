@@ -1,8 +1,8 @@
 import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
-import { 
-  Upload as UploadIcon, 
-  FileText, 
-  X, 
+import {
+  Upload as UploadIcon,
+  FileText,
+  X,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -19,6 +19,7 @@ import {
   File
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { apiFetch, getAuthToken } from '../lib/api';
 
 type FileStatus = 'idle' | 'uploading' | 'processing' | 'success' | 'error';
 
@@ -232,13 +233,12 @@ export function Upload() {
   const pollStatementStatus = async (statementId: number, fileIndex: number): Promise<boolean> => {
     const maxAttempts = 60;
     let attempts = 0;
-    
+
     while (attempts < maxAttempts) {
       try {
-        const response = await fetch(`/api/v1/statements/${statementId}`);
-        if (!response.ok) throw new Error('Failed to check status');
-        
-        const statement = await response.json();
+        const statement = await apiFetch<{ status: string; transaction_count?: number; error_message?: string }>(
+          `/api/v1/statements/${statementId}`
+        );
         
         if (statement.status === 'parsed') {
           setFiles(prev => prev.map((f, idx) => 
@@ -287,6 +287,9 @@ export function Upload() {
     ));
 
     try {
+      // Get auth token first
+      const token = await getAuthToken();
+
       const formData = new FormData();
       formData.append('file', fileData.file);
       formData.append('template_id', selectedTemplate.id.toString());
@@ -320,6 +323,12 @@ export function Upload() {
         xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
 
         xhr.open('POST', '/api/v1/statements');
+
+        // Add auth token
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        }
+
         xhr.send(formData);
       });
 
@@ -881,7 +890,7 @@ export function Upload() {
             </div>
           </div>
           <a
-            href="/transactions"
+            href="/app/transactions"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-amber-200 text-slate-900 hover:bg-amber-300 transition-colors font-medium"
           >
             View Transactions

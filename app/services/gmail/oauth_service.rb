@@ -121,9 +121,9 @@ module Gmail
 
       def default_redirect_uri
         if Rails.env.development?
-          'http://localhost:3000/api/v1/gmail/callback'
+          'http://localhost:3000/app/gmail/callback'
         else
-          "#{ENV.fetch('APP_HOST', 'https://stmtiq.com')}/api/v1/gmail/callback"
+          "#{ENV.fetch('APP_HOST', 'https://stmtiq.com')}/app/gmail/callback"
         end
       end
     end

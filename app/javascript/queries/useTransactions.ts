@@ -3,6 +3,7 @@ import { TransactionsService } from "../types/generated/services.gen";
 import type { Transaction, TransactionStats } from "../types/api";
 import type { PatchV1TransactionsIdData, PatchV1TransactionsBulkData } from "../types/generated/types.gen";
 import { transactionKeys } from "./keys";
+import { apiFetch, getAuthToken } from "../lib/api";
 
 // ============================================
 // Types
@@ -48,7 +49,7 @@ export const useTransactions = (filters?: TransactionFilters) => {
   return useQuery({
     queryKey: transactionKeys.list(filters),
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = await getAuthToken();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -206,7 +207,7 @@ export const useCategorizeTransactions = () => {
   >({
     mutationFn: async (params) => {
       // Use manual fetch since generated service might not have this endpoint yet
-      const token = localStorage.getItem('auth_token');
+      const token = await getAuthToken();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -271,30 +272,14 @@ export const useTransactionFeedback = () => {
     { transactionId: number; categoryId: number; subcategoryId?: number; applyToSimilar?: boolean }
   >({
     mutationFn: async ({ transactionId, categoryId, subcategoryId, applyToSimilar = false }) => {
-      const token = localStorage.getItem('auth_token');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`/api/v1/transactions/${transactionId}/feedback`, {
+      return apiFetch<FeedbackResult>(`/api/v1/transactions/${transactionId}/feedback`, {
         method: 'POST',
-        headers,
         body: JSON.stringify({
           category_id: categoryId,
           subcategory_id: subcategoryId,
           apply_to_similar: applyToSimilar,
         }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit feedback');
-      }
-
-      return response.json();
     },
     onSuccess: (result) => {
       // Invalidate all transaction queries to refresh the list
@@ -340,7 +325,7 @@ export const useCategorizationProgress = (enabled = true) => {
   return useQuery({
     queryKey: ['categorization', 'progress'],
     queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
+      const token = await getAuthToken();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class GmailConnection < ApplicationRecord
-  include WorkspaceScoped
+  acts_as_tenant :workspace
 
   # ============================================
   # Associations

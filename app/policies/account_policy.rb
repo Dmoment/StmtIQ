@@ -25,7 +25,8 @@ class AccountPolicy < ApplicationPolicy
     def resolve
       return scope.none unless user && current_workspace
 
-      scope.in_workspace(current_workspace)
+      # acts_as_tenant automatically scopes to current tenant
+      scope.all
     end
   end
 end

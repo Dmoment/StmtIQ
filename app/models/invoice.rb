@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Invoice < ApplicationRecord
-  include WorkspaceScoped
+  acts_as_tenant :workspace
 
   belongs_to :user
   belongs_to :account, optional: true

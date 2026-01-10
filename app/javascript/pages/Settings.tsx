@@ -335,7 +335,7 @@ interface GmailConnection {
 interface GmailConnectionRowProps {
   connection: GmailConnection;
   onSync: (id: number) => void;
-  onToggleSync: (id: number, enabled: boolean) => void;
+  onToggleSync: (connection: GmailConnection) => void;
   onDisconnect: (id: number) => void;
   isDisconnecting: boolean;
 }
@@ -393,7 +393,7 @@ function GmailConnectionRow({
         <div className="flex items-center gap-1">
           {/* Toggle Sync */}
           <button
-            onClick={() => onToggleSync(connection.id, !connection.sync_enabled)}
+            onClick={() => onToggleSync(connection)}
             className="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center"
             title={connection.sync_enabled ? 'Disable sync' : 'Enable sync'}
             aria-label={connection.sync_enabled ? 'Disable sync' : 'Enable sync'}

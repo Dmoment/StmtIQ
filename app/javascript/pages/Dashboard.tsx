@@ -286,7 +286,7 @@ export function Dashboard() {
             </p>
             <div className="flex items-center gap-4">
               <a
-                href="/transactions"
+                href="/app/transactions"
                 className="px-5 py-2.5 bg-amber-200 text-slate-900 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors"
               >
                 Review Now
@@ -321,7 +321,7 @@ export function Dashboard() {
                 <MoreHorizontal className="h-4 w-4" />
               </button>
               <a
-                href="/upload"
+                href="/app/upload"
                 className="px-5 py-2.5 bg-amber-200 text-slate-900 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors"
               >
                 Upload New
@@ -473,7 +473,7 @@ export function Dashboard() {
             analyzed automatically.
           </p>
           <a
-            href="/upload"
+            href="/app/upload"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-200 text-slate-900 font-medium hover:bg-amber-300 transition-colors"
           >
             <Upload className="w-5 h-5" />

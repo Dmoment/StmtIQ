@@ -237,7 +237,7 @@ module ML
     end
 
     def openai_api_key
-      ENV['OPENAI_API_KEY'] || Rails.application.credentials.dig(:openai, :api_key)
+      ENV['OPENAI_API_KEY']
     end
   end
 end

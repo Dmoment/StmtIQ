@@ -4,10 +4,16 @@ module WorkspaceHelpers
   extend Grape::API::Helpers
 
   # Get current workspace from header, params, or user's current workspace
+  # Also sets ActsAsTenant.current_tenant for automatic scoping
   def current_workspace
     return @current_workspace if defined?(@current_workspace)
 
     @current_workspace = resolve_workspace
+
+    # Set acts_as_tenant context for automatic scoping
+    ActsAsTenant.current_tenant = @current_workspace if @current_workspace
+
+    @current_workspace
   end
 
   # Require a workspace to be set
@@ -15,12 +21,11 @@ module WorkspaceHelpers
     error!({ error: 'Workspace required', detail: 'Please select a workspace' }, 400) unless current_workspace
   end
 
-  # Set workspace context for models that use WorkspaceScoped concern
-  def with_workspace_scope(&block)
+  # Set workspace context for models (now uses ActsAsTenant)
+  def with_workspace_scope
     return yield unless current_workspace
 
-    # Set workspace context for all WorkspaceScoped models
-    set_workspace_context(current_workspace, &block)
+    ActsAsTenant.with_tenant(current_workspace) { yield }
   end
 
   # Check if user has permission in current workspace
@@ -91,19 +96,5 @@ module WorkspaceHelpers
                 .joins(:workspace_memberships)
                 .where(workspace_memberships: { user_id: current_user.id, status: 'active' })
                 .find_by(id: workspace_id)
-  end
-
-  def set_workspace_context(workspace)
-    # Store the workspace context for WorkspaceScoped models
-    [Account, Statement, Transaction, Invoice, UserRule, LabeledExample, GmailConnection].each do |model|
-      model.current_workspace = workspace
-    end
-
-    yield
-  ensure
-    # Clear the workspace context after the block
-    [Account, Statement, Transaction, Invoice, UserRule, LabeledExample, GmailConnection].each do |model|
-      model.current_workspace = nil
-    end
   end
 end

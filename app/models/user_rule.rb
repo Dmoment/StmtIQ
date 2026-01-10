@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UserRule < ApplicationRecord
-  include WorkspaceScoped
+  acts_as_tenant :workspace
 
   # Associations
   belongs_to :user

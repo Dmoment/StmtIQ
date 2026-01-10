@@ -42,6 +42,7 @@ module V1
       end
       post do
         authenticate!
+        require_workspace!
 
         uploaded_file = params[:file]
         template = BankTemplate.find(params[:template_id])
