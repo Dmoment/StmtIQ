@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Api
+module API
   module V1
     # Server-Sent Events (SSE) endpoint for real-time parsing progress
     #
