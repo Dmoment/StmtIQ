@@ -18,6 +18,9 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
+  Users,
+  FilePlus,
+  RefreshCw,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCurrentUser } from '../queries/useAuth';
@@ -31,6 +34,8 @@ const navItems = [
   { to: '/upload', icon: Upload, label: 'Upload' },
   { to: '/transactions', icon: Receipt, label: 'Transactions' },
   { to: '/invoices', icon: FileText, label: 'Invoices' },
+  { to: '/recurring-invoices', icon: RefreshCw, label: 'Recurring' },
+  { to: '/clients', icon: Users, label: 'Clients' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

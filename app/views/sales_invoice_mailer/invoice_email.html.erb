@@ -1,0 +1,55 @@
+<div class="header">
+  <h1 style="margin: 0; color: #1e293b;"><%= @profile.business_name %></h1>
+</div>
+
+<div class="content">
+  <p>Dear <%= @client.display_name %>,</p>
+
+  <p>Please find attached invoice <strong><%= @invoice.invoice_number %></strong> for your review.</p>
+
+  <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+    <p style="margin: 0; color: #666;">Amount Due</p>
+    <p class="amount"><%= @invoice.currency %> <%= number_with_delimiter(@invoice.balance_due, delimiter: ',') %></p>
+    <p style="margin: 5px 0 0; color: #666;">Due Date: <%= @invoice.due_date.strftime('%d %B %Y') %></p>
+  </div>
+
+  <table style="width: 100%; margin: 20px 0; font-size: 13px;">
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Invoice Number:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;"><%= @invoice.invoice_number %></td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Invoice Date:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;"><%= @invoice.invoice_date.strftime('%d %B %Y') %></td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Total Amount:</strong></td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;"><%= @invoice.currency %> <%= number_with_delimiter(@invoice.total_amount, delimiter: ',') %></td>
+    </tr>
+  </table>
+
+  <% if @profile.bank_name.present? %>
+  <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <p style="margin: 0 0 10px; font-weight: 600;">Bank Details for Payment:</p>
+    <p style="margin: 0; font-size: 13px;">
+      <% if @profile.bank_name.present? %>Bank: <%= @profile.bank_name %><br><% end %>
+      <% if @profile.account_number.present? %>Account: <%= @profile.account_number %><br><% end %>
+      <% if @profile.ifsc_code.present? %>IFSC: <%= @profile.ifsc_code %><br><% end %>
+      <% if @profile.upi_id.present? %>UPI: <%= @profile.upi_id %><% end %>
+    </p>
+  </div>
+  <% end %>
+
+  <p>If you have any questions about this invoice, please contact us at <%= @profile.email || 'our office' %>.</p>
+
+  <p>Thank you for your business!</p>
+
+  <p>Best regards,<br><strong><%= @profile.business_name %></strong></p>
+</div>
+
+<div class="footer">
+  <p>This invoice was sent by <%= @profile.business_name %></p>
+  <% if @profile.gstin.present? %>
+  <p>GSTIN: <%= @profile.gstin %></p>
+  <% end %>
+</div>

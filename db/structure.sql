@@ -1,6 +1,7 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -217,6 +218,61 @@ ALTER SEQUENCE public.bank_templates_id_seq OWNED BY public.bank_templates.id;
 
 
 --
+-- Name: business_profiles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.business_profiles (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    business_name character varying NOT NULL,
+    legal_name character varying,
+    gstin character varying,
+    pan_number character varying,
+    address_line1 character varying,
+    address_line2 character varying,
+    city character varying,
+    state character varying,
+    state_code character varying(2),
+    pincode character varying(10),
+    country character varying DEFAULT 'India'::character varying,
+    email character varying,
+    phone character varying,
+    bank_name character varying,
+    account_number character varying,
+    ifsc_code character varying,
+    upi_id character varying,
+    primary_color character varying DEFAULT '#f59e0b'::character varying,
+    secondary_color character varying DEFAULT '#1e293b'::character varying,
+    invoice_prefix character varying DEFAULT 'INV-'::character varying,
+    invoice_next_number integer DEFAULT 1,
+    default_payment_terms_days integer DEFAULT 30,
+    default_notes text,
+    default_terms text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: business_profiles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.business_profiles_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: business_profiles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.business_profiles_id_seq OWNED BY public.business_profiles.id;
+
+
+--
 -- Name: categories; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -251,6 +307,60 @@ CREATE SEQUENCE public.categories_id_seq
 --
 
 ALTER SEQUENCE public.categories_id_seq OWNED BY public.categories.id;
+
+
+--
+-- Name: clients; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.clients (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    name character varying NOT NULL,
+    email character varying,
+    phone character varying,
+    company_name character varying,
+    gstin character varying,
+    billing_address_line1 character varying,
+    billing_address_line2 character varying,
+    billing_city character varying,
+    billing_state character varying,
+    billing_state_code character varying(2),
+    billing_pincode character varying(10),
+    billing_country character varying DEFAULT 'India'::character varying,
+    shipping_address_line1 character varying,
+    shipping_address_line2 character varying,
+    shipping_city character varying,
+    shipping_state character varying,
+    shipping_state_code character varying(2),
+    shipping_pincode character varying(10),
+    shipping_country character varying,
+    default_currency character varying DEFAULT 'INR'::character varying,
+    notes text,
+    is_active boolean DEFAULT true,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: clients_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.clients_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: clients_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.clients_id_seq OWNED BY public.clients.id;
 
 
 --
@@ -334,6 +444,45 @@ CREATE SEQUENCE public.gmail_connections_id_seq
 --
 
 ALTER SEQUENCE public.gmail_connections_id_seq OWNED BY public.gmail_connections.id;
+
+
+--
+-- Name: invoice_line_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.invoice_line_items (
+    id bigint NOT NULL,
+    sales_invoice_id bigint NOT NULL,
+    "position" integer DEFAULT 0 NOT NULL,
+    description character varying NOT NULL,
+    hsn_sac_code character varying,
+    quantity numeric(10,2) DEFAULT 1.0 NOT NULL,
+    unit character varying DEFAULT 'units'::character varying,
+    rate numeric(15,2) DEFAULT 0.0 NOT NULL,
+    amount numeric(15,2) DEFAULT 0.0 NOT NULL,
+    tax_rate numeric(5,2),
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: invoice_line_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.invoice_line_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: invoice_line_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.invoice_line_items_id_seq OWNED BY public.invoice_line_items.id;
 
 
 --
@@ -424,6 +573,119 @@ CREATE SEQUENCE public.labeled_examples_id_seq
 --
 
 ALTER SEQUENCE public.labeled_examples_id_seq OWNED BY public.labeled_examples.id;
+
+
+--
+-- Name: recurring_invoices; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recurring_invoices (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    client_id bigint NOT NULL,
+    business_profile_id bigint NOT NULL,
+    name character varying NOT NULL,
+    frequency character varying NOT NULL,
+    start_date date NOT NULL,
+    end_date date,
+    next_run_date date,
+    status character varying DEFAULT 'active'::character varying NOT NULL,
+    auto_send boolean DEFAULT false,
+    send_days_before_due integer DEFAULT 0,
+    template_data jsonb DEFAULT '{}'::jsonb,
+    currency character varying DEFAULT 'INR'::character varying,
+    payment_terms_days integer DEFAULT 30,
+    tax_rate numeric(5,2),
+    last_invoice_id bigint,
+    invoice_count integer DEFAULT 0,
+    last_run_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: recurring_invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.recurring_invoices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: recurring_invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.recurring_invoices_id_seq OWNED BY public.recurring_invoices.id;
+
+
+--
+-- Name: sales_invoices; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sales_invoices (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    client_id bigint NOT NULL,
+    business_profile_id bigint NOT NULL,
+    invoice_number character varying NOT NULL,
+    status character varying DEFAULT 'draft'::character varying NOT NULL,
+    invoice_date date NOT NULL,
+    due_date date NOT NULL,
+    currency character varying DEFAULT 'INR'::character varying NOT NULL,
+    exchange_rate numeric(10,4) DEFAULT 1.0,
+    exchange_rate_date date,
+    subtotal numeric(15,2) DEFAULT 0.0,
+    discount_amount numeric(15,2) DEFAULT 0.0,
+    discount_type character varying DEFAULT 'fixed'::character varying,
+    tax_type character varying,
+    cgst_rate numeric(5,2),
+    cgst_amount numeric(15,2) DEFAULT 0.0,
+    sgst_rate numeric(5,2),
+    sgst_amount numeric(15,2) DEFAULT 0.0,
+    igst_rate numeric(5,2),
+    igst_amount numeric(15,2) DEFAULT 0.0,
+    total_amount numeric(15,2) DEFAULT 0.0,
+    amount_paid numeric(15,2) DEFAULT 0.0,
+    balance_due numeric(15,2) DEFAULT 0.0,
+    notes text,
+    terms text,
+    primary_color character varying,
+    secondary_color character varying,
+    sent_at timestamp(6) without time zone,
+    viewed_at timestamp(6) without time zone,
+    paid_at timestamp(6) without time zone,
+    pdf_generated_at timestamp(6) without time zone,
+    recurring_invoice_id bigint,
+    matched_transaction_id bigint,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: sales_invoices_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sales_invoices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sales_invoices_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sales_invoices_id_seq OWNED BY public.sales_invoices.id;
 
 
 --
@@ -852,10 +1114,24 @@ ALTER TABLE ONLY public.bank_templates ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: business_profiles id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.business_profiles ALTER COLUMN id SET DEFAULT nextval('public.business_profiles_id_seq'::regclass);
+
+
+--
 -- Name: categories id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.categories_id_seq'::regclass);
+
+
+--
+-- Name: clients id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.clients ALTER COLUMN id SET DEFAULT nextval('public.clients_id_seq'::regclass);
 
 
 --
@@ -873,6 +1149,13 @@ ALTER TABLE ONLY public.gmail_connections ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
+-- Name: invoice_line_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoice_line_items ALTER COLUMN id SET DEFAULT nextval('public.invoice_line_items_id_seq'::regclass);
+
+
+--
 -- Name: invoices id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -884,6 +1167,20 @@ ALTER TABLE ONLY public.invoices ALTER COLUMN id SET DEFAULT nextval('public.inv
 --
 
 ALTER TABLE ONLY public.labeled_examples ALTER COLUMN id SET DEFAULT nextval('public.labeled_examples_id_seq'::regclass);
+
+
+--
+-- Name: recurring_invoices id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recurring_invoices ALTER COLUMN id SET DEFAULT nextval('public.recurring_invoices_id_seq'::regclass);
+
+
+--
+-- Name: sales_invoices id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices ALTER COLUMN id SET DEFAULT nextval('public.sales_invoices_id_seq'::regclass);
 
 
 --
@@ -998,11 +1295,27 @@ ALTER TABLE ONLY public.bank_templates
 
 
 --
+-- Name: business_profiles business_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.business_profiles
+    ADD CONSTRAINT business_profiles_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.categories
     ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: clients clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.clients
+    ADD CONSTRAINT clients_pkey PRIMARY KEY (id);
 
 
 --
@@ -1022,6 +1335,14 @@ ALTER TABLE ONLY public.gmail_connections
 
 
 --
+-- Name: invoice_line_items invoice_line_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoice_line_items
+    ADD CONSTRAINT invoice_line_items_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: invoices invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1035,6 +1356,22 @@ ALTER TABLE ONLY public.invoices
 
 ALTER TABLE ONLY public.labeled_examples
     ADD CONSTRAINT labeled_examples_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recurring_invoices recurring_invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recurring_invoices
+    ADD CONSTRAINT recurring_invoices_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sales_invoices sales_invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices
+    ADD CONSTRAINT sales_invoices_pkey PRIMARY KEY (id);
 
 
 --
@@ -1230,6 +1567,55 @@ CREATE INDEX index_bank_templates_on_is_active ON public.bank_templates USING bt
 
 
 --
+-- Name: index_business_profiles_on_gstin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_business_profiles_on_gstin ON public.business_profiles USING btree (gstin) WHERE (gstin IS NOT NULL);
+
+
+--
+-- Name: index_business_profiles_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_business_profiles_on_workspace_id ON public.business_profiles USING btree (workspace_id);
+
+
+--
+-- Name: index_clients_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_clients_on_user_id ON public.clients USING btree (user_id);
+
+
+--
+-- Name: index_clients_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_clients_on_workspace_id ON public.clients USING btree (workspace_id);
+
+
+--
+-- Name: index_clients_on_workspace_id_and_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_clients_on_workspace_id_and_email ON public.clients USING btree (workspace_id, email) WHERE (email IS NOT NULL);
+
+
+--
+-- Name: index_clients_on_workspace_id_and_gstin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_clients_on_workspace_id_and_gstin ON public.clients USING btree (workspace_id, gstin) WHERE (gstin IS NOT NULL);
+
+
+--
+-- Name: index_clients_on_workspace_id_and_is_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_clients_on_workspace_id_and_is_active ON public.clients USING btree (workspace_id, is_active);
+
+
+--
 -- Name: index_global_patterns_on_category_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1304,6 +1690,20 @@ CREATE UNIQUE INDEX index_gmail_connections_on_user_id_and_email ON public.gmail
 --
 
 CREATE INDEX index_gmail_connections_on_workspace_id ON public.gmail_connections USING btree (workspace_id);
+
+
+--
+-- Name: index_invoice_line_items_on_sales_invoice_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoice_line_items_on_sales_invoice_id ON public.invoice_line_items USING btree (sales_invoice_id);
+
+
+--
+-- Name: index_invoice_line_items_on_sales_invoice_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_invoice_line_items_on_sales_invoice_id_and_position ON public.invoice_line_items USING btree (sales_invoice_id, "position");
 
 
 --
@@ -1402,6 +1802,132 @@ CREATE INDEX index_labeled_examples_on_user_id ON public.labeled_examples USING 
 --
 
 CREATE INDEX index_labeled_examples_on_workspace_id ON public.labeled_examples USING btree (workspace_id);
+
+
+--
+-- Name: index_recurring_invoices_on_business_profile_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recurring_invoices_on_business_profile_id ON public.recurring_invoices USING btree (business_profile_id);
+
+
+--
+-- Name: index_recurring_invoices_on_client_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recurring_invoices_on_client_id ON public.recurring_invoices USING btree (client_id);
+
+
+--
+-- Name: index_recurring_invoices_on_last_invoice_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recurring_invoices_on_last_invoice_id ON public.recurring_invoices USING btree (last_invoice_id);
+
+
+--
+-- Name: index_recurring_invoices_on_status_and_next_run_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recurring_invoices_on_status_and_next_run_date ON public.recurring_invoices USING btree (status, next_run_date);
+
+
+--
+-- Name: index_recurring_invoices_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recurring_invoices_on_user_id ON public.recurring_invoices USING btree (user_id);
+
+
+--
+-- Name: index_recurring_invoices_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recurring_invoices_on_workspace_id ON public.recurring_invoices USING btree (workspace_id);
+
+
+--
+-- Name: index_recurring_invoices_on_workspace_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_recurring_invoices_on_workspace_id_and_status ON public.recurring_invoices USING btree (workspace_id, status);
+
+
+--
+-- Name: index_sales_invoices_on_business_profile_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_business_profile_id ON public.sales_invoices USING btree (business_profile_id);
+
+
+--
+-- Name: index_sales_invoices_on_client_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_client_id ON public.sales_invoices USING btree (client_id);
+
+
+--
+-- Name: index_sales_invoices_on_client_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_client_id_and_status ON public.sales_invoices USING btree (client_id, status);
+
+
+--
+-- Name: index_sales_invoices_on_matched_transaction_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_matched_transaction_id ON public.sales_invoices USING btree (matched_transaction_id);
+
+
+--
+-- Name: index_sales_invoices_on_recurring_invoice_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_recurring_invoice_id ON public.sales_invoices USING btree (recurring_invoice_id);
+
+
+--
+-- Name: index_sales_invoices_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_user_id ON public.sales_invoices USING btree (user_id);
+
+
+--
+-- Name: index_sales_invoices_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_workspace_id ON public.sales_invoices USING btree (workspace_id);
+
+
+--
+-- Name: index_sales_invoices_on_workspace_id_and_due_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_workspace_id_and_due_date ON public.sales_invoices USING btree (workspace_id, due_date);
+
+
+--
+-- Name: index_sales_invoices_on_workspace_id_and_invoice_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_workspace_id_and_invoice_date ON public.sales_invoices USING btree (workspace_id, invoice_date);
+
+
+--
+-- Name: index_sales_invoices_on_workspace_id_and_invoice_number; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sales_invoices_on_workspace_id_and_invoice_number ON public.sales_invoices USING btree (workspace_id, invoice_number);
+
+
+--
+-- Name: index_sales_invoices_on_workspace_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_workspace_id_and_status ON public.sales_invoices USING btree (workspace_id, status);
 
 
 --
@@ -1770,11 +2296,27 @@ ALTER TABLE ONLY public.transactions
 
 
 --
+-- Name: recurring_invoices fk_rails_0dfff2eedb; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recurring_invoices
+    ADD CONSTRAINT fk_rails_0dfff2eedb FOREIGN KEY (business_profile_id) REFERENCES public.business_profiles(id);
+
+
+--
 -- Name: transactions fk_rails_0ea2ad3927; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.transactions
     ADD CONSTRAINT fk_rails_0ea2ad3927 FOREIGN KEY (category_id) REFERENCES public.categories(id);
+
+
+--
+-- Name: recurring_invoices fk_rails_0ead1458fc; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recurring_invoices
+    ADD CONSTRAINT fk_rails_0ead1458fc FOREIGN KEY (client_id) REFERENCES public.clients(id);
 
 
 --
@@ -1799,6 +2341,22 @@ ALTER TABLE ONLY public.statements
 
 ALTER TABLE ONLY public.invoices
     ADD CONSTRAINT fk_rails_2013e671f4 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: sales_invoices fk_rails_208ee73ab2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices
+    ADD CONSTRAINT fk_rails_208ee73ab2 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: clients fk_rails_21c421fd41; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.clients
+    ADD CONSTRAINT fk_rails_21c421fd41 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1906,6 +2464,22 @@ ALTER TABLE ONLY public.global_patterns
 
 
 --
+-- Name: business_profiles fk_rails_68038daaed; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.business_profiles
+    ADD CONSTRAINT fk_rails_68038daaed FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: invoice_line_items fk_rails_6a77d01fed; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invoice_line_items
+    ADD CONSTRAINT fk_rails_6a77d01fed FOREIGN KEY (sales_invoice_id) REFERENCES public.sales_invoices(id);
+
+
+--
 -- Name: transactions fk_rails_6b611ee905; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1938,6 +2512,14 @@ ALTER TABLE ONLY public.transactions
 
 
 --
+-- Name: sales_invoices fk_rails_81a032c669; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices
+    ADD CONSTRAINT fk_rails_81a032c669 FOREIGN KEY (business_profile_id) REFERENCES public.business_profiles(id);
+
+
+--
 -- Name: statements fk_rails_820ad8a5f2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1962,6 +2544,38 @@ ALTER TABLE ONLY public.statements
 
 
 --
+-- Name: recurring_invoices fk_rails_8730c409b9; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recurring_invoices
+    ADD CONSTRAINT fk_rails_8730c409b9 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: sales_invoices fk_rails_879f994157; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices
+    ADD CONSTRAINT fk_rails_879f994157 FOREIGN KEY (recurring_invoice_id) REFERENCES public.recurring_invoices(id);
+
+
+--
+-- Name: sales_invoices fk_rails_8f263b7cb5; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices
+    ADD CONSTRAINT fk_rails_8f263b7cb5 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: recurring_invoices fk_rails_971e52b369; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recurring_invoices
+    ADD CONSTRAINT fk_rails_971e52b369 FOREIGN KEY (last_invoice_id) REFERENCES public.sales_invoices(id);
+
+
+--
 -- Name: active_storage_variant_records fk_rails_993965df05; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1983,6 +2597,14 @@ ALTER TABLE ONLY public.invoices
 
 ALTER TABLE ONLY public.gmail_connections
     ADD CONSTRAINT fk_rails_a343a4adb5 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: recurring_invoices fk_rails_a59bf6fb50; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recurring_invoices
+    ADD CONSTRAINT fk_rails_a59bf6fb50 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
 
 
 --
@@ -2015,6 +2637,14 @@ ALTER TABLE ONLY public.invoices
 
 ALTER TABLE ONLY public.accounts
     ADD CONSTRAINT fk_rails_b1e30bebc8 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: sales_invoices fk_rails_b48f1cb104; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices
+    ADD CONSTRAINT fk_rails_b48f1cb104 FOREIGN KEY (matched_transaction_id) REFERENCES public.transactions(id);
 
 
 --
@@ -2066,6 +2696,22 @@ ALTER TABLE ONLY public.user_rules
 
 
 --
+-- Name: sales_invoices fk_rails_e7f8b5574e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sales_invoices
+    ADD CONSTRAINT fk_rails_e7f8b5574e FOREIGN KEY (client_id) REFERENCES public.clients(id);
+
+
+--
+-- Name: clients fk_rails_e83b0e502d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.clients
+    ADD CONSTRAINT fk_rails_e83b0e502d FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
 -- Name: transactions fk_rails_f9235709da; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2080,6 +2726,12 @@ ALTER TABLE ONLY public.transactions
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260113100006'),
+('20260113100005'),
+('20260113100004'),
+('20260113100003'),
+('20260113100002'),
+('20260113100001'),
 ('20260109110758'),
 ('20260109100636'),
 ('20260109081541'),

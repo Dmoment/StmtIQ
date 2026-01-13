@@ -96,16 +96,21 @@ module Helpers
 
   def set_workspace_context(workspace)
     # Store the workspace context for WorkspaceScoped models
-    [Account, Statement, Transaction, Invoice, UserRule, LabeledExample, GmailConnection].each do |model|
+    workspace_scoped_models.each do |model|
       model.current_workspace = workspace
     end
 
     yield
   ensure
     # Clear the workspace context after the block
-    [Account, Statement, Transaction, Invoice, UserRule, LabeledExample, GmailConnection].each do |model|
+    workspace_scoped_models.each do |model|
       model.current_workspace = nil
     end
+  end
+
+  def workspace_scoped_models
+    [Account, Statement, Transaction, Invoice, UserRule, LabeledExample, GmailConnection,
+     Client, SalesInvoice, RecurringInvoice]
   end
   end
 end

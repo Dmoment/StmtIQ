@@ -24,6 +24,11 @@ export class Interceptors<T> {
 }
 
 
+function getCsrfToken(): string {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  return meta?.getAttribute('content') || '';
+}
+
 export type OpenAPIConfig = {
 	BASE: string;
 	CREDENTIALS: 'include' | 'omit' | 'same-origin';
@@ -40,25 +45,16 @@ export type OpenAPIConfig = {
 	};
 };
 
-// Get auth token from Clerk's global instance
-export async function getClerkToken(): Promise<string | null> {
-	try {
-		const clerk = (window as unknown as { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk;
-		return await clerk?.session?.getToken() || null;
-	} catch {
-		return null;
-	}
-}
-
 export const OpenAPI: OpenAPIConfig = {
 	BASE: '/api',
 	CREDENTIALS: 'include',
 	ENCODE_PATH: undefined,
 	HEADERS: {
+		'X-CSRF-Token': getCsrfToken(),
 		'Content-Type': 'application/json',
 	},
 	PASSWORD: undefined,
-	TOKEN: async () => await getClerkToken() || undefined,
+	TOKEN: undefined,
 	USERNAME: undefined,
 	VERSION: '0.0.1',
 	WITH_CREDENTIALS: false,
@@ -67,15 +63,3 @@ export const OpenAPI: OpenAPIConfig = {
 		response: new Interceptors(),
 	},
 };
-
-// Request interceptor to add auth token to all requests
-OpenAPI.interceptors.request.use(async (request) => {
-	const token = await getClerkToken();
-	if (token) {
-		request.headers = {
-			...request.headers,
-			'Authorization': `Bearer ${token}`,
-		};
-	}
-	return request;
-});

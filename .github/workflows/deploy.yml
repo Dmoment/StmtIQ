@@ -1,0 +1,82 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false  # Don't cancel in-progress deployments
+
+env:
+  DOCKER_BUILDKIT: 1
+  RAILS_ENV: production
+
+jobs:
+  deploy:
+    name: Deploy with Kamal
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.4
+          bundler-cache: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install Kamal
+        run: gem install kamal -v '~> 2.0'
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 135.181.255.190 >> ~/.ssh/known_hosts
+
+      - name: Create .env.kamal file
+        run: |
+          cat > .env.kamal << EOF
+          DEPLOY_SERVER_IP=135.181.255.190
+          DEPLOY_HOST=khatatrack.com
+          DOCKER_REGISTRY_USERNAME=modestmoron
+          KAMAL_REGISTRY_PASSWORD=${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+          RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
+          CLERK_ISSUER=https://funny-pika-77.clerk.accounts.dev
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION=ap-south-1
+          AWS_BUCKET=stmtiq-production
+          ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=${{ secrets.ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY }}
+          ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=${{ secrets.ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY }}
+          ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=${{ secrets.ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT }}
+          EOF
+          # Remove leading whitespace from each line
+          sed -i 's/^[[:space:]]*//' .env.kamal
+
+      - name: Deploy with Kamal
+        run: kamal deploy
+        # Note: post-deploy hook in .kamal/hooks/post-deploy runs db:migrate automatically
+
+      - name: Verify deployment
+        run: |
+          sleep 10
+          curl -f https://khatatrack.com/up || exit 1
+          echo "Deployment verified successfully!"

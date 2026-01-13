@@ -76,6 +76,109 @@ export const $patchV1UsersMe = {
     description: 'Update current user profile'
 } as const;
 
+export const $postV1OnboardingComplete = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string',
+            description: 'User display name'
+        },
+        workspace_name: {
+            type: 'string',
+            description: 'Workspace name'
+        },
+        workspace_type: {
+            type: 'string',
+            description: 'Workspace type',
+            enum: ['personal', 'business']
+        }
+    },
+    required: ['name', 'workspace_name', 'workspace_type'],
+    description: 'Complete user onboarding'
+} as const;
+
+export const $postV1Workspaces = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string',
+            description: 'Workspace name'
+        },
+        workspace_type: {
+            type: 'string',
+            description: 'Workspace type',
+            enum: ['personal', 'business']
+        },
+        description: {
+            type: 'string',
+            description: 'Description'
+        },
+        logo_url: {
+            type: 'string',
+            description: 'Logo URL'
+        }
+    },
+    required: ['name', 'workspace_type'],
+    description: 'Create a new workspace'
+} as const;
+
+export const $patchV1WorkspacesId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string',
+            description: 'Workspace name'
+        },
+        description: {
+            type: 'string',
+            description: 'Description'
+        },
+        logo_url: {
+            type: 'string',
+            description: 'Logo URL'
+        },
+        settings: {
+            type: 'object',
+            description: 'Settings'
+        }
+    },
+    description: 'Update workspace'
+} as const;
+
+export const $patchV1WorkspacesIdMembersMemberId = {
+    type: 'object',
+    properties: {
+        role: {
+            type: 'string',
+            description: 'New role',
+            enum: ['viewer', 'member', 'accountant', 'admin']
+        }
+    },
+    required: ['role'],
+    description: 'Update member role'
+} as const;
+
+export const $postV1WorkspacesIdInvitations = {
+    type: 'object',
+    properties: {
+        email: {
+            type: 'string',
+            description: 'Email address'
+        },
+        phone_number: {
+            type: 'string',
+            description: 'Phone number'
+        },
+        role: {
+            type: 'string',
+            description: 'Role to assign',
+            enum: ['viewer', 'member', 'accountant', 'admin']
+        }
+    },
+    required: ['role'],
+    description: 'Invite user to workspace'
+} as const;
+
 export const $postV1Categories = {
     type: 'object',
     properties: {
@@ -550,4 +653,765 @@ export const $V1_Entities_Account = {
         }
     },
     required: ['id', 'name', 'bank_name', 'account_number_last4', 'account_type', 'currency', 'is_active', 'created_at', 'display_name']
+} as const;
+
+export const $patchV1GmailConnectionsId = {
+    type: 'object',
+    properties: {
+        sync_enabled: {
+            type: 'boolean',
+            description: 'Enable/disable sync'
+        }
+    },
+    description: 'Update Gmail connection settings'
+} as const;
+
+export const $postV1BusinessProfile = {
+    type: 'object',
+    properties: {
+        business_name: {
+            type: 'string'
+        },
+        legal_name: {
+            type: 'string'
+        },
+        gstin: {
+            type: 'string'
+        },
+        pan_number: {
+            type: 'string'
+        },
+        address_line1: {
+            type: 'string'
+        },
+        address_line2: {
+            type: 'string'
+        },
+        city: {
+            type: 'string'
+        },
+        state: {
+            type: 'string'
+        },
+        state_code: {
+            type: 'string'
+        },
+        pincode: {
+            type: 'string'
+        },
+        country: {
+            type: 'string'
+        },
+        email: {
+            type: 'string'
+        },
+        phone: {
+            type: 'string'
+        },
+        bank_name: {
+            type: 'string'
+        },
+        account_number: {
+            type: 'string'
+        },
+        ifsc_code: {
+            type: 'string'
+        },
+        upi_id: {
+            type: 'string'
+        },
+        primary_color: {
+            type: 'string'
+        },
+        secondary_color: {
+            type: 'string'
+        },
+        invoice_prefix: {
+            type: 'string'
+        },
+        invoice_next_number: {
+            type: 'integer',
+            format: 'int32'
+        },
+        default_payment_terms_days: {
+            type: 'integer',
+            format: 'int32'
+        },
+        default_notes: {
+            type: 'string'
+        },
+        default_terms: {
+            type: 'string'
+        }
+    },
+    required: ['business_name'],
+    description: 'Create business profile for current workspace'
+} as const;
+
+export const $patchV1BusinessProfile = {
+    type: 'object',
+    properties: {
+        business_name: {
+            type: 'string'
+        },
+        legal_name: {
+            type: 'string'
+        },
+        gstin: {
+            type: 'string'
+        },
+        pan_number: {
+            type: 'string'
+        },
+        address_line1: {
+            type: 'string'
+        },
+        address_line2: {
+            type: 'string'
+        },
+        city: {
+            type: 'string'
+        },
+        state: {
+            type: 'string'
+        },
+        state_code: {
+            type: 'string'
+        },
+        pincode: {
+            type: 'string'
+        },
+        country: {
+            type: 'string'
+        },
+        email: {
+            type: 'string'
+        },
+        phone: {
+            type: 'string'
+        },
+        bank_name: {
+            type: 'string'
+        },
+        account_number: {
+            type: 'string'
+        },
+        ifsc_code: {
+            type: 'string'
+        },
+        upi_id: {
+            type: 'string'
+        },
+        primary_color: {
+            type: 'string'
+        },
+        secondary_color: {
+            type: 'string'
+        },
+        invoice_prefix: {
+            type: 'string'
+        },
+        invoice_next_number: {
+            type: 'integer',
+            format: 'int32'
+        },
+        default_payment_terms_days: {
+            type: 'integer',
+            format: 'int32'
+        },
+        default_notes: {
+            type: 'string'
+        },
+        default_terms: {
+            type: 'string'
+        }
+    },
+    description: 'Update business profile'
+} as const;
+
+export const $postV1BusinessProfileLogo = {
+    type: 'object',
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary'
+        }
+    },
+    required: ['file'],
+    description: 'Upload logo'
+} as const;
+
+export const $postV1BusinessProfileSignature = {
+    type: 'object',
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary'
+        }
+    },
+    required: ['file'],
+    description: 'Upload signature'
+} as const;
+
+export const $postV1Clients = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        email: {
+            type: 'string'
+        },
+        phone: {
+            type: 'string'
+        },
+        company_name: {
+            type: 'string'
+        },
+        gstin: {
+            type: 'string'
+        },
+        billing_address_line1: {
+            type: 'string'
+        },
+        billing_address_line2: {
+            type: 'string'
+        },
+        billing_city: {
+            type: 'string'
+        },
+        billing_state: {
+            type: 'string'
+        },
+        billing_state_code: {
+            type: 'string'
+        },
+        billing_pincode: {
+            type: 'string'
+        },
+        billing_country: {
+            type: 'string'
+        },
+        shipping_address_line1: {
+            type: 'string'
+        },
+        shipping_address_line2: {
+            type: 'string'
+        },
+        shipping_city: {
+            type: 'string'
+        },
+        shipping_state: {
+            type: 'string'
+        },
+        shipping_state_code: {
+            type: 'string'
+        },
+        shipping_pincode: {
+            type: 'string'
+        },
+        shipping_country: {
+            type: 'string'
+        },
+        default_currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP'],
+            default: 'INR'
+        },
+        notes: {
+            type: 'string'
+        }
+    },
+    required: ['name'],
+    description: 'Create a new client'
+} as const;
+
+export const $patchV1ClientsId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        email: {
+            type: 'string'
+        },
+        phone: {
+            type: 'string'
+        },
+        company_name: {
+            type: 'string'
+        },
+        gstin: {
+            type: 'string'
+        },
+        billing_address_line1: {
+            type: 'string'
+        },
+        billing_address_line2: {
+            type: 'string'
+        },
+        billing_city: {
+            type: 'string'
+        },
+        billing_state: {
+            type: 'string'
+        },
+        billing_state_code: {
+            type: 'string'
+        },
+        billing_pincode: {
+            type: 'string'
+        },
+        billing_country: {
+            type: 'string'
+        },
+        shipping_address_line1: {
+            type: 'string'
+        },
+        shipping_address_line2: {
+            type: 'string'
+        },
+        shipping_city: {
+            type: 'string'
+        },
+        shipping_state: {
+            type: 'string'
+        },
+        shipping_state_code: {
+            type: 'string'
+        },
+        shipping_pincode: {
+            type: 'string'
+        },
+        shipping_country: {
+            type: 'string'
+        },
+        default_currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP']
+        },
+        notes: {
+            type: 'string'
+        },
+        is_active: {
+            type: 'boolean'
+        }
+    },
+    description: 'Update a client'
+} as const;
+
+export const $postV1SalesInvoices = {
+    type: 'object',
+    properties: {
+        client_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        invoice_date: {
+            type: 'string',
+            format: 'date'
+        },
+        due_date: {
+            type: 'string',
+            format: 'date'
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP'],
+            default: 'INR'
+        },
+        exchange_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        exchange_rate_date: {
+            type: 'string',
+            format: 'date'
+        },
+        discount_amount: {
+            type: 'number',
+            format: 'float',
+            default: 0
+        },
+        discount_type: {
+            type: 'string',
+            enum: ['fixed', 'percentage'],
+            default: 'fixed'
+        },
+        tax_type: {
+            type: 'string',
+            enum: ['none', 'cgst_sgst', 'igst']
+        },
+        cgst_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        sgst_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        igst_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        notes: {
+            type: 'string'
+        },
+        terms: {
+            type: 'string'
+        },
+        primary_color: {
+            type: 'string'
+        },
+        secondary_color: {
+            type: 'string'
+        },
+        line_items: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    description: {
+                        type: 'string'
+                    },
+                    hsn_sac_code: {
+                        type: 'string'
+                    },
+                    quantity: {
+                        type: 'number',
+                        format: 'float',
+                        default: 1
+                    },
+                    unit: {
+                        type: 'string',
+                        default: 'units'
+                    },
+                    rate: {
+                        type: 'number',
+                        format: 'float'
+                    }
+                },
+                required: ['description', 'rate']
+            }
+        }
+    },
+    required: ['client_id'],
+    description: 'Create a new sales invoice'
+} as const;
+
+export const $patchV1SalesInvoicesId = {
+    type: 'object',
+    properties: {
+        client_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        invoice_date: {
+            type: 'string',
+            format: 'date'
+        },
+        due_date: {
+            type: 'string',
+            format: 'date'
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP']
+        },
+        exchange_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        exchange_rate_date: {
+            type: 'string',
+            format: 'date'
+        },
+        discount_amount: {
+            type: 'number',
+            format: 'float'
+        },
+        discount_type: {
+            type: 'string',
+            enum: ['fixed', 'percentage']
+        },
+        tax_type: {
+            type: 'string',
+            enum: ['none', 'cgst_sgst', 'igst']
+        },
+        cgst_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        sgst_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        igst_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        notes: {
+            type: 'string'
+        },
+        terms: {
+            type: 'string'
+        },
+        primary_color: {
+            type: 'string'
+        },
+        secondary_color: {
+            type: 'string'
+        },
+        line_items: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    id: {
+                        type: 'integer',
+                        format: 'int32'
+                    },
+                    _destroy: {
+                        type: 'boolean'
+                    },
+                    description: {
+                        type: 'string'
+                    },
+                    hsn_sac_code: {
+                        type: 'string'
+                    },
+                    quantity: {
+                        type: 'number',
+                        format: 'float'
+                    },
+                    unit: {
+                        type: 'string'
+                    },
+                    rate: {
+                        type: 'number',
+                        format: 'float'
+                    }
+                },
+                required: ['description', 'rate']
+            }
+        }
+    },
+    description: 'Update an invoice'
+} as const;
+
+export const $postV1SalesInvoicesIdRecordPayment = {
+    type: 'object',
+    properties: {
+        amount: {
+            type: 'number',
+            format: 'float'
+        },
+        payment_date: {
+            type: 'string',
+            format: 'date'
+        },
+        payment_method: {
+            type: 'string'
+        },
+        reference: {
+            type: 'string'
+        }
+    },
+    required: ['amount'],
+    description: 'Record a payment'
+} as const;
+
+export const $postV1SalesInvoicesCalculateGst = {
+    type: 'object',
+    properties: {
+        subtotal: {
+            type: 'number',
+            format: 'float'
+        },
+        seller_state_code: {
+            type: 'string'
+        },
+        buyer_state_code: {
+            type: 'string'
+        },
+        tax_rate: {
+            type: 'number',
+            format: 'float',
+            default: 18
+        }
+    },
+    required: ['subtotal', 'seller_state_code', 'buyer_state_code'],
+    description: 'Calculate GST for invoice'
+} as const;
+
+export const $postV1RecurringInvoices = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        client_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        frequency: {
+            type: 'string',
+            enum: ['weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']
+        },
+        start_date: {
+            type: 'string',
+            format: 'date'
+        },
+        end_date: {
+            type: 'string',
+            format: 'date'
+        },
+        auto_send: {
+            type: 'boolean',
+            default: false
+        },
+        send_days_before_due: {
+            type: 'integer',
+            format: 'int32',
+            default: 0
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP'],
+            default: 'INR'
+        },
+        payment_terms_days: {
+            type: 'integer',
+            format: 'int32',
+            default: 30
+        },
+        tax_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        template_data: {
+            type: 'object',
+            properties: {
+                notes: {
+                    type: 'string'
+                },
+                terms: {
+                    type: 'string'
+                },
+                line_items: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            description: {
+                                type: 'string'
+                            },
+                            hsn_sac_code: {
+                                type: 'string'
+                            },
+                            quantity: {
+                                type: 'number',
+                                format: 'float',
+                                default: 1
+                            },
+                            unit: {
+                                type: 'string',
+                                default: 'units'
+                            },
+                            rate: {
+                                type: 'number',
+                                format: 'float'
+                            }
+                        },
+                        required: ['description', 'rate']
+                    }
+                }
+            },
+            required: ['line_items']
+        }
+    },
+    required: ['name', 'client_id', 'frequency', 'start_date', 'template_data'],
+    description: 'Create a recurring invoice'
+} as const;
+
+export const $patchV1RecurringInvoicesId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        client_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        frequency: {
+            type: 'string',
+            enum: ['weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']
+        },
+        start_date: {
+            type: 'string',
+            format: 'date'
+        },
+        end_date: {
+            type: 'string',
+            format: 'date'
+        },
+        auto_send: {
+            type: 'boolean'
+        },
+        send_days_before_due: {
+            type: 'integer',
+            format: 'int32'
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP']
+        },
+        payment_terms_days: {
+            type: 'integer',
+            format: 'int32'
+        },
+        tax_rate: {
+            type: 'number',
+            format: 'float'
+        },
+        template_data: {
+            type: 'object',
+            properties: {
+                notes: {
+                    type: 'string'
+                },
+                terms: {
+                    type: 'string'
+                },
+                line_items: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            description: {
+                                type: 'string'
+                            },
+                            hsn_sac_code: {
+                                type: 'string'
+                            },
+                            quantity: {
+                                type: 'number',
+                                format: 'float'
+                            },
+                            unit: {
+                                type: 'string'
+                            },
+                            rate: {
+                                type: 'number',
+                                format: 'float'
+                            }
+                        },
+                        required: ['description', 'rate']
+                    }
+                }
+            }
+        }
+    },
+    description: 'Update a recurring invoice'
 } as const;

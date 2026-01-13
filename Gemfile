@@ -43,6 +43,9 @@ gem "redis", "~> 5.0"
 # File Processing & Parsing
 # ============================================
 gem "pdf-reader", "~> 2.11"        # PDF text extraction
+gem "prawn", "~> 2.4"              # PDF generation
+gem "prawn-table", "~> 0.2"        # Tables for PDF invoices
+gem "matrix"                       # Required by prawn in Ruby 3.1+
 gem "roo", "~> 2.10"               # Excel/CSV parsing (fallback for XLS)
 gem "roo-xls", "~> 1.2"            # .xls support
 gem "creek", "~> 2.6"              # TRUE streaming XLSX parser (memory-efficient)
@@ -74,6 +77,8 @@ gem "kaminari", "~> 1.2"
 # ============================================
 gem "hashie"                       # Hash utilities for API
 gem "oj"                           # Fast JSON parsing
+gem "csv"                          # CSV parsing (required in Ruby 3.4+)
+gem "http"                         # HTTP client for exchange rates
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]

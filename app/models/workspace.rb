@@ -20,6 +20,12 @@ class Workspace < ApplicationRecord
   has_many :invoices, dependent: :destroy
   has_many :gmail_connections, dependent: :destroy
 
+  # Sales Invoice associations
+  has_one :business_profile, dependent: :destroy
+  has_many :clients, dependent: :destroy
+  has_many :sales_invoices, dependent: :destroy
+  has_many :recurring_invoices, dependent: :destroy
+
   # Validations
   validates :name, presence: true, length: { maximum: 100 }
   validates :slug, presence: true, uniqueness: true, length: { maximum: 50 }

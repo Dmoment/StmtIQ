@@ -11,7 +11,10 @@ import { Dashboard } from './pages/Dashboard';
 import { Upload } from './pages/Upload';
 import { Transactions } from './pages/Transactions';
 import { Invoices } from './pages/Invoices';
+import { Clients } from './pages/Clients';
+import { CreateInvoice } from './pages/CreateInvoice';
 import { Settings } from './pages/Settings';
+import { RecurringInvoices } from './pages/RecurringInvoices';
 import { Login } from './pages/Login';
 import { SSOCallback } from './pages/SSOCallback';
 import { GmailCallback } from './pages/GmailCallback';
@@ -79,6 +82,10 @@ function App() {
                   <Route path="upload" element={<Upload />} />
                   <Route path="transactions" element={<Transactions />} />
                   <Route path="invoices" element={<Invoices />} />
+                  <Route path="invoices/new" element={<CreateInvoice />} />
+                  <Route path="invoices/:id/edit" element={<CreateInvoice />} />
+                  <Route path="clients" element={<Clients />} />
+                  <Route path="recurring-invoices" element={<RecurringInvoices />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
 

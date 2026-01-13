@@ -20,6 +20,13 @@ module V1
     mount V1::Uploads
     mount V1::Gmail
 
+    # Sales Invoice endpoints
+    mount V1::BusinessProfiles
+    mount V1::Clients
+    mount V1::SalesInvoices
+    mount V1::RecurringInvoices
+    mount V1::ExchangeRates
+
     # Swagger documentation
     add_swagger_documentation(
       api_version: 'v1',

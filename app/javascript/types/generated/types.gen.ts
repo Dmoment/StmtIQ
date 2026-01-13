@@ -74,6 +74,108 @@ export type patchV1UsersMe = {
 };
 
 /**
+ * Complete user onboarding
+ */
+export type postV1OnboardingComplete = {
+    /**
+     * User display name
+     */
+    name: string;
+    /**
+     * Workspace name
+     */
+    workspace_name: string;
+    /**
+     * Workspace type
+     */
+    workspace_type: 'personal' | 'business';
+};
+
+/**
+ * Workspace type
+ */
+export type workspace_type = 'personal' | 'business';
+
+/**
+ * Create a new workspace
+ */
+export type postV1Workspaces = {
+    /**
+     * Workspace name
+     */
+    name: string;
+    /**
+     * Workspace type
+     */
+    workspace_type: 'personal' | 'business';
+    /**
+     * Description
+     */
+    description?: string;
+    /**
+     * Logo URL
+     */
+    logo_url?: string;
+};
+
+/**
+ * Update workspace
+ */
+export type patchV1WorkspacesId = {
+    /**
+     * Workspace name
+     */
+    name?: string;
+    /**
+     * Description
+     */
+    description?: string;
+    /**
+     * Logo URL
+     */
+    logo_url?: string;
+    /**
+     * Settings
+     */
+    settings?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Update member role
+ */
+export type patchV1WorkspacesIdMembersMemberId = {
+    /**
+     * New role
+     */
+    role: 'viewer' | 'member' | 'accountant' | 'admin';
+};
+
+/**
+ * New role
+ */
+export type role = 'viewer' | 'member' | 'accountant' | 'admin';
+
+/**
+ * Invite user to workspace
+ */
+export type postV1WorkspacesIdInvitations = {
+    /**
+     * Email address
+     */
+    email?: string;
+    /**
+     * Phone number
+     */
+    phone_number?: string;
+    /**
+     * Role to assign
+     */
+    role: 'viewer' | 'member' | 'accountant' | 'admin';
+};
+
+/**
  * Create a custom category
  */
 export type postV1Categories = {
@@ -345,6 +447,287 @@ export type V1_Entities_Account = {
     current_balance?: string;
 };
 
+/**
+ * Update Gmail connection settings
+ */
+export type patchV1GmailConnectionsId = {
+    /**
+     * Enable/disable sync
+     */
+    sync_enabled?: boolean;
+};
+
+/**
+ * Create business profile for current workspace
+ */
+export type postV1BusinessProfile = {
+    business_name: string;
+    legal_name?: string;
+    gstin?: string;
+    pan_number?: string;
+    address_line1?: string;
+    address_line2?: string;
+    city?: string;
+    state?: string;
+    state_code?: string;
+    pincode?: string;
+    country?: string;
+    email?: string;
+    phone?: string;
+    bank_name?: string;
+    account_number?: string;
+    ifsc_code?: string;
+    upi_id?: string;
+    primary_color?: string;
+    secondary_color?: string;
+    invoice_prefix?: string;
+    invoice_next_number?: number;
+    default_payment_terms_days?: number;
+    default_notes?: string;
+    default_terms?: string;
+};
+
+/**
+ * Update business profile
+ */
+export type patchV1BusinessProfile = {
+    business_name?: string;
+    legal_name?: string;
+    gstin?: string;
+    pan_number?: string;
+    address_line1?: string;
+    address_line2?: string;
+    city?: string;
+    state?: string;
+    state_code?: string;
+    pincode?: string;
+    country?: string;
+    email?: string;
+    phone?: string;
+    bank_name?: string;
+    account_number?: string;
+    ifsc_code?: string;
+    upi_id?: string;
+    primary_color?: string;
+    secondary_color?: string;
+    invoice_prefix?: string;
+    invoice_next_number?: number;
+    default_payment_terms_days?: number;
+    default_notes?: string;
+    default_terms?: string;
+};
+
+/**
+ * Upload logo
+ */
+export type postV1BusinessProfileLogo = {
+    file: (Blob | File);
+};
+
+/**
+ * Upload signature
+ */
+export type postV1BusinessProfileSignature = {
+    file: (Blob | File);
+};
+
+/**
+ * Create a new client
+ */
+export type postV1Clients = {
+    name: string;
+    email?: string;
+    phone?: string;
+    company_name?: string;
+    gstin?: string;
+    billing_address_line1?: string;
+    billing_address_line2?: string;
+    billing_city?: string;
+    billing_state?: string;
+    billing_state_code?: string;
+    billing_pincode?: string;
+    billing_country?: string;
+    shipping_address_line1?: string;
+    shipping_address_line2?: string;
+    shipping_city?: string;
+    shipping_state?: string;
+    shipping_state_code?: string;
+    shipping_pincode?: string;
+    shipping_country?: string;
+    default_currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+    notes?: string;
+};
+
+export type default_currency = 'INR' | 'USD' | 'EUR' | 'GBP';
+
+/**
+ * Update a client
+ */
+export type patchV1ClientsId = {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company_name?: string;
+    gstin?: string;
+    billing_address_line1?: string;
+    billing_address_line2?: string;
+    billing_city?: string;
+    billing_state?: string;
+    billing_state_code?: string;
+    billing_pincode?: string;
+    billing_country?: string;
+    shipping_address_line1?: string;
+    shipping_address_line2?: string;
+    shipping_city?: string;
+    shipping_state?: string;
+    shipping_state_code?: string;
+    shipping_pincode?: string;
+    shipping_country?: string;
+    default_currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+    notes?: string;
+    is_active?: boolean;
+};
+
+/**
+ * Create a new sales invoice
+ */
+export type postV1SalesInvoices = {
+    client_id: number;
+    invoice_date?: string;
+    due_date?: string;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+    exchange_rate?: number;
+    exchange_rate_date?: string;
+    discount_amount?: number;
+    discount_type?: 'fixed' | 'percentage';
+    tax_type?: 'none' | 'cgst_sgst' | 'igst';
+    cgst_rate?: number;
+    sgst_rate?: number;
+    igst_rate?: number;
+    notes?: string;
+    terms?: string;
+    primary_color?: string;
+    secondary_color?: string;
+    line_items?: Array<{
+        description: string;
+        hsn_sac_code?: string;
+        quantity?: number;
+        unit?: string;
+        rate: number;
+    }>;
+};
+
+export type discount_type = 'fixed' | 'percentage';
+
+export type tax_type = 'none' | 'cgst_sgst' | 'igst';
+
+/**
+ * Update an invoice
+ */
+export type patchV1SalesInvoicesId = {
+    client_id?: number;
+    invoice_date?: string;
+    due_date?: string;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+    exchange_rate?: number;
+    exchange_rate_date?: string;
+    discount_amount?: number;
+    discount_type?: 'fixed' | 'percentage';
+    tax_type?: 'none' | 'cgst_sgst' | 'igst';
+    cgst_rate?: number;
+    sgst_rate?: number;
+    igst_rate?: number;
+    notes?: string;
+    terms?: string;
+    primary_color?: string;
+    secondary_color?: string;
+    line_items?: Array<{
+        id?: number;
+        _destroy?: boolean;
+        description: string;
+        hsn_sac_code?: string;
+        quantity?: number;
+        unit?: string;
+        rate: number;
+    }>;
+};
+
+/**
+ * Record a payment
+ */
+export type postV1SalesInvoicesIdRecordPayment = {
+    amount: number;
+    payment_date?: string;
+    payment_method?: string;
+    reference?: string;
+};
+
+/**
+ * Calculate GST for invoice
+ */
+export type postV1SalesInvoicesCalculateGst = {
+    subtotal: number;
+    seller_state_code: string;
+    buyer_state_code: string;
+    tax_rate?: number;
+};
+
+/**
+ * Create a recurring invoice
+ */
+export type postV1RecurringInvoices = {
+    name: string;
+    client_id: number;
+    frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
+    start_date: string;
+    end_date?: string;
+    auto_send?: boolean;
+    send_days_before_due?: number;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+    payment_terms_days?: number;
+    tax_rate?: number;
+    template_data: {
+        notes?: string;
+        terms?: string;
+        line_items: Array<{
+            description: string;
+            hsn_sac_code?: string;
+            quantity?: number;
+            unit?: string;
+            rate: number;
+        }>;
+    };
+};
+
+export type frequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
+
+/**
+ * Update a recurring invoice
+ */
+export type patchV1RecurringInvoicesId = {
+    name?: string;
+    client_id?: number;
+    frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
+    start_date?: string;
+    end_date?: string;
+    auto_send?: boolean;
+    send_days_before_due?: number;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+    payment_terms_days?: number;
+    tax_rate?: number;
+    template_data?: {
+        notes?: string;
+        terms?: string;
+        line_items?: Array<{
+            description: string;
+            hsn_sac_code?: string;
+            quantity?: number;
+            unit?: string;
+            rate: number;
+        }>;
+    };
+};
+
 export type PostV1AuthSendOtpData = {
     requestBody: postV1AuthSendOtp;
 };
@@ -382,6 +765,156 @@ export type PatchV1UsersMeData = {
 };
 
 export type PatchV1UsersMeResponse = unknown;
+
+export type PostV1OnboardingCompleteData = {
+    requestBody: postV1OnboardingComplete;
+};
+
+export type PostV1OnboardingCompleteResponse = unknown;
+
+export type GetV1OnboardingStatusResponse = unknown;
+
+export type GetV1WorkspacesResponse = unknown;
+
+export type PostV1WorkspacesData = {
+    requestBody: postV1Workspaces;
+};
+
+export type PostV1WorkspacesResponse = unknown;
+
+export type GetV1WorkspacesCurrentResponse = unknown;
+
+export type PostV1WorkspacesIdSwitchData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+};
+
+export type PostV1WorkspacesIdSwitchResponse = unknown;
+
+export type GetV1WorkspacesIdData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+};
+
+export type GetV1WorkspacesIdResponse = unknown;
+
+export type PatchV1WorkspacesIdData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+    requestBody: patchV1WorkspacesId;
+};
+
+export type PatchV1WorkspacesIdResponse = unknown;
+
+export type DeleteV1WorkspacesIdData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+};
+
+export type DeleteV1WorkspacesIdResponse = void;
+
+export type GetV1WorkspacesIdMembersData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+};
+
+export type GetV1WorkspacesIdMembersResponse = unknown;
+
+export type PatchV1WorkspacesIdMembersMemberIdData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+    /**
+     * Member ID
+     */
+    memberId: number;
+    requestBody: patchV1WorkspacesIdMembersMemberId;
+};
+
+export type PatchV1WorkspacesIdMembersMemberIdResponse = unknown;
+
+export type DeleteV1WorkspacesIdMembersMemberIdData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+    /**
+     * Member ID
+     */
+    memberId: number;
+};
+
+export type DeleteV1WorkspacesIdMembersMemberIdResponse = void;
+
+export type PostV1WorkspacesIdLeaveData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+};
+
+export type PostV1WorkspacesIdLeaveResponse = unknown;
+
+export type GetV1WorkspacesIdInvitationsData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+};
+
+export type GetV1WorkspacesIdInvitationsResponse = unknown;
+
+export type PostV1WorkspacesIdInvitationsData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+    requestBody: postV1WorkspacesIdInvitations;
+};
+
+export type PostV1WorkspacesIdInvitationsResponse = unknown;
+
+export type DeleteV1WorkspacesIdInvitationsInvitationIdData = {
+    /**
+     * Workspace ID
+     */
+    id: number;
+    /**
+     * Invitation ID
+     */
+    invitationId: number;
+};
+
+export type DeleteV1WorkspacesIdInvitationsInvitationIdResponse = void;
+
+export type PostV1InvitationsTokenAcceptData = {
+    /**
+     * Invitation token
+     */
+    token: string;
+};
+
+export type PostV1InvitationsTokenAcceptResponse = unknown;
+
+export type GetV1InvitationsTokenData = {
+    /**
+     * Invitation token
+     */
+    token: string;
+};
+
+export type GetV1InvitationsTokenResponse = unknown;
 
 export type GetV1BankTemplatesResponse = unknown;
 
@@ -663,6 +1196,284 @@ export type PostV1UploadsConfirmData = {
 
 export type PostV1UploadsConfirmResponse = V1_Entities_Statement;
 
+export type GetV1GmailAuthResponse = unknown;
+
+export type GetV1GmailCallbackData = {
+    /**
+     * Authorization code from Google
+     */
+    code: string;
+    /**
+     * CSRF state token
+     */
+    state: string;
+};
+
+export type GetV1GmailCallbackResponse = unknown;
+
+export type GetV1GmailConnectionsResponse = unknown;
+
+export type GetV1GmailConnectionsIdData = {
+    /**
+     * Connection ID
+     */
+    id: number;
+};
+
+export type GetV1GmailConnectionsIdResponse = unknown;
+
+export type PatchV1GmailConnectionsIdData = {
+    /**
+     * Connection ID
+     */
+    id: number;
+    requestBody: patchV1GmailConnectionsId;
+};
+
+export type PatchV1GmailConnectionsIdResponse = unknown;
+
+export type DeleteV1GmailConnectionsIdData = {
+    /**
+     * Connection ID
+     */
+    id: number;
+};
+
+export type DeleteV1GmailConnectionsIdResponse = void;
+
+export type PostV1GmailConnectionsIdSyncData = {
+    /**
+     * Connection ID
+     */
+    id: number;
+};
+
+export type PostV1GmailConnectionsIdSyncResponse = unknown;
+
+export type GetV1GmailStatusResponse = unknown;
+
+export type GetV1BusinessProfileResponse = unknown;
+
+export type PostV1BusinessProfileData = {
+    requestBody: postV1BusinessProfile;
+};
+
+export type PostV1BusinessProfileResponse = unknown;
+
+export type PatchV1BusinessProfileData = {
+    requestBody: patchV1BusinessProfile;
+};
+
+export type PatchV1BusinessProfileResponse = unknown;
+
+export type PostV1BusinessProfileLogoData = {
+    requestBody: postV1BusinessProfileLogo;
+};
+
+export type PostV1BusinessProfileLogoResponse = unknown;
+
+export type PostV1BusinessProfileSignatureData = {
+    requestBody: postV1BusinessProfileSignature;
+};
+
+export type PostV1BusinessProfileSignatureResponse = unknown;
+
+export type GetV1ClientsData = {
+    activeOnly?: boolean;
+    page?: number;
+    perPage?: number;
+    search?: string;
+};
+
+export type GetV1ClientsResponse = unknown;
+
+export type PostV1ClientsData = {
+    requestBody: postV1Clients;
+};
+
+export type PostV1ClientsResponse = unknown;
+
+export type GetV1ClientsIdData = {
+    id: number;
+};
+
+export type GetV1ClientsIdResponse = unknown;
+
+export type PatchV1ClientsIdData = {
+    id: number;
+    requestBody: patchV1ClientsId;
+};
+
+export type PatchV1ClientsIdResponse = unknown;
+
+export type DeleteV1ClientsIdData = {
+    id: number;
+};
+
+export type DeleteV1ClientsIdResponse = void;
+
+export type GetV1ClientsIdInvoicesData = {
+    id: number;
+    page?: number;
+    perPage?: number;
+};
+
+export type GetV1ClientsIdInvoicesResponse = unknown;
+
+export type GetV1SalesInvoicesData = {
+    clientId?: number;
+    fromDate?: string;
+    page?: number;
+    perPage?: number;
+    status?: 'draft' | 'sent' | 'viewed' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
+    toDate?: string;
+};
+
+export type GetV1SalesInvoicesResponse = unknown;
+
+export type PostV1SalesInvoicesData = {
+    requestBody: postV1SalesInvoices;
+};
+
+export type PostV1SalesInvoicesResponse = unknown;
+
+export type GetV1SalesInvoicesNextNumberResponse = unknown;
+
+export type GetV1SalesInvoicesStatsResponse = unknown;
+
+export type GetV1SalesInvoicesIdData = {
+    id: number;
+};
+
+export type GetV1SalesInvoicesIdResponse = unknown;
+
+export type PatchV1SalesInvoicesIdData = {
+    id: number;
+    requestBody: patchV1SalesInvoicesId;
+};
+
+export type PatchV1SalesInvoicesIdResponse = unknown;
+
+export type DeleteV1SalesInvoicesIdData = {
+    id: number;
+};
+
+export type DeleteV1SalesInvoicesIdResponse = void;
+
+export type PostV1SalesInvoicesIdSendData = {
+    id: number;
+};
+
+export type PostV1SalesInvoicesIdSendResponse = unknown;
+
+export type PostV1SalesInvoicesIdDuplicateData = {
+    id: number;
+};
+
+export type PostV1SalesInvoicesIdDuplicateResponse = unknown;
+
+export type GetV1SalesInvoicesIdPdfData = {
+    id: number;
+};
+
+export type GetV1SalesInvoicesIdPdfResponse = unknown;
+
+export type PostV1SalesInvoicesIdRecordPaymentData = {
+    id: number;
+    requestBody: postV1SalesInvoicesIdRecordPayment;
+};
+
+export type PostV1SalesInvoicesIdRecordPaymentResponse = unknown;
+
+export type PostV1SalesInvoicesIdCancelData = {
+    id: number;
+};
+
+export type PostV1SalesInvoicesIdCancelResponse = unknown;
+
+export type PostV1SalesInvoicesCalculateGstData = {
+    requestBody: postV1SalesInvoicesCalculateGst;
+};
+
+export type PostV1SalesInvoicesCalculateGstResponse = unknown;
+
+export type GetV1RecurringInvoicesData = {
+    clientId?: number;
+    page?: number;
+    perPage?: number;
+    status?: 'active' | 'paused' | 'completed';
+};
+
+export type GetV1RecurringInvoicesResponse = unknown;
+
+export type PostV1RecurringInvoicesData = {
+    requestBody: postV1RecurringInvoices;
+};
+
+export type PostV1RecurringInvoicesResponse = unknown;
+
+export type GetV1RecurringInvoicesIdData = {
+    id: number;
+};
+
+export type GetV1RecurringInvoicesIdResponse = unknown;
+
+export type PatchV1RecurringInvoicesIdData = {
+    id: number;
+    requestBody: patchV1RecurringInvoicesId;
+};
+
+export type PatchV1RecurringInvoicesIdResponse = unknown;
+
+export type DeleteV1RecurringInvoicesIdData = {
+    id: number;
+};
+
+export type DeleteV1RecurringInvoicesIdResponse = void;
+
+export type PostV1RecurringInvoicesIdPauseData = {
+    id: number;
+};
+
+export type PostV1RecurringInvoicesIdPauseResponse = unknown;
+
+export type PostV1RecurringInvoicesIdResumeData = {
+    id: number;
+};
+
+export type PostV1RecurringInvoicesIdResumeResponse = unknown;
+
+export type PostV1RecurringInvoicesIdGenerateData = {
+    id: number;
+};
+
+export type PostV1RecurringInvoicesIdGenerateResponse = unknown;
+
+export type GetV1RecurringInvoicesIdInvoicesData = {
+    id: number;
+    page?: number;
+    perPage?: number;
+};
+
+export type GetV1RecurringInvoicesIdInvoicesResponse = unknown;
+
+export type GetV1ExchangeRatesCurrentResponse = unknown;
+
+export type GetV1ExchangeRatesConvertData = {
+    amount: number;
+    from: 'INR' | 'USD' | 'EUR' | 'GBP';
+    to: 'INR' | 'USD' | 'EUR' | 'GBP';
+};
+
+export type GetV1ExchangeRatesConvertResponse = unknown;
+
+export type GetV1ExchangeRatesRateData = {
+    from: 'INR' | 'USD' | 'EUR' | 'GBP';
+    to: 'INR' | 'USD' | 'EUR' | 'GBP';
+};
+
+export type GetV1ExchangeRatesRateResponse = unknown;
+
 export type $OpenApiTs = {
     '/v1/auth/send_otp': {
         post: {
@@ -760,6 +1571,275 @@ export type $OpenApiTs = {
             res: {
                 /**
                  * Update current user profile
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/onboarding/complete': {
+        post: {
+            req: {
+                requestBody: postV1OnboardingComplete;
+            };
+            res: {
+                /**
+                 * Complete user onboarding
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/onboarding/status': {
+        get: {
+            res: {
+                /**
+                 * Check onboarding status
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workspaces': {
+        get: {
+            res: {
+                /**
+                 * List all workspaces for current user
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1Workspaces;
+            };
+            res: {
+                /**
+                 * Create a new workspace
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workspaces/current': {
+        get: {
+            res: {
+                /**
+                 * Get current workspace
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workspaces/{id}/switch': {
+        post: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * Switch to a workspace
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workspaces/{id}': {
+        get: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * Get workspace details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+                requestBody: patchV1WorkspacesId;
+            };
+            res: {
+                /**
+                 * Update workspace
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete workspace (soft delete)
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/workspaces/{id}/members': {
+        get: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * List workspace members
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workspaces/{id}/members/{member_id}': {
+        patch: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+                /**
+                 * Member ID
+                 */
+                memberId: number;
+                requestBody: patchV1WorkspacesIdMembersMemberId;
+            };
+            res: {
+                /**
+                 * Update member role
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+                /**
+                 * Member ID
+                 */
+                memberId: number;
+            };
+            res: {
+                /**
+                 * Remove member from workspace
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/workspaces/{id}/leave': {
+        post: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * Leave workspace
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workspaces/{id}/invitations': {
+        get: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * List pending invitations
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+                requestBody: postV1WorkspacesIdInvitations;
+            };
+            res: {
+                /**
+                 * Invite user to workspace
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workspaces/{id}/invitations/{invitation_id}': {
+        delete: {
+            req: {
+                /**
+                 * Workspace ID
+                 */
+                id: number;
+                /**
+                 * Invitation ID
+                 */
+                invitationId: number;
+            };
+            res: {
+                /**
+                 * Revoke invitation
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/invitations/{token}/accept': {
+        post: {
+            req: {
+                /**
+                 * Invitation token
+                 */
+                token: string;
+            };
+            res: {
+                /**
+                 * Accept workspace invitation
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/invitations/{token}': {
+        get: {
+            req: {
+                /**
+                 * Invitation token
+                 */
+                token: string;
+            };
+            res: {
+                /**
+                 * Get invitation details
                  */
                 200: unknown;
             };
@@ -1342,6 +2422,573 @@ export type $OpenApiTs = {
                  * File format mismatch
                  */
                 422: unknown;
+            };
+        };
+    };
+    '/v1/gmail/auth': {
+        get: {
+            res: {
+                /**
+                 * Get Gmail OAuth authorization URL
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/gmail/callback': {
+        get: {
+            req: {
+                /**
+                 * Authorization code from Google
+                 */
+                code: string;
+                /**
+                 * CSRF state token
+                 */
+                state: string;
+            };
+            res: {
+                /**
+                 * Handle Gmail OAuth callback
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/gmail/connections': {
+        get: {
+            res: {
+                /**
+                 * List all Gmail connections
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/gmail/connections/{id}': {
+        get: {
+            req: {
+                /**
+                 * Connection ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * Get a specific Gmail connection
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                /**
+                 * Connection ID
+                 */
+                id: number;
+                requestBody: patchV1GmailConnectionsId;
+            };
+            res: {
+                /**
+                 * Update Gmail connection settings
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                /**
+                 * Connection ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * Disconnect Gmail account
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/gmail/connections/{id}/sync': {
+        post: {
+            req: {
+                /**
+                 * Connection ID
+                 */
+                id: number;
+            };
+            res: {
+                /**
+                 * Trigger manual sync for a Gmail connection
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/gmail/status': {
+        get: {
+            res: {
+                /**
+                 * Check if Gmail integration is available
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/business_profile': {
+        get: {
+            res: {
+                /**
+                 * Get current workspace business profile
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1BusinessProfile;
+            };
+            res: {
+                /**
+                 * Create business profile for current workspace
+                 */
+                201: unknown;
+            };
+        };
+        patch: {
+            req: {
+                requestBody: patchV1BusinessProfile;
+            };
+            res: {
+                /**
+                 * Update business profile
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/business_profile/logo': {
+        post: {
+            req: {
+                requestBody: postV1BusinessProfileLogo;
+            };
+            res: {
+                /**
+                 * Upload logo
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/business_profile/signature': {
+        post: {
+            req: {
+                requestBody: postV1BusinessProfileSignature;
+            };
+            res: {
+                /**
+                 * Upload signature
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/clients': {
+        get: {
+            req: {
+                activeOnly?: boolean;
+                page?: number;
+                perPage?: number;
+                search?: string;
+            };
+            res: {
+                /**
+                 * List clients with filtering and pagination
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1Clients;
+            };
+            res: {
+                /**
+                 * Create a new client
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/clients/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get client details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1ClientsId;
+            };
+            res: {
+                /**
+                 * Update a client
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete a client
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/clients/{id}/invoices': {
+        get: {
+            req: {
+                id: number;
+                page?: number;
+                perPage?: number;
+            };
+            res: {
+                /**
+                 * Get client invoice history
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices': {
+        get: {
+            req: {
+                clientId?: number;
+                fromDate?: string;
+                page?: number;
+                perPage?: number;
+                status?: 'draft' | 'sent' | 'viewed' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
+                toDate?: string;
+            };
+            res: {
+                /**
+                 * List sales invoices with filtering and pagination
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1SalesInvoices;
+            };
+            res: {
+                /**
+                 * Create a new sales invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/next_number': {
+        get: {
+            res: {
+                /**
+                 * Get next invoice number
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/stats': {
+        get: {
+            res: {
+                /**
+                 * Get invoice statistics
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get invoice details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1SalesInvoicesId;
+            };
+            res: {
+                /**
+                 * Update an invoice
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete a draft invoice
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/sales_invoices/{id}/send': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Send invoice to client
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/{id}/duplicate': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Duplicate an invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/{id}/pdf': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Download invoice PDF
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/{id}/record_payment': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1SalesInvoicesIdRecordPayment;
+            };
+            res: {
+                /**
+                 * Record a payment
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/{id}/cancel': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Cancel an invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/sales_invoices/calculate_gst': {
+        post: {
+            req: {
+                requestBody: postV1SalesInvoicesCalculateGst;
+            };
+            res: {
+                /**
+                 * Calculate GST for invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/recurring_invoices': {
+        get: {
+            req: {
+                clientId?: number;
+                page?: number;
+                perPage?: number;
+                status?: 'active' | 'paused' | 'completed';
+            };
+            res: {
+                /**
+                 * List recurring invoices
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1RecurringInvoices;
+            };
+            res: {
+                /**
+                 * Create a recurring invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/recurring_invoices/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get recurring invoice details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1RecurringInvoicesId;
+            };
+            res: {
+                /**
+                 * Update a recurring invoice
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete a recurring invoice
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/recurring_invoices/{id}/pause': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Pause a recurring invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/recurring_invoices/{id}/resume': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Resume a recurring invoice
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/recurring_invoices/{id}/generate': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Generate invoice now (manual trigger)
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/recurring_invoices/{id}/invoices': {
+        get: {
+            req: {
+                id: number;
+                page?: number;
+                perPage?: number;
+            };
+            res: {
+                /**
+                 * Get generated invoices for this recurring schedule
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/exchange_rates/current': {
+        get: {
+            res: {
+                /**
+                 * Get current exchange rates
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/exchange_rates/convert': {
+        get: {
+            req: {
+                amount: number;
+                from: 'INR' | 'USD' | 'EUR' | 'GBP';
+                to: 'INR' | 'USD' | 'EUR' | 'GBP';
+            };
+            res: {
+                /**
+                 * Convert amount between currencies
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/exchange_rates/rate': {
+        get: {
+            req: {
+                from: 'INR' | 'USD' | 'EUR' | 'GBP';
+                to: 'INR' | 'USD' | 'EUR' | 'GBP';
+            };
+            res: {
+                /**
+                 * Get rate for a specific currency pair
+                 */
+                200: unknown;
             };
         };
     };

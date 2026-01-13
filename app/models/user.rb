@@ -17,6 +17,11 @@ class User < ApplicationRecord
   has_many :invoices, dependent: :destroy
   has_many :gmail_connections, dependent: :destroy
 
+  # Sales Invoice Associations
+  has_many :clients, dependent: :destroy
+  has_many :sales_invoices, dependent: :destroy
+  has_many :recurring_invoices, dependent: :destroy
+
   # Validations
   validates :clerk_id, uniqueness: true, allow_nil: true
   validates :phone_number,

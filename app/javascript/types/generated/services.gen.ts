@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1StatementsIdProgressData, GetV1StatementsIdProgressResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsData, GetV1TransactionsStatsResponse, GetV1TransactionsCategorizationProgressResponse, PostV1TransactionsCategorizeData, PostV1TransactionsCategorizeResponse, PostV1TransactionsIdFeedbackData, PostV1TransactionsIdFeedbackResponse, GetV1TransactionsRulesResponse, DeleteV1TransactionsRulesRuleIdData, DeleteV1TransactionsRulesRuleIdResponse, GetV1InvoicesData, GetV1InvoicesResponse, PostV1InvoicesData, PostV1InvoicesResponse, PostV1InvoicesUploadData, PostV1InvoicesUploadResponse, GetV1InvoicesIdData, GetV1InvoicesIdResponse, PatchV1InvoicesIdData, PatchV1InvoicesIdResponse, DeleteV1InvoicesIdData, DeleteV1InvoicesIdResponse, GetV1InvoicesIdSuggestionsData, GetV1InvoicesIdSuggestionsResponse, PostV1InvoicesIdLinkData, PostV1InvoicesIdLinkResponse, PostV1InvoicesIdUnlinkData, PostV1InvoicesIdUnlinkResponse, PostV1InvoicesIdRetryData, PostV1InvoicesIdRetryResponse, GetV1InvoicesStatsResponse, PostV1UploadsPresignData, PostV1UploadsPresignResponse, PostV1UploadsConfirmData, PostV1UploadsConfirmResponse } from './types.gen';
+import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, PostV1OnboardingCompleteData, PostV1OnboardingCompleteResponse, GetV1OnboardingStatusResponse, GetV1WorkspacesResponse, PostV1WorkspacesData, PostV1WorkspacesResponse, GetV1WorkspacesCurrentResponse, PostV1WorkspacesIdSwitchData, PostV1WorkspacesIdSwitchResponse, GetV1WorkspacesIdData, GetV1WorkspacesIdResponse, PatchV1WorkspacesIdData, PatchV1WorkspacesIdResponse, DeleteV1WorkspacesIdData, DeleteV1WorkspacesIdResponse, GetV1WorkspacesIdMembersData, GetV1WorkspacesIdMembersResponse, PatchV1WorkspacesIdMembersMemberIdData, PatchV1WorkspacesIdMembersMemberIdResponse, DeleteV1WorkspacesIdMembersMemberIdData, DeleteV1WorkspacesIdMembersMemberIdResponse, PostV1WorkspacesIdLeaveData, PostV1WorkspacesIdLeaveResponse, GetV1WorkspacesIdInvitationsData, GetV1WorkspacesIdInvitationsResponse, PostV1WorkspacesIdInvitationsData, PostV1WorkspacesIdInvitationsResponse, DeleteV1WorkspacesIdInvitationsInvitationIdData, DeleteV1WorkspacesIdInvitationsInvitationIdResponse, PostV1InvitationsTokenAcceptData, PostV1InvitationsTokenAcceptResponse, GetV1InvitationsTokenData, GetV1InvitationsTokenResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1StatementsIdProgressData, GetV1StatementsIdProgressResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsData, GetV1TransactionsStatsResponse, GetV1TransactionsCategorizationProgressResponse, PostV1TransactionsCategorizeData, PostV1TransactionsCategorizeResponse, PostV1TransactionsIdFeedbackData, PostV1TransactionsIdFeedbackResponse, GetV1TransactionsRulesResponse, DeleteV1TransactionsRulesRuleIdData, DeleteV1TransactionsRulesRuleIdResponse, GetV1InvoicesData, GetV1InvoicesResponse, PostV1InvoicesData, PostV1InvoicesResponse, PostV1InvoicesUploadData, PostV1InvoicesUploadResponse, GetV1InvoicesIdData, GetV1InvoicesIdResponse, PatchV1InvoicesIdData, PatchV1InvoicesIdResponse, DeleteV1InvoicesIdData, DeleteV1InvoicesIdResponse, GetV1InvoicesIdSuggestionsData, GetV1InvoicesIdSuggestionsResponse, PostV1InvoicesIdLinkData, PostV1InvoicesIdLinkResponse, PostV1InvoicesIdUnlinkData, PostV1InvoicesIdUnlinkResponse, PostV1InvoicesIdRetryData, PostV1InvoicesIdRetryResponse, GetV1InvoicesStatsResponse, PostV1UploadsPresignData, PostV1UploadsPresignResponse, PostV1UploadsConfirmData, PostV1UploadsConfirmResponse, GetV1GmailAuthResponse, GetV1GmailCallbackData, GetV1GmailCallbackResponse, GetV1GmailConnectionsResponse, GetV1GmailConnectionsIdData, GetV1GmailConnectionsIdResponse, PatchV1GmailConnectionsIdData, PatchV1GmailConnectionsIdResponse, DeleteV1GmailConnectionsIdData, DeleteV1GmailConnectionsIdResponse, PostV1GmailConnectionsIdSyncData, PostV1GmailConnectionsIdSyncResponse, GetV1GmailStatusResponse, GetV1BusinessProfileResponse, PostV1BusinessProfileData, PostV1BusinessProfileResponse, PatchV1BusinessProfileData, PatchV1BusinessProfileResponse, PostV1BusinessProfileLogoData, PostV1BusinessProfileLogoResponse, PostV1BusinessProfileSignatureData, PostV1BusinessProfileSignatureResponse, GetV1ClientsData, GetV1ClientsResponse, PostV1ClientsData, PostV1ClientsResponse, GetV1ClientsIdData, GetV1ClientsIdResponse, PatchV1ClientsIdData, PatchV1ClientsIdResponse, DeleteV1ClientsIdData, DeleteV1ClientsIdResponse, GetV1ClientsIdInvoicesData, GetV1ClientsIdInvoicesResponse, GetV1SalesInvoicesData, GetV1SalesInvoicesResponse, PostV1SalesInvoicesData, PostV1SalesInvoicesResponse, GetV1SalesInvoicesNextNumberResponse, GetV1SalesInvoicesStatsResponse, GetV1SalesInvoicesIdData, GetV1SalesInvoicesIdResponse, PatchV1SalesInvoicesIdData, PatchV1SalesInvoicesIdResponse, DeleteV1SalesInvoicesIdData, DeleteV1SalesInvoicesIdResponse, PostV1SalesInvoicesIdSendData, PostV1SalesInvoicesIdSendResponse, PostV1SalesInvoicesIdDuplicateData, PostV1SalesInvoicesIdDuplicateResponse, GetV1SalesInvoicesIdPdfData, GetV1SalesInvoicesIdPdfResponse, PostV1SalesInvoicesIdRecordPaymentData, PostV1SalesInvoicesIdRecordPaymentResponse, PostV1SalesInvoicesIdCancelData, PostV1SalesInvoicesIdCancelResponse, PostV1SalesInvoicesCalculateGstData, PostV1SalesInvoicesCalculateGstResponse, GetV1RecurringInvoicesData, GetV1RecurringInvoicesResponse, PostV1RecurringInvoicesData, PostV1RecurringInvoicesResponse, GetV1RecurringInvoicesIdData, GetV1RecurringInvoicesIdResponse, PatchV1RecurringInvoicesIdData, PatchV1RecurringInvoicesIdResponse, DeleteV1RecurringInvoicesIdData, DeleteV1RecurringInvoicesIdResponse, PostV1RecurringInvoicesIdPauseData, PostV1RecurringInvoicesIdPauseResponse, PostV1RecurringInvoicesIdResumeData, PostV1RecurringInvoicesIdResumeResponse, PostV1RecurringInvoicesIdGenerateData, PostV1RecurringInvoicesIdGenerateResponse, GetV1RecurringInvoicesIdInvoicesData, GetV1RecurringInvoicesIdInvoicesResponse, GetV1ExchangeRatesCurrentResponse, GetV1ExchangeRatesConvertData, GetV1ExchangeRatesConvertResponse, GetV1ExchangeRatesRateData, GetV1ExchangeRatesRateResponse } from './types.gen';
 
 export class AuthService {
     /**
@@ -137,6 +137,319 @@ export class UsersService {
             url: '/v1/users/me',
             body: data.requestBody,
             mediaType: 'application/json'
+        });
+    }
+    
+}
+
+export class OnboardingService {
+    /**
+     * Complete user onboarding
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Complete user onboarding
+     * @throws ApiError
+     */
+    public static postV1OnboardingComplete(data: PostV1OnboardingCompleteData): CancelablePromise<PostV1OnboardingCompleteResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/onboarding/complete',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Check onboarding status
+     * @returns unknown Check onboarding status
+     * @throws ApiError
+     */
+    public static getV1OnboardingStatus(): CancelablePromise<GetV1OnboardingStatusResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/onboarding/status'
+        });
+    }
+    
+}
+
+export class WorkspacesService {
+    /**
+     * List all workspaces for current user
+     * @returns unknown List all workspaces for current user
+     * @throws ApiError
+     */
+    public static getV1Workspaces(): CancelablePromise<GetV1WorkspacesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workspaces'
+        });
+    }
+    
+    /**
+     * Create a new workspace
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create a new workspace
+     * @throws ApiError
+     */
+    public static postV1Workspaces(data: PostV1WorkspacesData): CancelablePromise<PostV1WorkspacesResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workspaces',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get current workspace
+     * @returns unknown Get current workspace
+     * @throws ApiError
+     */
+    public static getV1WorkspacesCurrent(): CancelablePromise<GetV1WorkspacesCurrentResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workspaces/current'
+        });
+    }
+    
+    /**
+     * Switch to a workspace
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @returns unknown Switch to a workspace
+     * @throws ApiError
+     */
+    public static postV1WorkspacesIdSwitch(data: PostV1WorkspacesIdSwitchData): CancelablePromise<PostV1WorkspacesIdSwitchResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workspaces/{id}/switch',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Get workspace details
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @returns unknown Get workspace details
+     * @throws ApiError
+     */
+    public static getV1WorkspacesId(data: GetV1WorkspacesIdData): CancelablePromise<GetV1WorkspacesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workspaces/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update workspace
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @param data.requestBody
+     * @returns unknown Update workspace
+     * @throws ApiError
+     */
+    public static patchV1WorkspacesId(data: PatchV1WorkspacesIdData): CancelablePromise<PatchV1WorkspacesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/workspaces/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete workspace (soft delete)
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @returns void Delete workspace (soft delete)
+     * @throws ApiError
+     */
+    public static deleteV1WorkspacesId(data: DeleteV1WorkspacesIdData): CancelablePromise<DeleteV1WorkspacesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/workspaces/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * List workspace members
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @returns unknown List workspace members
+     * @throws ApiError
+     */
+    public static getV1WorkspacesIdMembers(data: GetV1WorkspacesIdMembersData): CancelablePromise<GetV1WorkspacesIdMembersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workspaces/{id}/members',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update member role
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @param data.memberId Member ID
+     * @param data.requestBody
+     * @returns unknown Update member role
+     * @throws ApiError
+     */
+    public static patchV1WorkspacesIdMembersMemberId(data: PatchV1WorkspacesIdMembersMemberIdData): CancelablePromise<PatchV1WorkspacesIdMembersMemberIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/workspaces/{id}/members/{member_id}',
+            path: {
+                id: data.id,
+                member_id: data.memberId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Remove member from workspace
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @param data.memberId Member ID
+     * @returns void Remove member from workspace
+     * @throws ApiError
+     */
+    public static deleteV1WorkspacesIdMembersMemberId(data: DeleteV1WorkspacesIdMembersMemberIdData): CancelablePromise<DeleteV1WorkspacesIdMembersMemberIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/workspaces/{id}/members/{member_id}',
+            path: {
+                id: data.id,
+                member_id: data.memberId
+            }
+        });
+    }
+    
+    /**
+     * Leave workspace
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @returns unknown Leave workspace
+     * @throws ApiError
+     */
+    public static postV1WorkspacesIdLeave(data: PostV1WorkspacesIdLeaveData): CancelablePromise<PostV1WorkspacesIdLeaveResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workspaces/{id}/leave',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * List pending invitations
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @returns unknown List pending invitations
+     * @throws ApiError
+     */
+    public static getV1WorkspacesIdInvitations(data: GetV1WorkspacesIdInvitationsData): CancelablePromise<GetV1WorkspacesIdInvitationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workspaces/{id}/invitations',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Invite user to workspace
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @param data.requestBody
+     * @returns unknown Invite user to workspace
+     * @throws ApiError
+     */
+    public static postV1WorkspacesIdInvitations(data: PostV1WorkspacesIdInvitationsData): CancelablePromise<PostV1WorkspacesIdInvitationsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workspaces/{id}/invitations',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Revoke invitation
+     * @param data The data for the request.
+     * @param data.id Workspace ID
+     * @param data.invitationId Invitation ID
+     * @returns void Revoke invitation
+     * @throws ApiError
+     */
+    public static deleteV1WorkspacesIdInvitationsInvitationId(data: DeleteV1WorkspacesIdInvitationsInvitationIdData): CancelablePromise<DeleteV1WorkspacesIdInvitationsInvitationIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/workspaces/{id}/invitations/{invitation_id}',
+            path: {
+                id: data.id,
+                invitation_id: data.invitationId
+            }
+        });
+    }
+    
+}
+
+export class InvitationsService {
+    /**
+     * Accept workspace invitation
+     * @param data The data for the request.
+     * @param data.token Invitation token
+     * @returns unknown Accept workspace invitation
+     * @throws ApiError
+     */
+    public static postV1InvitationsTokenAccept(data: PostV1InvitationsTokenAcceptData): CancelablePromise<PostV1InvitationsTokenAcceptResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/invitations/{token}/accept',
+            path: {
+                token: data.token
+            }
+        });
+    }
+    
+    /**
+     * Get invitation details
+     * @param data The data for the request.
+     * @param data.token Invitation token
+     * @returns unknown Get invitation details
+     * @throws ApiError
+     */
+    public static getV1InvitationsToken(data: GetV1InvitationsTokenData): CancelablePromise<GetV1InvitationsTokenResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/invitations/{token}',
+            path: {
+                token: data.token
+            }
         });
     }
     
@@ -924,6 +1237,786 @@ export class UploadsService {
             errors: {
                 404: 'Upload not found in S3',
                 422: 'File format mismatch'
+            }
+        });
+    }
+    
+}
+
+export class GmailService {
+    /**
+     * Get Gmail OAuth authorization URL
+     * @returns unknown Get Gmail OAuth authorization URL
+     * @throws ApiError
+     */
+    public static getV1GmailAuth(): CancelablePromise<GetV1GmailAuthResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gmail/auth'
+        });
+    }
+    
+    /**
+     * Handle Gmail OAuth callback
+     * @param data The data for the request.
+     * @param data.code Authorization code from Google
+     * @param data.state CSRF state token
+     * @returns unknown Handle Gmail OAuth callback
+     * @throws ApiError
+     */
+    public static getV1GmailCallback(data: GetV1GmailCallbackData): CancelablePromise<GetV1GmailCallbackResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gmail/callback',
+            query: {
+                code: data.code,
+                state: data.state
+            }
+        });
+    }
+    
+    /**
+     * List all Gmail connections
+     * @returns unknown List all Gmail connections
+     * @throws ApiError
+     */
+    public static getV1GmailConnections(): CancelablePromise<GetV1GmailConnectionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gmail/connections'
+        });
+    }
+    
+    /**
+     * Get a specific Gmail connection
+     * @param data The data for the request.
+     * @param data.id Connection ID
+     * @returns unknown Get a specific Gmail connection
+     * @throws ApiError
+     */
+    public static getV1GmailConnectionsId(data: GetV1GmailConnectionsIdData): CancelablePromise<GetV1GmailConnectionsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gmail/connections/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update Gmail connection settings
+     * @param data The data for the request.
+     * @param data.id Connection ID
+     * @param data.requestBody
+     * @returns unknown Update Gmail connection settings
+     * @throws ApiError
+     */
+    public static patchV1GmailConnectionsId(data: PatchV1GmailConnectionsIdData): CancelablePromise<PatchV1GmailConnectionsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/gmail/connections/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Disconnect Gmail account
+     * @param data The data for the request.
+     * @param data.id Connection ID
+     * @returns void Disconnect Gmail account
+     * @throws ApiError
+     */
+    public static deleteV1GmailConnectionsId(data: DeleteV1GmailConnectionsIdData): CancelablePromise<DeleteV1GmailConnectionsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/gmail/connections/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Trigger manual sync for a Gmail connection
+     * @param data The data for the request.
+     * @param data.id Connection ID
+     * @returns unknown Trigger manual sync for a Gmail connection
+     * @throws ApiError
+     */
+    public static postV1GmailConnectionsIdSync(data: PostV1GmailConnectionsIdSyncData): CancelablePromise<PostV1GmailConnectionsIdSyncResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/gmail/connections/{id}/sync',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Check if Gmail integration is available
+     * @returns unknown Check if Gmail integration is available
+     * @throws ApiError
+     */
+    public static getV1GmailStatus(): CancelablePromise<GetV1GmailStatusResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gmail/status'
+        });
+    }
+    
+}
+
+export class BusinessProfileService {
+    /**
+     * Get current workspace business profile
+     * @returns unknown Get current workspace business profile
+     * @throws ApiError
+     */
+    public static getV1BusinessProfile(): CancelablePromise<GetV1BusinessProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/business_profile'
+        });
+    }
+    
+    /**
+     * Create business profile for current workspace
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create business profile for current workspace
+     * @throws ApiError
+     */
+    public static postV1BusinessProfile(data: PostV1BusinessProfileData): CancelablePromise<PostV1BusinessProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/business_profile',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Update business profile
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Update business profile
+     * @throws ApiError
+     */
+    public static patchV1BusinessProfile(data: PatchV1BusinessProfileData): CancelablePromise<PatchV1BusinessProfileResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/business_profile',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Upload logo
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Upload logo
+     * @throws ApiError
+     */
+    public static postV1BusinessProfileLogo(data: PostV1BusinessProfileLogoData): CancelablePromise<PostV1BusinessProfileLogoResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/business_profile/logo',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Upload signature
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Upload signature
+     * @throws ApiError
+     */
+    public static postV1BusinessProfileSignature(data: PostV1BusinessProfileSignatureData): CancelablePromise<PostV1BusinessProfileSignatureResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/business_profile/signature',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+}
+
+export class ClientsService {
+    /**
+     * List clients with filtering and pagination
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @param data.search
+     * @param data.activeOnly
+     * @returns unknown List clients with filtering and pagination
+     * @throws ApiError
+     */
+    public static getV1Clients(data: GetV1ClientsData = {}): CancelablePromise<GetV1ClientsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/clients',
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                search: data.search,
+                active_only: data.activeOnly
+            }
+        });
+    }
+    
+    /**
+     * Create a new client
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create a new client
+     * @throws ApiError
+     */
+    public static postV1Clients(data: PostV1ClientsData): CancelablePromise<PostV1ClientsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/clients',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get client details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get client details
+     * @throws ApiError
+     */
+    public static getV1ClientsId(data: GetV1ClientsIdData): CancelablePromise<GetV1ClientsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/clients/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update a client
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update a client
+     * @throws ApiError
+     */
+    public static patchV1ClientsId(data: PatchV1ClientsIdData): CancelablePromise<PatchV1ClientsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/clients/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a client
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete a client
+     * @throws ApiError
+     */
+    public static deleteV1ClientsId(data: DeleteV1ClientsIdData): CancelablePromise<DeleteV1ClientsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/clients/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Get client invoice history
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.page
+     * @param data.perPage
+     * @returns unknown Get client invoice history
+     * @throws ApiError
+     */
+    public static getV1ClientsIdInvoices(data: GetV1ClientsIdInvoicesData): CancelablePromise<GetV1ClientsIdInvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/clients/{id}/invoices',
+            path: {
+                id: data.id
+            },
+            query: {
+                page: data.page,
+                per_page: data.perPage
+            }
+        });
+    }
+    
+}
+
+export class SalesInvoicesService {
+    /**
+     * List sales invoices with filtering and pagination
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @param data.status
+     * @param data.clientId
+     * @param data.fromDate
+     * @param data.toDate
+     * @returns unknown List sales invoices with filtering and pagination
+     * @throws ApiError
+     */
+    public static getV1SalesInvoices(data: GetV1SalesInvoicesData = {}): CancelablePromise<GetV1SalesInvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/sales_invoices',
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                status: data.status,
+                client_id: data.clientId,
+                from_date: data.fromDate,
+                to_date: data.toDate
+            }
+        });
+    }
+    
+    /**
+     * Create a new sales invoice
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create a new sales invoice
+     * @throws ApiError
+     */
+    public static postV1SalesInvoices(data: PostV1SalesInvoicesData): CancelablePromise<PostV1SalesInvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/sales_invoices',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get next invoice number
+     * @returns unknown Get next invoice number
+     * @throws ApiError
+     */
+    public static getV1SalesInvoicesNextNumber(): CancelablePromise<GetV1SalesInvoicesNextNumberResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/sales_invoices/next_number'
+        });
+    }
+    
+    /**
+     * Get invoice statistics
+     * @returns unknown Get invoice statistics
+     * @throws ApiError
+     */
+    public static getV1SalesInvoicesStats(): CancelablePromise<GetV1SalesInvoicesStatsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/sales_invoices/stats'
+        });
+    }
+    
+    /**
+     * Get invoice details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get invoice details
+     * @throws ApiError
+     */
+    public static getV1SalesInvoicesId(data: GetV1SalesInvoicesIdData): CancelablePromise<GetV1SalesInvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/sales_invoices/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update an invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update an invoice
+     * @throws ApiError
+     */
+    public static patchV1SalesInvoicesId(data: PatchV1SalesInvoicesIdData): CancelablePromise<PatchV1SalesInvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/sales_invoices/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a draft invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete a draft invoice
+     * @throws ApiError
+     */
+    public static deleteV1SalesInvoicesId(data: DeleteV1SalesInvoicesIdData): CancelablePromise<DeleteV1SalesInvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/sales_invoices/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Send invoice to client
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Send invoice to client
+     * @throws ApiError
+     */
+    public static postV1SalesInvoicesIdSend(data: PostV1SalesInvoicesIdSendData): CancelablePromise<PostV1SalesInvoicesIdSendResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/sales_invoices/{id}/send',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Duplicate an invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Duplicate an invoice
+     * @throws ApiError
+     */
+    public static postV1SalesInvoicesIdDuplicate(data: PostV1SalesInvoicesIdDuplicateData): CancelablePromise<PostV1SalesInvoicesIdDuplicateResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/sales_invoices/{id}/duplicate',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Download invoice PDF
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Download invoice PDF
+     * @throws ApiError
+     */
+    public static getV1SalesInvoicesIdPdf(data: GetV1SalesInvoicesIdPdfData): CancelablePromise<GetV1SalesInvoicesIdPdfResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/sales_invoices/{id}/pdf',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Record a payment
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Record a payment
+     * @throws ApiError
+     */
+    public static postV1SalesInvoicesIdRecordPayment(data: PostV1SalesInvoicesIdRecordPaymentData): CancelablePromise<PostV1SalesInvoicesIdRecordPaymentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/sales_invoices/{id}/record_payment',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Cancel an invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Cancel an invoice
+     * @throws ApiError
+     */
+    public static postV1SalesInvoicesIdCancel(data: PostV1SalesInvoicesIdCancelData): CancelablePromise<PostV1SalesInvoicesIdCancelResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/sales_invoices/{id}/cancel',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Calculate GST for invoice
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Calculate GST for invoice
+     * @throws ApiError
+     */
+    public static postV1SalesInvoicesCalculateGst(data: PostV1SalesInvoicesCalculateGstData): CancelablePromise<PostV1SalesInvoicesCalculateGstResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/sales_invoices/calculate_gst',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+}
+
+export class RecurringInvoicesService {
+    /**
+     * List recurring invoices
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @param data.status
+     * @param data.clientId
+     * @returns unknown List recurring invoices
+     * @throws ApiError
+     */
+    public static getV1RecurringInvoices(data: GetV1RecurringInvoicesData = {}): CancelablePromise<GetV1RecurringInvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/recurring_invoices',
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                status: data.status,
+                client_id: data.clientId
+            }
+        });
+    }
+    
+    /**
+     * Create a recurring invoice
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create a recurring invoice
+     * @throws ApiError
+     */
+    public static postV1RecurringInvoices(data: PostV1RecurringInvoicesData): CancelablePromise<PostV1RecurringInvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/recurring_invoices',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get recurring invoice details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get recurring invoice details
+     * @throws ApiError
+     */
+    public static getV1RecurringInvoicesId(data: GetV1RecurringInvoicesIdData): CancelablePromise<GetV1RecurringInvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/recurring_invoices/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update a recurring invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update a recurring invoice
+     * @throws ApiError
+     */
+    public static patchV1RecurringInvoicesId(data: PatchV1RecurringInvoicesIdData): CancelablePromise<PatchV1RecurringInvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/recurring_invoices/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a recurring invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete a recurring invoice
+     * @throws ApiError
+     */
+    public static deleteV1RecurringInvoicesId(data: DeleteV1RecurringInvoicesIdData): CancelablePromise<DeleteV1RecurringInvoicesIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/recurring_invoices/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Pause a recurring invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Pause a recurring invoice
+     * @throws ApiError
+     */
+    public static postV1RecurringInvoicesIdPause(data: PostV1RecurringInvoicesIdPauseData): CancelablePromise<PostV1RecurringInvoicesIdPauseResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/recurring_invoices/{id}/pause',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Resume a recurring invoice
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Resume a recurring invoice
+     * @throws ApiError
+     */
+    public static postV1RecurringInvoicesIdResume(data: PostV1RecurringInvoicesIdResumeData): CancelablePromise<PostV1RecurringInvoicesIdResumeResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/recurring_invoices/{id}/resume',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Generate invoice now (manual trigger)
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Generate invoice now (manual trigger)
+     * @throws ApiError
+     */
+    public static postV1RecurringInvoicesIdGenerate(data: PostV1RecurringInvoicesIdGenerateData): CancelablePromise<PostV1RecurringInvoicesIdGenerateResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/recurring_invoices/{id}/generate',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Get generated invoices for this recurring schedule
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.page
+     * @param data.perPage
+     * @returns unknown Get generated invoices for this recurring schedule
+     * @throws ApiError
+     */
+    public static getV1RecurringInvoicesIdInvoices(data: GetV1RecurringInvoicesIdInvoicesData): CancelablePromise<GetV1RecurringInvoicesIdInvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/recurring_invoices/{id}/invoices',
+            path: {
+                id: data.id
+            },
+            query: {
+                page: data.page,
+                per_page: data.perPage
+            }
+        });
+    }
+    
+}
+
+export class ExchangeRatesService {
+    /**
+     * Get current exchange rates
+     * @returns unknown Get current exchange rates
+     * @throws ApiError
+     */
+    public static getV1ExchangeRatesCurrent(): CancelablePromise<GetV1ExchangeRatesCurrentResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/exchange_rates/current'
+        });
+    }
+    
+    /**
+     * Convert amount between currencies
+     * @param data The data for the request.
+     * @param data.amount
+     * @param data.from
+     * @param data.to
+     * @returns unknown Convert amount between currencies
+     * @throws ApiError
+     */
+    public static getV1ExchangeRatesConvert(data: GetV1ExchangeRatesConvertData): CancelablePromise<GetV1ExchangeRatesConvertResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/exchange_rates/convert',
+            query: {
+                amount: data.amount,
+                from: data.from,
+                to: data.to
+            }
+        });
+    }
+    
+    /**
+     * Get rate for a specific currency pair
+     * @param data The data for the request.
+     * @param data.from
+     * @param data.to
+     * @returns unknown Get rate for a specific currency pair
+     * @throws ApiError
+     */
+    public static getV1ExchangeRatesRate(data: GetV1ExchangeRatesRateData): CancelablePromise<GetV1ExchangeRatesRateResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/exchange_rates/rate',
+            query: {
+                from: data.from,
+                to: data.to
             }
         });
     }

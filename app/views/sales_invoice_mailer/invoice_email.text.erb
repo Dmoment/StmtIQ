@@ -1,0 +1,31 @@
+Invoice from <%= @profile.business_name %>
+
+Dear <%= @client.display_name %>,
+
+Please find attached invoice <%= @invoice.invoice_number %> for your review.
+
+INVOICE DETAILS
+---------------
+Invoice Number: <%= @invoice.invoice_number %>
+Invoice Date: <%= @invoice.invoice_date.strftime('%d %B %Y') %>
+Due Date: <%= @invoice.due_date.strftime('%d %B %Y') %>
+Total Amount: <%= @invoice.currency %> <%= @invoice.total_amount %>
+Amount Due: <%= @invoice.currency %> <%= @invoice.balance_due %>
+
+<% if @profile.bank_name.present? %>
+BANK DETAILS FOR PAYMENT
+------------------------
+<% if @profile.bank_name.present? %>Bank: <%= @profile.bank_name %>
+<% end %><% if @profile.account_number.present? %>Account: <%= @profile.account_number %>
+<% end %><% if @profile.ifsc_code.present? %>IFSC: <%= @profile.ifsc_code %>
+<% end %><% if @profile.upi_id.present? %>UPI: <%= @profile.upi_id %>
+<% end %>
+<% end %>
+
+If you have any questions about this invoice, please contact us.
+
+Thank you for your business!
+
+Best regards,
+<%= @profile.business_name %>
+<% if @profile.gstin.present? %>GSTIN: <%= @profile.gstin %><% end %>

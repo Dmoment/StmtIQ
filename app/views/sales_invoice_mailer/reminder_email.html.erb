@@ -1,0 +1,39 @@
+<div class="header">
+  <h1 style="margin: 0; color: #1e293b;"><%= @profile.business_name %></h1>
+</div>
+
+<div class="content">
+  <p>Dear <%= @client.display_name %>,</p>
+
+  <p>This is a friendly reminder that payment for invoice <strong><%= @invoice.invoice_number %></strong> is <% if @days_overdue > 0 %>now <%= @days_overdue %> days overdue<% else %>due soon<% end %>.</p>
+
+  <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border-left: 4px solid #ef4444;">
+    <p style="margin: 0; color: #666;">Outstanding Amount</p>
+    <p class="amount" style="color: #ef4444;"><%= @invoice.currency %> <%= number_with_delimiter(@invoice.balance_due, delimiter: ',') %></p>
+    <p style="margin: 5px 0 0; color: #666;">Due Date: <%= @invoice.due_date.strftime('%d %B %Y') %></p>
+  </div>
+
+  <p>Please arrange payment at your earliest convenience. The invoice is attached for your reference.</p>
+
+  <% if @profile.bank_name.present? %>
+  <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <p style="margin: 0 0 10px; font-weight: 600;">Bank Details for Payment:</p>
+    <p style="margin: 0; font-size: 13px;">
+      <% if @profile.bank_name.present? %>Bank: <%= @profile.bank_name %><br><% end %>
+      <% if @profile.account_number.present? %>Account: <%= @profile.account_number %><br><% end %>
+      <% if @profile.ifsc_code.present? %>IFSC: <%= @profile.ifsc_code %><br><% end %>
+      <% if @profile.upi_id.present? %>UPI: <%= @profile.upi_id %><% end %>
+    </p>
+  </div>
+  <% end %>
+
+  <p>If you have already made this payment, please disregard this reminder.</p>
+
+  <p>Thank you for your prompt attention to this matter.</p>
+
+  <p>Best regards,<br><strong><%= @profile.business_name %></strong></p>
+</div>
+
+<div class="footer">
+  <p>This is an automated reminder from <%= @profile.business_name %></p>
+</div>
