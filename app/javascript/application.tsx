@@ -15,6 +15,7 @@ import { Clients } from './pages/Clients';
 import { CreateInvoice } from './pages/CreateInvoice';
 import { Settings } from './pages/Settings';
 import { RecurringInvoices } from './pages/RecurringInvoices';
+import { Documents } from './pages/Documents';
 import { Login } from './pages/Login';
 import { SSOCallback } from './pages/SSOCallback';
 import { GmailCallback } from './pages/GmailCallback';
@@ -86,6 +87,7 @@ function App() {
                   <Route path="invoices/:id/edit" element={<CreateInvoice />} />
                   <Route path="clients" element={<Clients />} />
                   <Route path="recurring-invoices" element={<RecurringInvoices />} />
+                  <Route path="documents" element={<Documents />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
 

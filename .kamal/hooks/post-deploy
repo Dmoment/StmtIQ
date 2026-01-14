@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Post-deploy hook for StmtIQ
+# Runs automatically after every successful deployment
+#
+# Available environment variables:
+# KAMAL_RECORDED_AT, KAMAL_PERFORMER, KAMAL_VERSION
+# KAMAL_HOSTS, KAMAL_ROLES, KAMAL_DESTINATION, KAMAL_RUNTIME
+
+set -e
+
+echo "=========================================="
+echo "Post-deploy tasks starting..."
+echo "Deployed by: $KAMAL_PERFORMER"
+echo "Version: $KAMAL_VERSION"
+echo "Runtime: ${KAMAL_RUNTIME}s"
+echo "=========================================="
+
+# Run database migrations
+echo "Running database migrations..."
+kamal app exec "bin/rails db:migrate"
+
+# Clear Rails cache (optional - uncomment if needed)
+# echo "Clearing Rails cache..."
+# kamal app exec "bin/rails tmp:cache:clear"
+
+# Restart Solid Queue workers to pick up new code (optional)
+# kamal app exec "bin/rails solid_queue:restart"
+
+echo "=========================================="
+echo "Post-deploy tasks completed successfully!"
+echo "=========================================="

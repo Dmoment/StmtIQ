@@ -4,6 +4,21 @@ type Headers = Record<string, string>;
 type Middleware<T> = (value: T) => T | Promise<T>;
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 
+// Get Clerk token from the global Clerk instance
+export async function getClerkToken(): Promise<string | null> {
+  try {
+    // Access Clerk instance from window (injected by ClerkProvider)
+    const clerk = (window as unknown as { Clerk?: { session?: { getToken: () => Promise<string | null> } } }).Clerk;
+    if (clerk?.session?.getToken) {
+      return await clerk.session.getToken();
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to get Clerk token:', error);
+    return null;
+  }
+}
+
 export class Interceptors<T> {
   _fns: Middleware<T>[];
 

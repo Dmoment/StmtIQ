@@ -113,39 +113,7 @@ class User < ApplicationRecord
     scope.sum(:amount)
   end
 
-  private
-
-  def normalize_phone_number
-    # Remove all non-digits
-    digits = phone_number.to_s.gsub(/\D/, '')
-
-    # Remove leading 0 or country code 91
-    digits = digits[1..] if digits.start_with?('0')
-    digits = digits[2..] if digits.start_with?('91') && digits.length > 10
-
-    self.phone_number = digits.presence
-  end
-
-  def set_default_settings
-    self.settings ||= {
-      'currency' => 'INR',
-      'date_format' => 'DD/MM/YYYY',
-      'ca_whatsapp' => nil,
-      'auto_send_enabled' => false,
-      'send_day' => 1
-    }
-  end
-
-  def create_personal_workspace
-    workspace = owned_workspaces.create!(
-      name: "#{display_name}'s Workspace",
-      workspace_type: 'personal'
-    )
-    update_column(:current_workspace_id, workspace.id)
-    workspace
-  end
-
-  # Workspace Helper Methods
+  # Workspace Helper Methods (public)
   def personal_workspace
     owned_workspaces.personal.first
   end
@@ -177,5 +145,37 @@ class User < ApplicationRecord
   def active_workspaces
     workspaces.active.joins(:workspace_memberships)
               .where(workspace_memberships: { status: 'active' })
+  end
+
+  private
+
+  def normalize_phone_number
+    # Remove all non-digits
+    digits = phone_number.to_s.gsub(/\D/, '')
+
+    # Remove leading 0 or country code 91
+    digits = digits[1..] if digits.start_with?('0')
+    digits = digits[2..] if digits.start_with?('91') && digits.length > 10
+
+    self.phone_number = digits.presence
+  end
+
+  def set_default_settings
+    self.settings ||= {
+      'currency' => 'INR',
+      'date_format' => 'DD/MM/YYYY',
+      'ca_whatsapp' => nil,
+      'auto_send_enabled' => false,
+      'send_day' => 1
+    }
+  end
+
+  def create_personal_workspace
+    workspace = owned_workspaces.create!(
+      name: "#{display_name}'s Workspace",
+      workspace_type: 'personal'
+    )
+    update_column(:current_workspace_id, workspace.id)
+    workspace
   end
 end

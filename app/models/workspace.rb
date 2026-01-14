@@ -26,6 +26,11 @@ class Workspace < ApplicationRecord
   has_many :sales_invoices, dependent: :destroy
   has_many :recurring_invoices, dependent: :destroy
 
+  # Document Storage associations
+  has_many :folders, dependent: :destroy
+  has_many :documents, dependent: :destroy
+  has_many :buckets, dependent: :destroy
+
   # Validations
   validates :name, presence: true, length: { maximum: 100 }
   validates :slug, presence: true, uniqueness: true, length: { maximum: 50 }

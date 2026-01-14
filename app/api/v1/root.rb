@@ -27,6 +27,11 @@ module V1
     mount V1::RecurringInvoices
     mount V1::ExchangeRates
 
+    # Document Storage endpoints
+    mount V1::Folders
+    mount V1::Documents
+    mount V1::Buckets
+
     # Swagger documentation
     add_swagger_documentation(
       api_version: 'v1',

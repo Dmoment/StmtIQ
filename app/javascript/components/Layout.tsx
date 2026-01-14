@@ -21,6 +21,7 @@ import {
   Users,
   FilePlus,
   RefreshCw,
+  FolderOpen,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCurrentUser } from '../queries/useAuth';
@@ -36,6 +37,7 @@ const navItems = [
   { to: '/invoices', icon: FileText, label: 'Invoices' },
   { to: '/recurring-invoices', icon: RefreshCw, label: 'Recurring' },
   { to: '/clients', icon: Users, label: 'Clients' },
+  { to: '/documents', icon: FolderOpen, label: 'Documents' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

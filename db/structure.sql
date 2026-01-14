@@ -218,6 +218,122 @@ ALTER SEQUENCE public.bank_templates_id_seq OWNED BY public.bank_templates.id;
 
 
 --
+-- Name: bucket_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.bucket_items (
+    id bigint NOT NULL,
+    bucket_id bigint NOT NULL,
+    document_id bigint NOT NULL,
+    "position" integer DEFAULT 0,
+    notes text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: bucket_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.bucket_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: bucket_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.bucket_items_id_seq OWNED BY public.bucket_items.id;
+
+
+--
+-- Name: bucket_shares; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.bucket_shares (
+    id bigint NOT NULL,
+    bucket_id bigint NOT NULL,
+    shared_by_id bigint NOT NULL,
+    shared_with_email character varying NOT NULL,
+    shared_with_name character varying,
+    access_token character varying NOT NULL,
+    permission character varying DEFAULT 'view'::character varying,
+    message text,
+    expires_at timestamp(6) without time zone,
+    accessed_at timestamp(6) without time zone,
+    access_count integer DEFAULT 0,
+    active boolean DEFAULT true,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: bucket_shares_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.bucket_shares_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: bucket_shares_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.bucket_shares_id_seq OWNED BY public.bucket_shares.id;
+
+
+--
+-- Name: buckets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.buckets (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    created_by_id bigint NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    bucket_type character varying DEFAULT 'monthly'::character varying,
+    month integer,
+    year integer,
+    financial_year character varying,
+    status character varying DEFAULT 'draft'::character varying,
+    finalized_at timestamp(6) without time zone,
+    shared_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: buckets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.buckets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: buckets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.buckets_id_seq OWNED BY public.buckets.id;
+
+
+--
 -- Name: business_profiles; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -361,6 +477,127 @@ CREATE SEQUENCE public.clients_id_seq
 --
 
 ALTER SEQUENCE public.clients_id_seq OWNED BY public.clients.id;
+
+
+--
+-- Name: document_shares; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.document_shares (
+    id bigint NOT NULL,
+    document_id bigint NOT NULL,
+    shared_by_id bigint NOT NULL,
+    shared_with_email character varying NOT NULL,
+    shared_with_name character varying,
+    access_token character varying NOT NULL,
+    permission character varying DEFAULT 'view'::character varying,
+    message text,
+    expires_at timestamp(6) without time zone,
+    accessed_at timestamp(6) without time zone,
+    access_count integer DEFAULT 0,
+    active boolean DEFAULT true,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: document_shares_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.document_shares_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: document_shares_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.document_shares_id_seq OWNED BY public.document_shares.id;
+
+
+--
+-- Name: documents; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.documents (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    folder_id bigint,
+    name character varying NOT NULL,
+    document_type character varying DEFAULT 'other'::character varying NOT NULL,
+    description text,
+    metadata jsonb DEFAULT '{}'::jsonb,
+    document_date date,
+    financial_year character varying,
+    tags character varying[] DEFAULT '{}'::character varying[],
+    amount numeric(15,2),
+    currency character varying DEFAULT 'INR'::character varying,
+    reference_number character varying,
+    source character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: documents_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.documents_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.documents_id_seq OWNED BY public.documents.id;
+
+
+--
+-- Name: folders; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.folders (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    parent_id bigint,
+    name character varying NOT NULL,
+    description text,
+    color character varying DEFAULT 'slate'::character varying,
+    icon character varying,
+    "position" integer DEFAULT 0,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: folders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.folders_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: folders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.folders_id_seq OWNED BY public.folders.id;
 
 
 --
@@ -1114,6 +1351,27 @@ ALTER TABLE ONLY public.bank_templates ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- Name: bucket_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_items ALTER COLUMN id SET DEFAULT nextval('public.bucket_items_id_seq'::regclass);
+
+
+--
+-- Name: bucket_shares id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_shares ALTER COLUMN id SET DEFAULT nextval('public.bucket_shares_id_seq'::regclass);
+
+
+--
+-- Name: buckets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.buckets ALTER COLUMN id SET DEFAULT nextval('public.buckets_id_seq'::regclass);
+
+
+--
 -- Name: business_profiles id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1132,6 +1390,27 @@ ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.c
 --
 
 ALTER TABLE ONLY public.clients ALTER COLUMN id SET DEFAULT nextval('public.clients_id_seq'::regclass);
+
+
+--
+-- Name: document_shares id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.document_shares ALTER COLUMN id SET DEFAULT nextval('public.document_shares_id_seq'::regclass);
+
+
+--
+-- Name: documents id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.documents ALTER COLUMN id SET DEFAULT nextval('public.documents_id_seq'::regclass);
+
+
+--
+-- Name: folders id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.folders ALTER COLUMN id SET DEFAULT nextval('public.folders_id_seq'::regclass);
 
 
 --
@@ -1295,6 +1574,30 @@ ALTER TABLE ONLY public.bank_templates
 
 
 --
+-- Name: bucket_items bucket_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_items
+    ADD CONSTRAINT bucket_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: bucket_shares bucket_shares_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_shares
+    ADD CONSTRAINT bucket_shares_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: buckets buckets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.buckets
+    ADD CONSTRAINT buckets_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: business_profiles business_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1316,6 +1619,30 @@ ALTER TABLE ONLY public.categories
 
 ALTER TABLE ONLY public.clients
     ADD CONSTRAINT clients_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: document_shares document_shares_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.document_shares
+    ADD CONSTRAINT document_shares_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: documents documents_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.documents
+    ADD CONSTRAINT documents_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: folders folders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.folders
+    ADD CONSTRAINT folders_pkey PRIMARY KEY (id);
 
 
 --
@@ -1567,6 +1894,111 @@ CREATE INDEX index_bank_templates_on_is_active ON public.bank_templates USING bt
 
 
 --
+-- Name: index_bucket_items_on_bucket_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_bucket_items_on_bucket_id ON public.bucket_items USING btree (bucket_id);
+
+
+--
+-- Name: index_bucket_items_on_bucket_id_and_document_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_bucket_items_on_bucket_id_and_document_id ON public.bucket_items USING btree (bucket_id, document_id);
+
+
+--
+-- Name: index_bucket_items_on_bucket_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_bucket_items_on_bucket_id_and_position ON public.bucket_items USING btree (bucket_id, "position");
+
+
+--
+-- Name: index_bucket_items_on_document_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_bucket_items_on_document_id ON public.bucket_items USING btree (document_id);
+
+
+--
+-- Name: index_bucket_shares_on_access_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_bucket_shares_on_access_token ON public.bucket_shares USING btree (access_token);
+
+
+--
+-- Name: index_bucket_shares_on_bucket_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_bucket_shares_on_bucket_id ON public.bucket_shares USING btree (bucket_id);
+
+
+--
+-- Name: index_bucket_shares_on_bucket_id_and_shared_with_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_bucket_shares_on_bucket_id_and_shared_with_email ON public.bucket_shares USING btree (bucket_id, shared_with_email);
+
+
+--
+-- Name: index_bucket_shares_on_expires_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_bucket_shares_on_expires_at ON public.bucket_shares USING btree (expires_at);
+
+
+--
+-- Name: index_bucket_shares_on_shared_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_bucket_shares_on_shared_by_id ON public.bucket_shares USING btree (shared_by_id);
+
+
+--
+-- Name: index_bucket_shares_on_shared_with_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_bucket_shares_on_shared_with_email ON public.bucket_shares USING btree (shared_with_email);
+
+
+--
+-- Name: index_buckets_on_created_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_buckets_on_created_by_id ON public.buckets USING btree (created_by_id);
+
+
+--
+-- Name: index_buckets_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_buckets_on_status ON public.buckets USING btree (status);
+
+
+--
+-- Name: index_buckets_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_buckets_on_workspace_id ON public.buckets USING btree (workspace_id);
+
+
+--
+-- Name: index_buckets_on_workspace_id_and_financial_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_buckets_on_workspace_id_and_financial_year ON public.buckets USING btree (workspace_id, financial_year);
+
+
+--
+-- Name: index_buckets_on_workspace_id_and_month_and_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_buckets_on_workspace_id_and_month_and_year ON public.buckets USING btree (workspace_id, month, year) WHERE ((bucket_type)::text = 'monthly'::text);
+
+
+--
 -- Name: index_business_profiles_on_gstin; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1613,6 +2045,139 @@ CREATE UNIQUE INDEX index_clients_on_workspace_id_and_gstin ON public.clients US
 --
 
 CREATE INDEX index_clients_on_workspace_id_and_is_active ON public.clients USING btree (workspace_id, is_active);
+
+
+--
+-- Name: index_document_shares_on_access_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_document_shares_on_access_token ON public.document_shares USING btree (access_token);
+
+
+--
+-- Name: index_document_shares_on_document_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_document_shares_on_document_id ON public.document_shares USING btree (document_id);
+
+
+--
+-- Name: index_document_shares_on_document_id_and_shared_with_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_document_shares_on_document_id_and_shared_with_email ON public.document_shares USING btree (document_id, shared_with_email);
+
+
+--
+-- Name: index_document_shares_on_expires_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_document_shares_on_expires_at ON public.document_shares USING btree (expires_at);
+
+
+--
+-- Name: index_document_shares_on_shared_by_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_document_shares_on_shared_by_id ON public.document_shares USING btree (shared_by_id);
+
+
+--
+-- Name: index_document_shares_on_shared_with_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_document_shares_on_shared_with_email ON public.document_shares USING btree (shared_with_email);
+
+
+--
+-- Name: index_documents_on_document_date; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_document_date ON public.documents USING btree (document_date);
+
+
+--
+-- Name: index_documents_on_document_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_document_type ON public.documents USING btree (document_type);
+
+
+--
+-- Name: index_documents_on_financial_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_financial_year ON public.documents USING btree (financial_year);
+
+
+--
+-- Name: index_documents_on_folder_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_folder_id ON public.documents USING btree (folder_id);
+
+
+--
+-- Name: index_documents_on_tags; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_tags ON public.documents USING gin (tags);
+
+
+--
+-- Name: index_documents_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_workspace_id ON public.documents USING btree (workspace_id);
+
+
+--
+-- Name: index_documents_on_workspace_id_and_document_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_workspace_id_and_document_type ON public.documents USING btree (workspace_id, document_type);
+
+
+--
+-- Name: index_documents_on_workspace_id_and_financial_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_workspace_id_and_financial_year ON public.documents USING btree (workspace_id, financial_year);
+
+
+--
+-- Name: index_documents_on_workspace_id_and_folder_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_documents_on_workspace_id_and_folder_id ON public.documents USING btree (workspace_id, folder_id);
+
+
+--
+-- Name: index_folders_on_parent_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_folders_on_parent_id ON public.folders USING btree (parent_id);
+
+
+--
+-- Name: index_folders_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_folders_on_workspace_id ON public.folders USING btree (workspace_id);
+
+
+--
+-- Name: index_folders_on_workspace_id_and_parent_id_and_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_folders_on_workspace_id_and_parent_id_and_name ON public.folders USING btree (workspace_id, parent_id, name);
+
+
+--
+-- Name: index_folders_on_workspace_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_folders_on_workspace_id_and_position ON public.folders USING btree (workspace_id, "position");
 
 
 --
@@ -2296,6 +2861,14 @@ ALTER TABLE ONLY public.transactions
 
 
 --
+-- Name: document_shares fk_rails_04f7138d3c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.document_shares
+    ADD CONSTRAINT fk_rails_04f7138d3c FOREIGN KEY (shared_by_id) REFERENCES public.users(id);
+
+
+--
 -- Name: recurring_invoices fk_rails_0dfff2eedb; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2384,6 +2957,22 @@ ALTER TABLE ONLY public.transactions
 
 
 --
+-- Name: bucket_shares fk_rails_3233ad5059; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_shares
+    ADD CONSTRAINT fk_rails_3233ad5059 FOREIGN KEY (bucket_id) REFERENCES public.buckets(id);
+
+
+--
+-- Name: buckets fk_rails_352d1d0a81; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.buckets
+    ADD CONSTRAINT fk_rails_352d1d0a81 FOREIGN KEY (created_by_id) REFERENCES public.users(id);
+
+
+--
 -- Name: user_rules fk_rails_35d10e41ba; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2416,6 +3005,22 @@ ALTER TABLE ONLY public.invoices
 
 
 --
+-- Name: buckets fk_rails_3d8c4db67e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.buckets
+    ADD CONSTRAINT fk_rails_3d8c4db67e FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: documents fk_rails_404da7ca3d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.documents
+    ADD CONSTRAINT fk_rails_404da7ca3d FOREIGN KEY (folder_id) REFERENCES public.folders(id);
+
+
+--
 -- Name: transactions fk_rails_498dcead48; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2437,6 +3042,14 @@ ALTER TABLE ONLY public.labeled_examples
 
 ALTER TABLE ONLY public.workspaces
     ADD CONSTRAINT fk_rails_5506b4b37e FOREIGN KEY (owner_id) REFERENCES public.users(id);
+
+
+--
+-- Name: folders fk_rails_58e285f76e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.folders
+    ADD CONSTRAINT fk_rails_58e285f76e FOREIGN KEY (parent_id) REFERENCES public.folders(id);
 
 
 --
@@ -2469,6 +3082,14 @@ ALTER TABLE ONLY public.global_patterns
 
 ALTER TABLE ONLY public.business_profiles
     ADD CONSTRAINT fk_rails_68038daaed FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
+-- Name: documents fk_rails_685a92c7dc; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.documents
+    ADD CONSTRAINT fk_rails_685a92c7dc FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
 
 
 --
@@ -2557,6 +3178,14 @@ ALTER TABLE ONLY public.recurring_invoices
 
 ALTER TABLE ONLY public.sales_invoices
     ADD CONSTRAINT fk_rails_879f994157 FOREIGN KEY (recurring_invoice_id) REFERENCES public.recurring_invoices(id);
+
+
+--
+-- Name: bucket_shares fk_rails_882b4ec583; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_shares
+    ADD CONSTRAINT fk_rails_882b4ec583 FOREIGN KEY (shared_by_id) REFERENCES public.users(id);
 
 
 --
@@ -2688,11 +3317,27 @@ ALTER TABLE ONLY public.active_storage_attachments
 
 
 --
+-- Name: folders fk_rails_d1be4ab902; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.folders
+    ADD CONSTRAINT fk_rails_d1be4ab902 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
+
+
+--
 -- Name: user_rules fk_rails_d25e6ddd6c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_rules
     ADD CONSTRAINT fk_rails_d25e6ddd6c FOREIGN KEY (subcategory_id) REFERENCES public.subcategories(id);
+
+
+--
+-- Name: bucket_items fk_rails_d4299e624a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_items
+    ADD CONSTRAINT fk_rails_d4299e624a FOREIGN KEY (document_id) REFERENCES public.documents(id);
 
 
 --
@@ -2712,6 +3357,22 @@ ALTER TABLE ONLY public.clients
 
 
 --
+-- Name: document_shares fk_rails_eca6ee460d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.document_shares
+    ADD CONSTRAINT fk_rails_eca6ee460d FOREIGN KEY (document_id) REFERENCES public.documents(id);
+
+
+--
+-- Name: bucket_items fk_rails_f83dfac855; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.bucket_items
+    ADD CONSTRAINT fk_rails_f83dfac855 FOREIGN KEY (bucket_id) REFERENCES public.buckets(id);
+
+
+--
 -- Name: transactions fk_rails_f9235709da; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2726,6 +3387,12 @@ ALTER TABLE ONLY public.transactions
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260113125639'),
+('20260113125609'),
+('20260113125556'),
+('20260113125529'),
+('20260113125454'),
+('20260113125424'),
 ('20260113100006'),
 ('20260113100005'),
 ('20260113100004'),
