@@ -89,5 +89,6 @@ export {
   useUpdateGmailConnection,
   useSyncGmail,
   useDisconnectGmail,
+  useGmailSyncSuggestions,
 } from "./useGmail";
 

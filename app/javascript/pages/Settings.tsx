@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   User,
   Bell,
@@ -13,7 +14,6 @@ import {
   ChevronRight,
   Check,
   ExternalLink,
-  RefreshCw,
   Trash2,
   ToggleLeft,
   ToggleRight,
@@ -24,10 +24,14 @@ import {
   Save,
   Image,
   PenTool,
+  CheckCircle2,
 } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useGmailStatus, useGmailConnections } from '../queries';
+import { useQueryClient } from '@tanstack/react-query';
+import { useGmailStatus, useGmailConnections, gmailKeys, useGmailSyncSuggestions } from '../queries';
 import { useGmailManager } from '../hooks/useGmailManager';
+import { GmailSyncModal } from '../components/gmail/GmailSyncModal';
+import type { GmailConnection as GmailConnectionType } from '../types/api';
 import {
   useBusinessProfile,
   useCreateBusinessProfile,
@@ -105,9 +109,72 @@ const settingsSections: SettingsSection[] = [
 
 export function Settings() {
   const [activeSection, setActiveSection] = useState('business');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [gmailNotification, setGmailNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const queryClient = useQueryClient();
+
+  // Handle Gmail OAuth callback redirect
+  useEffect(() => {
+    const gmailSuccess = searchParams.get('gmail_success');
+    const gmailError = searchParams.get('gmail_error');
+    const gmailEmail = searchParams.get('gmail_email');
+
+    if (gmailSuccess === 'true') {
+      setGmailNotification({
+        type: 'success',
+        message: gmailEmail ? `Gmail connected: ${gmailEmail}` : 'Gmail connected successfully!',
+      });
+      setActiveSection('gmail');
+      // Refresh Gmail connections
+      queryClient.invalidateQueries({ queryKey: gmailKeys.connections() });
+      // Clear URL params
+      setSearchParams({}, { replace: true });
+    } else if (gmailError) {
+      setGmailNotification({
+        type: 'error',
+        message: gmailError,
+      });
+      setActiveSection('gmail');
+      // Clear URL params
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams, queryClient]);
+
+  // Auto-dismiss notification after 5 seconds
+  useEffect(() => {
+    if (gmailNotification) {
+      const timer = setTimeout(() => setGmailNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [gmailNotification]);
 
   return (
     <div className="space-y-6">
+      {/* Gmail OAuth Notification */}
+      {gmailNotification && (
+        <div
+          className={clsx(
+            'flex items-center gap-3 p-4 rounded-xl border',
+            gmailNotification.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          )}
+        >
+          {gmailNotification.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+          )}
+          <span className="flex-1 text-sm font-medium">{gmailNotification.message}</span>
+          <button
+            onClick={() => setGmailNotification(null)}
+            className="p-1 hover:bg-black/5 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar Navigation */}
         <nav className="lg:w-72 flex-shrink-0">
@@ -828,15 +895,29 @@ function GmailSettings() {
     isLoading: connectionsLoading,
     refetch,
   } = useGmailConnections();
+  const { data: syncSuggestions } = useGmailSyncSuggestions();
   const {
     handleConnect,
-    handleSync,
     handleToggleSync,
     handleDisconnect,
     disconnectingId,
     error,
     clearError,
   } = useGmailManager(refetch);
+
+  // State for sync modal
+  const [syncModalConnection, setSyncModalConnection] = useState<GmailConnectionType | null>(null);
+
+  const handleOpenSyncModal = (connection: GmailConnectionType) => {
+    setSyncModalConnection(connection);
+  };
+
+  const handleCloseSyncModal = () => {
+    setSyncModalConnection(null);
+  };
+
+  // Check if user has transactions (can sync)
+  const canSync = syncSuggestions?.has_transactions ?? false;
 
   if (statusLoading || connectionsLoading) {
     return (
@@ -951,14 +1032,24 @@ function GmailSettings() {
               <GmailConnectionRow
                 key={connection.id}
                 connection={connection}
-                onSync={handleSync}
+                onOpenSyncModal={handleOpenSyncModal}
                 onToggleSync={handleToggleSync}
                 onDisconnect={handleDisconnect}
                 isDisconnecting={disconnectingId === connection.id}
+                canSync={canSync}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {/* Gmail Sync Modal */}
+      {syncModalConnection && (
+        <GmailSyncModal
+          isOpen={!!syncModalConnection}
+          onClose={handleCloseSyncModal}
+          connection={syncModalConnection}
+        />
       )}
 
       {/* Connect Button */}
@@ -980,42 +1071,25 @@ function GmailSettings() {
   );
 }
 
-interface GmailConnection {
-  id: number;
-  email: string;
-  status: string;
-  sync_enabled: boolean;
-  last_sync_at: string | null;
-  invoices_imported: number;
-}
-
 interface GmailConnectionRowProps {
-  connection: GmailConnection;
-  onSync: (id: number) => void;
-  onToggleSync: (connection: GmailConnection) => void;
+  connection: GmailConnectionType;
+  onOpenSyncModal: (connection: GmailConnectionType) => void;
+  onToggleSync: (connection: GmailConnectionType) => void;
   onDisconnect: (id: number) => void;
   isDisconnecting: boolean;
+  canSync: boolean;
 }
 
 function GmailConnectionRow({
   connection,
-  onSync,
+  onOpenSyncModal,
   onToggleSync,
   onDisconnect,
   isDisconnecting,
+  canSync,
 }: GmailConnectionRowProps) {
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const handleSyncClick = async () => {
-    setIsSyncing(true);
-    try {
-      await onSync(connection.id);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
   const statusColor = {
+    pending: 'bg-amber-100 text-amber-700 border-amber-200',
     active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
     syncing: 'bg-blue-100 text-blue-700 border-blue-200',
     error: 'bg-red-100 text-red-700 border-red-200',
@@ -1062,18 +1136,21 @@ function GmailConnectionRow({
             )}
           </button>
 
-          {/* Sync Now */}
+          {/* Scan Inbox */}
           <button
-            onClick={handleSyncClick}
-            disabled={isSyncing || !connection.sync_enabled}
-            className="h-9 w-9 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            title="Sync now"
-            aria-label="Sync now"
+            onClick={() => onOpenSyncModal(connection)}
+            disabled={!canSync || connection.status === 'syncing'}
+            className={clsx(
+              "h-9 px-3 rounded-xl font-medium text-sm transition-colors flex items-center gap-2",
+              canSync && connection.status !== 'syncing'
+                ? "bg-amber-100 hover:bg-amber-200 text-amber-800"
+                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+            )}
+            title={canSync ? "Scan inbox for invoices" : "Upload transactions first to enable scanning"}
+            aria-label="Scan inbox for invoices"
           >
-            <RefreshCw className={clsx(
-              'w-5 h-5 text-slate-500',
-              isSyncing && 'animate-spin'
-            )} />
+            <Mail className="w-4 h-4" />
+            Scan
           </button>
 
           {/* Disconnect */}
@@ -1094,10 +1171,10 @@ function GmailConnectionRow({
       </div>
 
       {/* Stats */}
-      {connection.invoices_imported > 0 && (
+      {connection.invoice_count > 0 && (
         <div className="mt-3 pt-3 border-t border-slate-100">
           <p className="text-sm text-slate-500">
-            <span className="font-semibold text-slate-700">{connection.invoices_imported}</span> invoices imported
+            <span className="font-semibold text-slate-700">{connection.invoice_count}</span> invoices imported
           </p>
         </div>
       )}

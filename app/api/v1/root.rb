@@ -32,6 +32,9 @@ module V1
     mount V1::Documents
     mount V1::Buckets
 
+    # Workflow Automation endpoints
+    mount V1::Workflows
+
     # Swagger documentation
     add_swagger_documentation(
       api_version: 'v1',

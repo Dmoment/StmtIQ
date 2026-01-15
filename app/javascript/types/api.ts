@@ -283,6 +283,139 @@ export interface GmailStatusResponse {
 }
 
 // ============================================
+// Workflow Types
+// ============================================
+export type WorkflowStatus = 'draft' | 'active' | 'paused' | 'archived';
+export type WorkflowTriggerType = 'schedule' | 'event' | 'manual';
+export type WorkflowExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+export type WorkflowStepLogStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+
+export interface Workflow {
+  id: number;
+  name: string;
+  description: string | null;
+  status: WorkflowStatus;
+  trigger_type: WorkflowTriggerType;
+  trigger_config: Record<string, unknown>;
+  is_active: boolean;
+  can_execute: boolean;
+  steps_count: number;
+  enabled_steps_count: number;
+  executions_count: number;
+  last_executed_at: string | null;
+  trigger_description: string;
+  workflow_steps?: WorkflowStep[];
+  recent_executions?: WorkflowExecution[];
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkflowStep {
+  id: number;
+  workflow_id: number;
+  step_type: string;
+  name: string | null;
+  display_name: string;
+  position: number;
+  config: Record<string, unknown>;
+  conditions: Record<string, unknown>;
+  enabled: boolean;
+  continue_on_failure: boolean;
+  step_metadata: {
+    category: string;
+    icon: string;
+    description: string;
+  };
+  is_configured: boolean;
+  config_schema: StepConfigSchema;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StepConfigSchema {
+  type: string;
+  properties: Record<string, {
+    type: string;
+    title?: string;
+    description?: string;
+    enum?: string[];
+    default?: unknown;
+    minimum?: number;
+    maximum?: number;
+    maxLength?: number;
+    format?: string;
+    items?: Record<string, unknown>;
+    required?: boolean;
+  }>;
+  required?: string[];
+}
+
+export interface WorkflowExecution {
+  id: number;
+  workflow_id: number;
+  status: WorkflowExecutionStatus;
+  trigger_source: string;
+  trigger_data?: Record<string, unknown>;
+  current_step_position: number;
+  completed_steps_count: number;
+  failed_steps_count: number;
+  progress_percentage: number;
+  started_at: string | null;
+  completed_at: string | null;
+  duration_ms: number | null;
+  duration_human: string | null;
+  error_message?: string;
+  step_logs?: WorkflowStepLog[];
+  can_resume: boolean;
+  can_cancel: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkflowStepLog {
+  id: number;
+  workflow_execution_id: number;
+  workflow_step_id: number;
+  status: WorkflowStepLogStatus;
+  position: number;
+  step_name: string;
+  step_type: string;
+  started_at: string | null;
+  completed_at: string | null;
+  duration_ms: number | null;
+  input_data?: Record<string, unknown>;
+  output_data?: Record<string, unknown>;
+  error_message?: string;
+  retry_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkflowTemplate {
+  id: number;
+  name: string;
+  description: string | null;
+  category: string | null;
+  featured: boolean;
+  steps_preview: { step_type: string; name: string }[];
+  steps_count: number;
+  trigger_type: WorkflowTriggerType;
+  definition?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StepTypeInfo {
+  type: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  config_schema: StepConfigSchema;
+}
+
+// ============================================
 // API Error Types
 // ============================================
 export interface ApiError {

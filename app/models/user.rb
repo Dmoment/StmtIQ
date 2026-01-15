@@ -22,6 +22,9 @@ class User < ApplicationRecord
   has_many :sales_invoices, dependent: :destroy
   has_many :recurring_invoices, dependent: :destroy
 
+  # Workflow Associations
+  has_many :workflows, dependent: :destroy
+
   # Validations
   validates :clerk_id, uniqueness: true, allow_nil: true
   validates :phone_number,

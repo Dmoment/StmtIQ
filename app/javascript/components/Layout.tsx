@@ -22,6 +22,7 @@ import {
   FilePlus,
   RefreshCw,
   FolderOpen,
+  GitBranch,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCurrentUser } from '../queries/useAuth';
@@ -38,6 +39,7 @@ const navItems = [
   { to: '/recurring-invoices', icon: RefreshCw, label: 'Recurring' },
   { to: '/clients', icon: Users, label: 'Clients' },
   { to: '/documents', icon: FolderOpen, label: 'Documents' },
+  { to: '/workflows', icon: GitBranch, label: 'Workflows' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

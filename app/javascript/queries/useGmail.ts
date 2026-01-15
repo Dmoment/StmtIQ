@@ -106,20 +106,65 @@ export const useUpdateGmailConnection = () => {
 };
 
 /**
- * Trigger manual sync for a Gmail connection
+ * Sync suggestions based on user transactions
+ */
+export interface GmailSyncSuggestions {
+  has_transactions: boolean;
+  date_range: {
+    start_date: string | null;
+    end_date: string | null;
+  } | null;
+  suggested_keywords: string[];
+  default_keywords: string[];
+  transaction_count: number;
+}
+
+export const useGmailSyncSuggestions = () => {
+  return useQuery({
+    queryKey: [...gmailKeys.all, "sync_suggestions"],
+    queryFn: () => gmailFetch<GmailSyncSuggestions>("/sync_suggestions"),
+    staleTime: 60 * 1000, // 1 minute
+  });
+};
+
+/**
+ * Sync filters for Gmail
+ */
+export interface GmailSyncFilters {
+  date_from?: string;
+  date_to?: string;
+  keywords?: string[];
+  include_attachments_only?: boolean;
+}
+
+export interface GmailSyncResponse {
+  success: boolean;
+  message: string;
+  filters_applied: {
+    date_range: string | null;
+    keywords: string[] | null;
+    attachments_only: boolean;
+  };
+}
+
+/**
+ * Trigger manual sync for a Gmail connection with filters
  */
 export const useSyncGmail = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<{ success: boolean; message: string }, Error, number>({
-    mutationFn: (id) =>
-      gmailFetch<{ success: boolean; message: string }>(
+  return useMutation<GmailSyncResponse, Error, { id: number; filters?: GmailSyncFilters }>({
+    mutationFn: ({ id, filters }) =>
+      gmailFetch<GmailSyncResponse>(
         `/connections/${id}/sync`,
-        { method: "POST" }
+        {
+          method: "POST",
+          body: JSON.stringify(filters || {}),
+        }
       ),
-    onSuccess: (_, connectionId) => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({
-        queryKey: gmailKeys.connection(connectionId),
+        queryKey: gmailKeys.connection(id),
       });
       queryClient.invalidateQueries({ queryKey: gmailKeys.connections() });
       // Invoices may be updated after sync

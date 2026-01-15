@@ -31,6 +31,10 @@ class Workspace < ApplicationRecord
   has_many :documents, dependent: :destroy
   has_many :buckets, dependent: :destroy
 
+  # Workflow associations
+  has_many :workflows, dependent: :destroy
+  has_many :workflow_executions, dependent: :destroy
+
   # Validations
   validates :name, presence: true, length: { maximum: 100 }
   validates :slug, presence: true, uniqueness: true, length: { maximum: 50 }

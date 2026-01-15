@@ -44,7 +44,7 @@ export function useGmailManager(
     async (id: number) => {
       try {
         setError(null);
-        await syncGmail.mutateAsync(id);
+        await syncGmail.mutateAsync({ id });
         if (refetch) {
           setTimeout(refetch, 2000);
         }

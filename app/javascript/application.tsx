@@ -16,6 +16,8 @@ import { CreateInvoice } from './pages/CreateInvoice';
 import { Settings } from './pages/Settings';
 import { RecurringInvoices } from './pages/RecurringInvoices';
 import { Documents } from './pages/Documents';
+import { Workflows } from './pages/Workflows';
+import { WorkflowBuilder } from './pages/WorkflowBuilder';
 import { Login } from './pages/Login';
 import { SSOCallback } from './pages/SSOCallback';
 import { GmailCallback } from './pages/GmailCallback';
@@ -88,6 +90,9 @@ function App() {
                   <Route path="clients" element={<Clients />} />
                   <Route path="recurring-invoices" element={<RecurringInvoices />} />
                   <Route path="documents" element={<Documents />} />
+                  <Route path="workflows" element={<Workflows />} />
+                  <Route path="workflows/new" element={<WorkflowBuilder />} />
+                  <Route path="workflows/:id/edit" element={<WorkflowBuilder />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
 

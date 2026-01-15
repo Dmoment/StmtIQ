@@ -1200,6 +1200,205 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: workflow_executions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workflow_executions (
+    id bigint NOT NULL,
+    workflow_id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    status character varying DEFAULT 'pending'::character varying NOT NULL,
+    trigger_source character varying,
+    context jsonb DEFAULT '{}'::jsonb,
+    trigger_data jsonb DEFAULT '{}'::jsonb,
+    current_step_position integer DEFAULT 0,
+    completed_steps_count integer DEFAULT 0,
+    failed_steps_count integer DEFAULT 0,
+    started_at timestamp(6) without time zone,
+    completed_at timestamp(6) without time zone,
+    duration_ms integer,
+    error_message text,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workflow_executions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workflow_executions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workflow_executions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workflow_executions_id_seq OWNED BY public.workflow_executions.id;
+
+
+--
+-- Name: workflow_step_logs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workflow_step_logs (
+    id bigint NOT NULL,
+    workflow_execution_id bigint NOT NULL,
+    workflow_step_id bigint NOT NULL,
+    status character varying DEFAULT 'pending'::character varying NOT NULL,
+    "position" integer,
+    input_data jsonb DEFAULT '{}'::jsonb,
+    output_data jsonb DEFAULT '{}'::jsonb,
+    started_at timestamp(6) without time zone,
+    completed_at timestamp(6) without time zone,
+    duration_ms integer,
+    error_message text,
+    error_backtrace text,
+    retry_count integer DEFAULT 0,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workflow_step_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workflow_step_logs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workflow_step_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workflow_step_logs_id_seq OWNED BY public.workflow_step_logs.id;
+
+
+--
+-- Name: workflow_steps; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workflow_steps (
+    id bigint NOT NULL,
+    workflow_id bigint NOT NULL,
+    step_type character varying NOT NULL,
+    name character varying,
+    "position" integer NOT NULL,
+    config jsonb DEFAULT '{}'::jsonb,
+    conditions jsonb DEFAULT '{}'::jsonb,
+    enabled boolean DEFAULT true,
+    continue_on_failure boolean DEFAULT false,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workflow_steps_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workflow_steps_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workflow_steps_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workflow_steps_id_seq OWNED BY public.workflow_steps.id;
+
+
+--
+-- Name: workflow_templates; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workflow_templates (
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    category character varying,
+    definition jsonb DEFAULT '{}'::jsonb,
+    featured boolean DEFAULT false,
+    icon character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workflow_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workflow_templates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workflow_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workflow_templates_id_seq OWNED BY public.workflow_templates.id;
+
+
+--
+-- Name: workflows; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workflows (
+    id bigint NOT NULL,
+    workspace_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    status character varying DEFAULT 'draft'::character varying NOT NULL,
+    trigger_type character varying NOT NULL,
+    trigger_config jsonb DEFAULT '{}'::jsonb,
+    metadata jsonb DEFAULT '{}'::jsonb,
+    executions_count integer DEFAULT 0,
+    last_executed_at timestamp(6) without time zone,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: workflows_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.workflows_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: workflows_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.workflows_id_seq OWNED BY public.workflows.id;
+
+
+--
 -- Name: workspace_invitations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1505,6 +1704,41 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
+-- Name: workflow_executions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_executions ALTER COLUMN id SET DEFAULT nextval('public.workflow_executions_id_seq'::regclass);
+
+
+--
+-- Name: workflow_step_logs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_step_logs ALTER COLUMN id SET DEFAULT nextval('public.workflow_step_logs_id_seq'::regclass);
+
+
+--
+-- Name: workflow_steps id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_steps ALTER COLUMN id SET DEFAULT nextval('public.workflow_steps_id_seq'::regclass);
+
+
+--
+-- Name: workflow_templates id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_templates ALTER COLUMN id SET DEFAULT nextval('public.workflow_templates_id_seq'::regclass);
+
+
+--
+-- Name: workflows id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflows ALTER COLUMN id SET DEFAULT nextval('public.workflows_id_seq'::regclass);
+
+
+--
 -- Name: workspace_invitations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1755,6 +1989,46 @@ ALTER TABLE ONLY public.user_rules
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: workflow_executions workflow_executions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_executions
+    ADD CONSTRAINT workflow_executions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: workflow_step_logs workflow_step_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_step_logs
+    ADD CONSTRAINT workflow_step_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: workflow_steps workflow_steps_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_steps
+    ADD CONSTRAINT workflow_steps_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: workflow_templates workflow_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_templates
+    ADD CONSTRAINT workflow_templates_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: workflows workflows_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflows
+    ADD CONSTRAINT workflows_pkey PRIMARY KEY (id);
 
 
 --
@@ -2748,6 +3022,132 @@ CREATE UNIQUE INDEX index_users_on_session_token ON public.users USING btree (se
 
 
 --
+-- Name: index_workflow_executions_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_executions_on_status ON public.workflow_executions USING btree (status);
+
+
+--
+-- Name: index_workflow_executions_on_workflow_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_executions_on_workflow_id ON public.workflow_executions USING btree (workflow_id);
+
+
+--
+-- Name: index_workflow_executions_on_workflow_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_executions_on_workflow_id_and_status ON public.workflow_executions USING btree (workflow_id, status);
+
+
+--
+-- Name: index_workflow_executions_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_executions_on_workspace_id ON public.workflow_executions USING btree (workspace_id);
+
+
+--
+-- Name: index_workflow_executions_on_workspace_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_executions_on_workspace_id_and_created_at ON public.workflow_executions USING btree (workspace_id, created_at);
+
+
+--
+-- Name: index_workflow_step_logs_on_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_step_logs_on_status ON public.workflow_step_logs USING btree (status);
+
+
+--
+-- Name: index_workflow_step_logs_on_workflow_execution_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_step_logs_on_workflow_execution_id ON public.workflow_step_logs USING btree (workflow_execution_id);
+
+
+--
+-- Name: index_workflow_step_logs_on_workflow_execution_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_step_logs_on_workflow_execution_id_and_position ON public.workflow_step_logs USING btree (workflow_execution_id, "position");
+
+
+--
+-- Name: index_workflow_step_logs_on_workflow_step_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_step_logs_on_workflow_step_id ON public.workflow_step_logs USING btree (workflow_step_id);
+
+
+--
+-- Name: index_workflow_steps_on_step_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_steps_on_step_type ON public.workflow_steps USING btree (step_type);
+
+
+--
+-- Name: index_workflow_steps_on_workflow_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_steps_on_workflow_id ON public.workflow_steps USING btree (workflow_id);
+
+
+--
+-- Name: index_workflow_steps_on_workflow_id_and_position; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_steps_on_workflow_id_and_position ON public.workflow_steps USING btree (workflow_id, "position");
+
+
+--
+-- Name: index_workflow_templates_on_category; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_templates_on_category ON public.workflow_templates USING btree (category);
+
+
+--
+-- Name: index_workflow_templates_on_featured; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflow_templates_on_featured ON public.workflow_templates USING btree (featured);
+
+
+--
+-- Name: index_workflows_on_trigger_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflows_on_trigger_type ON public.workflows USING btree (trigger_type);
+
+
+--
+-- Name: index_workflows_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflows_on_user_id ON public.workflows USING btree (user_id);
+
+
+--
+-- Name: index_workflows_on_workspace_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflows_on_workspace_id ON public.workflows USING btree (workspace_id);
+
+
+--
+-- Name: index_workflows_on_workspace_id_and_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_workflows_on_workspace_id_and_status ON public.workflows USING btree (workspace_id, status);
+
+
+--
 -- Name: index_workspace_invitations_on_email; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2925,6 +3325,14 @@ ALTER TABLE ONLY public.sales_invoices
 
 
 --
+-- Name: workflow_step_logs fk_rails_216edb0bdd; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_step_logs
+    ADD CONSTRAINT fk_rails_216edb0bdd FOREIGN KEY (workflow_execution_id) REFERENCES public.workflow_executions(id);
+
+
+--
 -- Name: clients fk_rails_21c421fd41; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3018,6 +3426,14 @@ ALTER TABLE ONLY public.buckets
 
 ALTER TABLE ONLY public.documents
     ADD CONSTRAINT fk_rails_404da7ca3d FOREIGN KEY (folder_id) REFERENCES public.folders(id);
+
+
+--
+-- Name: workflow_executions fk_rails_47b2555580; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_executions
+    ADD CONSTRAINT fk_rails_47b2555580 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
 
 
 --
@@ -3253,6 +3669,14 @@ ALTER TABLE ONLY public.workspace_memberships
 
 
 --
+-- Name: workflow_steps fk_rails_af7ad8555a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_steps
+    ADD CONSTRAINT fk_rails_af7ad8555a FOREIGN KEY (workflow_id) REFERENCES public.workflows(id);
+
+
+--
 -- Name: invoices fk_rails_afb4b1e584; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3266,6 +3690,14 @@ ALTER TABLE ONLY public.invoices
 
 ALTER TABLE ONLY public.accounts
     ADD CONSTRAINT fk_rails_b1e30bebc8 FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: workflows fk_rails_b2ae6690e8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflows
+    ADD CONSTRAINT fk_rails_b2ae6690e8 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -3357,11 +3789,35 @@ ALTER TABLE ONLY public.clients
 
 
 --
+-- Name: workflow_step_logs fk_rails_e98498d3cc; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_step_logs
+    ADD CONSTRAINT fk_rails_e98498d3cc FOREIGN KEY (workflow_step_id) REFERENCES public.workflow_steps(id);
+
+
+--
 -- Name: document_shares fk_rails_eca6ee460d; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.document_shares
     ADD CONSTRAINT fk_rails_eca6ee460d FOREIGN KEY (document_id) REFERENCES public.documents(id);
+
+
+--
+-- Name: workflow_executions fk_rails_f18ad9b797; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflow_executions
+    ADD CONSTRAINT fk_rails_f18ad9b797 FOREIGN KEY (workflow_id) REFERENCES public.workflows(id);
+
+
+--
+-- Name: workflows fk_rails_f64cd10465; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflows
+    ADD CONSTRAINT fk_rails_f64cd10465 FOREIGN KEY (workspace_id) REFERENCES public.workspaces(id);
 
 
 --
@@ -3387,6 +3843,7 @@ ALTER TABLE ONLY public.transactions
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260114162821'),
 ('20260113125639'),
 ('20260113125609'),
 ('20260113125556'),

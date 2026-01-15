@@ -107,3 +107,24 @@ export const gmailKeys = {
   connection: (id: number) => [...gmailKeys.connections(), id] as const,
 };
 
+export const workflowKeys = {
+  all: ["workflows"] as const,
+  lists: () => [...workflowKeys.all, "list"] as const,
+  list: (filters?: {
+    page?: number;
+    per_page?: number;
+    status?: string;
+    trigger_type?: string;
+  }) => [...workflowKeys.lists(), filters] as const,
+  details: () => [...workflowKeys.all, "detail"] as const,
+  detail: (id: number) => [...workflowKeys.details(), id] as const,
+  executions: (id: number, filters?: { page?: number; per_page?: number; status?: string }) =>
+    [...workflowKeys.detail(id), "executions", filters] as const,
+  execution: (workflowId: number, executionId: number) =>
+    [...workflowKeys.detail(workflowId), "execution", executionId] as const,
+  stepTypes: () => [...workflowKeys.all, "step-types"] as const,
+  templates: (filters?: { category?: string; featured_only?: boolean }) =>
+    [...workflowKeys.all, "templates", filters] as const,
+  template: (id: number) => [...workflowKeys.all, "template", id] as const,
+};
+

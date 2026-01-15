@@ -110,7 +110,7 @@ module Helpers
 
   def workspace_scoped_models
     [Account, Statement, Transaction, Invoice, UserRule, LabeledExample, GmailConnection,
-     Client, SalesInvoice, RecurringInvoice]
+     Client, SalesInvoice, RecurringInvoice, Workflow, WorkflowExecution]
   end
   end
 end

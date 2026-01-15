@@ -595,6 +595,7 @@ DEPENDENCIES
   dotenv-rails
   factory_bot_rails (~> 6.4)
   faker (~> 3.4)
+  fugit (~> 1.9)
   google-apis-gmail_v1 (~> 0.30)
   googleauth (~> 1.8)
   grape (~> 2.0)
