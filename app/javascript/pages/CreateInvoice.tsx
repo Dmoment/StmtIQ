@@ -36,7 +36,56 @@ import { BilledToCard } from '../components/invoice/BilledToCard';
 import { TotalsSection } from '../components/invoice/TotalsSection';
 import { FooterActions } from '../components/invoice/FooterActions';
 import { InvoicePreviewModal } from '../components/invoice/InvoicePreviewModal';
+import { InfoTooltip } from '../components/ui/InfoTooltip';
 import { LineItem, Client, BusinessProfile, InvoiceCalculations } from '../types/invoice';
+
+// Extended BusinessProfile type with additional fields from API
+interface ExtendedBusinessProfile extends BusinessProfile {
+  default_payment_terms_days?: number;
+  default_notes?: string;
+  default_terms?: string;
+}
+
+// Type for next invoice number response
+interface NextInvoiceNumberResponse {
+  next_number: string;
+}
+
+// Type for exchange rate response
+interface ExchangeRateResponse {
+  rate: number;
+  from_currency: string;
+  to_currency: string;
+}
+
+// Type for existing sales invoice
+interface ExistingSalesInvoice {
+  id: number;
+  invoice_number: string;
+  client?: Client;
+  invoice_date: string | null;
+  due_date: string | null;
+  currency: 'INR' | 'USD' | 'EUR' | 'GBP';
+  discount_amount: string | null;
+  discount_type: 'fixed' | 'percentage';
+  notes: string | null;
+  terms: string | null;
+  tax_type: 'none' | 'cgst_sgst' | 'igst';
+  place_of_supply: string | null;
+  igst_rate?: number;
+  cess_rate?: number;
+  is_reverse_charge?: boolean;
+  line_items?: Array<{
+    id?: number;
+    description: string;
+    hsn_sac_code?: string;
+    quantity: string | number;
+    unit: string;
+    rate: string | number;
+    gst_rate: number;
+  }>;
+  custom_fields?: Array<{ label: string; value: string }>;
+}
 
 // Indian state codes for GST
 const INDIAN_STATES = [
@@ -139,6 +188,9 @@ export function CreateInvoice() {
   const [additionalFields, setAdditionalFields] = useState<{ label: string; value: string }[]>([]);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
+  // Line item display options
+  const [showHsnSac, setShowHsnSac] = useState(false);
+
   // UI state
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -150,8 +202,9 @@ export function CreateInvoice() {
   // Preview modal
   const [showPreview, setShowPreview] = useState(false);
 
-  const profile = businessProfile as any;
-  const invoiceNumber = (nextNumberData as any)?.next_number || 'INV-001';
+  const profile = businessProfile as ExtendedBusinessProfile | undefined;
+  const typedNextNumber = nextNumberData as NextInvoiceNumberResponse | undefined;
+  const invoiceNumber = typedNextNumber?.next_number || 'INV-001';
   const currencyConfig = CURRENCIES.find((c) => c.code === currency);
 
   // Get exchange rate if not INR
@@ -188,26 +241,26 @@ export function CreateInvoice() {
   // Load existing invoice data
   useEffect(() => {
     if (existingInvoice && isEditing) {
-      const invoice = existingInvoice as any;
+      const invoice = existingInvoice as ExistingSalesInvoice;
       if (invoice.client) {
         setSelectedClient(invoice.client);
       }
       setInvoiceDate(invoice.invoice_date || '');
       setDueDate(invoice.due_date || '');
       setCurrency(invoice.currency || 'INR');
-      setDiscountAmount(parseFloat(invoice.discount_amount) || 0);
+      setDiscountAmount(parseFloat(invoice.discount_amount || '0') || 0);
       setDiscountType(invoice.discount_type || 'fixed');
       setNotes(invoice.notes || '');
       setTerms(invoice.terms || '');
-      if (invoice.line_items?.length > 0) {
+      if (invoice.line_items && invoice.line_items.length > 0) {
         setLineItems(
-          invoice.line_items.map((item: any) => ({
+          invoice.line_items.map((item) => ({
             id: item.id,
             description: item.description || '',
             hsn_sac_code: item.hsn_sac_code || '',
-            quantity: parseFloat(item.quantity) || 1,
+            quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) : item.quantity || 1,
             unit: item.unit || 'qty',
-            rate: parseFloat(item.rate) || 0,
+            rate: typeof item.rate === 'string' ? parseFloat(item.rate) : item.rate || 0,
             gst_rate: item.gst_rate || 18,
           }))
         );
@@ -220,6 +273,10 @@ export function CreateInvoice() {
         cessRate: invoice.cess_rate || 0,
         isReverseCharge: invoice.is_reverse_charge || false,
       });
+      // Load custom fields (additional info)
+      if (invoice.custom_fields && invoice.custom_fields.length > 0) {
+        setAdditionalFields(invoice.custom_fields);
+      }
     }
   }, [existingInvoice, isEditing]);
 
@@ -287,7 +344,8 @@ export function CreateInvoice() {
 
     let totalInINR = total;
     if (currency !== 'INR' && exchangeRateData) {
-      totalInINR = total * ((exchangeRateData as any).rate || 1);
+      const typedExchangeRate = exchangeRateData as ExchangeRateResponse;
+      totalInINR = total * (typedExchangeRate.rate || 1);
     }
 
     return {
@@ -375,21 +433,22 @@ export function CreateInvoice() {
     setIsSaving(true);
 
     try {
+      const typedExchangeRate = exchangeRateData as ExchangeRateResponse | undefined;
       const invoiceData = {
         client_id: selectedClient!.id,
-        invoice_date: invoiceDate,
-        due_date: dueDate,
+        invoice_date: invoiceDate || undefined,
+        due_date: dueDate || undefined,
         currency,
-        exchange_rate: currency !== 'INR' ? (exchangeRateData as any)?.rate : undefined,
+        exchange_rate: currency !== 'INR' ? typedExchangeRate?.rate : undefined,
         exchange_rate_date: currency !== 'INR' ? new Date().toISOString().split('T')[0] : undefined,
         discount_amount: discountAmount,
-        discount_type: discountType,
-        tax_type: taxConfig.taxType === 'none' ? 'none' : taxConfig.gstType,
-        place_of_supply: taxConfig.placeOfSupply,
+        discount_type: discountType as 'fixed' | 'percentage',
+        tax_type: (taxConfig.taxType === 'none' ? 'none' : taxConfig.gstType) as 'none' | 'cgst_sgst' | 'igst',
+        place_of_supply: taxConfig.placeOfSupply || undefined,
         cess_rate: taxConfig.cessRate,
         is_reverse_charge: taxConfig.isReverseCharge,
-        notes,
-        terms,
+        notes: notes || undefined,
+        terms: terms || undefined,
         line_items: lineItems.map((item) => ({
           id: item.id,
           _destroy: item._destroy,
@@ -400,25 +459,28 @@ export function CreateInvoice() {
           rate: item.rate,
           gst_rate: item.gst_rate,
         })),
+        // Additional info fields (LUT Number, PO Number, etc.)
+        custom_fields: additionalFields.filter(f => f.label && f.value),
       };
 
-      let result;
+      let result: { id?: number } | undefined;
       if (isEditing) {
-        result = await updateInvoice.mutateAsync({
-          id: parseInt(id),
+        const updateData = {
+          id: parseInt(id!),
           ...invoiceData,
-        });
+        };
+        result = await updateInvoice.mutateAsync(updateData) as { id?: number };
       } else {
-        result = await createInvoice.mutateAsync(invoiceData);
+        result = await createInvoice.mutateAsync(invoiceData) as { id?: number };
       }
 
-      const invoiceId = (result as any).id || parseInt(id);
+      const invoiceId = result?.id || parseInt(id!);
 
       if (send && invoiceId) {
         await sendInvoice.mutateAsync(invoiceId);
       }
 
-      navigate('/invoices');
+      navigate('/invoices?tab=sent');
     } catch (error) {
       console.error('Failed to save invoice:', error);
     } finally {
@@ -440,9 +502,9 @@ export function CreateInvoice() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px]" role="status" aria-label="Loading invoice form">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-slate-400" aria-hidden="true" />
           <span className="text-slate-500">Loading...</span>
         </div>
       </div>
@@ -462,47 +524,50 @@ export function CreateInvoice() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/invoices')}
+            aria-label="Go back to invoices list"
             className="h-10 w-10 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+            <ArrowLeft className="w-5 h-5 text-slate-600" aria-hidden="true" />
           </button>
           <div>
             <h1 className="text-xl font-semibold text-slate-900">Create New Invoice</h1>
-            <div className="flex items-center gap-2 text-sm text-slate-500 mt-0.5">
-              <span className="flex items-center gap-1">
+            <nav aria-label="Invoice creation steps" className="flex items-center gap-2 text-sm text-slate-500 mt-0.5">
+              <span className="flex items-center gap-1" aria-current="step">
                 <span
                   className="w-5 h-5 rounded-full text-xs font-medium flex items-center justify-center"
                   style={{ backgroundColor: `${primaryColor}30`, color: primaryColor }}
+                  aria-hidden="true"
                 >
                   1
                 </span>
                 Add Invoice Details
               </span>
-              <span className="text-slate-300">{'>'}</span>
+              <span className="text-slate-300" aria-hidden="true">{'>'}</span>
               <span className="text-slate-400">
-                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-400 text-xs font-medium inline-flex items-center justify-center mr-1">
+                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-400 text-xs font-medium inline-flex items-center justify-center mr-1" aria-hidden="true">
                   2
                 </span>
                 Design & Share (optional)
               </span>
-            </div>
+            </nav>
           </div>
         </div>
 
         {/* Preview Button */}
         <button
           onClick={() => setShowPreview(true)}
+          aria-label="Preview invoice before saving"
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium transition-colors hover:opacity-90"
           style={{ backgroundColor: primaryColor }}
         >
-          <Eye className="w-4 h-4" />
+          <Eye className="w-4 h-4" aria-hidden="true" />
           Preview Invoice
         </button>
       </div>
 
       {/* Validation Errors */}
       {Object.keys(errors).length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <div role="alert" aria-live="polite" className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
           <ul className="list-disc list-inside text-sm text-red-600">
             {Object.values(errors).map((error, i) => (
               <li key={i}>{error}</li>
@@ -576,12 +641,23 @@ export function CreateInvoice() {
           <div className="grid grid-cols-2 gap-6">
             {/* Invoice Number */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1">
                 Invoice No<span className="text-red-500">*</span>
+                <InfoTooltip
+                  title="Invoice Number"
+                  content={
+                    <>
+                      Auto-generated unique number for each invoice. Format follows your business settings.
+                      <br /><br />
+                      Used for tracking payments and required for GST compliance.
+                    </>
+                  }
+                  position="right"
+                />
               </label>
               <input
                 type="text"
-                value={isEditing ? (existingInvoice as any)?.invoice_number : invoiceNumber}
+                value={isEditing ? (existingInvoice as ExistingSalesInvoice | undefined)?.invoice_number : invoiceNumber}
                 disabled
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-medium"
               />
@@ -597,8 +673,22 @@ export function CreateInvoice() {
 
             {/* Invoice Date */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1">
                 Invoice Date<span className="text-red-500">*</span>
+                <InfoTooltip
+                  title="Invoice Date"
+                  content={
+                    <>
+                      The date when the invoice is issued to the client.
+                      <br /><br />
+                      This date is used for:
+                      <br />• GST return filing period
+                      <br />• Payment terms calculation
+                      <br />• Financial records
+                    </>
+                  }
+                  position="right"
+                />
               </label>
               <input
                 type="date"
@@ -610,8 +700,22 @@ export function CreateInvoice() {
 
             {/* Due Date */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1">
                 Due Date
+                <InfoTooltip
+                  title="Due Date"
+                  content={
+                    <>
+                      Payment deadline for this invoice. Auto-calculated based on your default payment terms.
+                      <br /><br />
+                      <strong>Tips:</strong>
+                      <br />• Set reminders before due date
+                      <br />• Track overdue invoices easily
+                      <br />• Industry standard: Net 30 days
+                    </>
+                  }
+                  position="right"
+                />
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -650,13 +754,11 @@ export function CreateInvoice() {
         <div className="p-6 border-b border-slate-100">
           <div className="grid grid-cols-2 gap-6">
             <BilledByCard
-              profile={profile}
-              onEdit={() => navigate('/settings/business')}
+              profile={profile as BusinessProfile | null}
             />
             <BilledToCard
               selectedClient={selectedClient}
               onSelect={setSelectedClient}
-              onEdit={(client) => navigate(`/clients/${client.id}/edit`)}
             />
           </div>
 
@@ -676,26 +778,86 @@ export function CreateInvoice() {
             <span className="text-sm font-medium text-slate-700">Currency*</span>
 
             {/* Configure GST Button */}
-            <button
-              onClick={() => setShowTaxModal(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              <Percent className="w-4 h-4 text-slate-500" />
-              Configure GST
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowTaxModal(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <Percent className="w-4 h-4 text-slate-500" />
+                Configure GST
+              </button>
+              <InfoTooltip
+                title="GST Configuration"
+                content={
+                  <>
+                    <strong>IGST:</strong> For sales to other states (inter-state)
+                    <br /><br />
+                    <strong>CGST + SGST:</strong> For sales within same state (intra-state)
+                    <br /><br />
+                    <strong>No Tax:</strong> For exports, SEZ, or exempt supplies
+                  </>
+                }
+                position="bottom"
+              />
+            </div>
+
+            {/* HSN/SAC Toggle */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowHsnSac(!showHsnSac)}
+                className={clsx(
+                  "flex items-center gap-2 px-4 py-2 rounded-xl border text-sm transition-colors",
+                  showHsnSac
+                    ? "border-amber-300 bg-amber-50 text-amber-700"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                )}
+              >
+                <span className="font-mono text-xs">HSN</span>
+                {showHsnSac ? 'Hide HSN/SAC' : 'Show HSN/SAC'}
+              </button>
+              <InfoTooltip
+                title="HSN/SAC Codes"
+                content={
+                  <>
+                    <strong>HSN:</strong> For goods (4-8 digits)
+                    <br />
+                    <strong>SAC:</strong> For services (6 digits, starts with 99)
+                    <br /><br />
+                    Required for businesses with turnover above ₹5 Cr. Optional for smaller businesses.
+                  </>
+                }
+                position="bottom"
+              />
+            </div>
 
             {/* Currency Selector */}
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as any)}
-              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.name} ({c.symbol})
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-1">
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as 'INR' | 'USD' | 'EUR' | 'GBP')}
+                className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name} ({c.symbol})
+                  </option>
+                ))}
+              </select>
+              <InfoTooltip
+                title="Currency"
+                content={
+                  <>
+                    Select the currency for this invoice.
+                    <br /><br />
+                    <strong>For foreign currency:</strong>
+                    <br />• Exchange rate auto-fetched
+                    <br />• INR equivalent shown for GST
+                    <br />• Client sees their currency
+                  </>
+                }
+                position="bottom"
+              />
+            </div>
 
             {/* Number Format */}
             <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 transition-colors">
@@ -746,14 +908,18 @@ export function CreateInvoice() {
                 style={{ color: accentColor }}
               >
                 <div className="flex-[3] min-w-[200px]">Item</div>
-                <div className="w-20 text-center">HSN/SAC</div>
-                <div className="w-16 text-center">GST %</div>
+                {showHsnSac && <div className="w-20 text-center">HSN/SAC</div>}
+                {taxConfig.taxType !== 'none' && (
+                  <div className="w-16 text-center">GST %</div>
+                )}
                 <div className="w-24 text-center">Quantity</div>
                 <div className="w-24 text-right">Rate</div>
                 <div className="w-24 text-right">Amount</div>
-                <div className="w-20 text-right">
-                  {taxConfig.gstType === 'igst' ? 'IGST' : 'Tax'}
-                </div>
+                {taxConfig.taxType !== 'none' && (
+                  <div className="w-20 text-right">
+                    {taxConfig.gstType === 'igst' ? 'IGST' : 'Tax'}
+                  </div>
+                )}
                 <div className="w-24 text-right">Total</div>
                 <div className="w-8"></div>
               </div>
@@ -796,34 +962,38 @@ export function CreateInvoice() {
                         </div>
 
                         {/* HSN/SAC */}
-                        <div className="w-20">
-                          <input
-                            type="text"
-                            value={item.hsn_sac_code}
-                            onChange={(e) =>
-                              handleLineItemChange(actualIndex, 'hsn_sac_code', e.target.value)
-                            }
-                            placeholder="—"
-                            className="w-full px-2 py-1.5 rounded border border-transparent hover:border-slate-200 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm text-center"
-                          />
-                        </div>
+                        {showHsnSac && (
+                          <div className="w-20">
+                            <input
+                              type="text"
+                              value={item.hsn_sac_code}
+                              onChange={(e) =>
+                                handleLineItemChange(actualIndex, 'hsn_sac_code', e.target.value)
+                              }
+                              placeholder="—"
+                              className="w-full px-2 py-1.5 rounded border border-transparent hover:border-slate-200 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm text-center"
+                            />
+                          </div>
+                        )}
 
                         {/* GST Rate */}
-                        <div className="w-16">
-                          <select
-                            value={item.gst_rate}
-                            onChange={(e) =>
-                              handleLineItemChange(actualIndex, 'gst_rate', parseInt(e.target.value))
-                            }
-                            className="w-full px-1 py-1.5 rounded border border-transparent hover:border-slate-200 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm text-center bg-transparent"
-                          >
-                            {GST_RATES.map((rate) => (
-                              <option key={rate} value={rate}>
-                                {rate}%
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                        {taxConfig.taxType !== 'none' && (
+                          <div className="w-16">
+                            <select
+                              value={item.gst_rate}
+                              onChange={(e) =>
+                                handleLineItemChange(actualIndex, 'gst_rate', parseInt(e.target.value))
+                              }
+                              className="w-full px-1 py-1.5 rounded border border-transparent hover:border-slate-200 focus:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm text-center bg-transparent"
+                            >
+                              {GST_RATES.map((rate) => (
+                                <option key={rate} value={rate}>
+                                  {rate}%
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
 
                         {/* Quantity */}
                         <div className="w-24">
@@ -889,10 +1059,12 @@ export function CreateInvoice() {
                         </div>
 
                         {/* Tax */}
-                        <div className="w-20 text-right text-sm text-slate-700">
-                          {currencyConfig?.symbol}
-                          {calc.taxAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                        </div>
+                        {taxConfig.taxType !== 'none' && (
+                          <div className="w-20 text-right text-sm text-slate-700">
+                            {currencyConfig?.symbol}
+                            {calc.taxAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </div>
+                        )}
 
                         {/* Total */}
                         <div className="w-24 text-right text-sm font-medium text-slate-900">
@@ -996,6 +1168,7 @@ export function CreateInvoice() {
                 currencySymbol={currencyConfig?.symbol || '₹'}
                 extraCharges={extraCharges}
                 onExtraChargesChange={setExtraCharges}
+                isReverseCharge={taxConfig.isReverseCharge}
               />
             </div>
           </div>
@@ -1008,6 +1181,7 @@ export function CreateInvoice() {
             onTermsChange={setTerms}
             notes={notes}
             onNotesChange={setNotes}
+            isReverseCharge={taxConfig.isReverseCharge}
           />
         </div>
 
@@ -1069,10 +1243,28 @@ export function CreateInvoice() {
               onChange={(e) => setIsRecurring(e.target.checked)}
               className="w-4 h-4 mt-0.5 rounded text-amber-500 focus:ring-amber-500"
             />
-            <div>
-              <span className="text-sm font-medium text-slate-900">
-                This is a Recurring invoice
-              </span>
+            <div className="flex-1">
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-medium text-slate-900">
+                  This is a Recurring invoice
+                </span>
+                <InfoTooltip
+                  title="Recurring Invoice"
+                  content={
+                    <>
+                      Automatically create invoices on a schedule.
+                      <br /><br />
+                      <strong>How it works:</strong>
+                      <br />• Draft invoice created each period
+                      <br />• Same line items and amounts
+                      <br />• Review before sending
+                      <br /><br />
+                      <strong>Best for:</strong> Monthly retainers, subscriptions, maintenance contracts
+                    </>
+                  }
+                  position="right"
+                />
+              </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 A draft invoice will be created with the same details every next period.
               </p>
@@ -1162,12 +1354,14 @@ export function CreateInvoice() {
         <button
           onClick={() => handleSave(false)}
           disabled={isSaving}
+          aria-label={isSaving ? 'Saving invoice' : 'Save invoice and continue'}
+          aria-busy={isSaving}
           className="px-8 py-3 text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 hover:opacity-90"
           style={{ backgroundColor: primaryColor }}
         >
           {isSaving ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
               Saving...
             </>
           ) : (
@@ -1191,10 +1385,10 @@ export function CreateInvoice() {
         onClose={() => setShowPreview(false)}
         invoiceTitle={invoiceTitle}
         invoiceSubtitle={invoiceSubtitle}
-        invoiceNumber={isEditing ? (existingInvoice as any)?.invoice_number : invoiceNumber}
+        invoiceNumber={isEditing ? (existingInvoice as ExistingSalesInvoice | undefined)?.invoice_number || '' : invoiceNumber}
         invoiceDate={invoiceDate}
         dueDate={dueDate}
-        businessProfile={profile}
+        businessProfile={profile as BusinessProfile | null}
         client={selectedClient}
         lineItems={lineItems}
         calculations={calculations}
@@ -1206,6 +1400,7 @@ export function CreateInvoice() {
         accentColor={accentColor}
         terms={terms}
         notes={notes}
+        customFields={additionalFields.filter(f => f.label && f.value)}
       />
     </div>
   );

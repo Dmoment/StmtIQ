@@ -7,7 +7,8 @@ module V1
       expose :business_name
       expose :legal_name
       expose :gstin
-      expose :pan_number
+      # Expose as 'pan' for frontend consistency (database column is pan_number)
+      expose :pan_number, as: :pan
 
       # Address
       expose :address_line1

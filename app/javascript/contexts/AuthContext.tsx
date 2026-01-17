@@ -7,6 +7,7 @@ import {
   ReactNode,
 } from 'react';
 import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/clerk-react';
+import { setClerkTokenGetter, clearClerkTokenGetter } from '../types/generated/core/OpenAPI';
 
 interface User {
   id: number;
@@ -86,6 +87,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       syncWithBackend();
     }
   }, [isLoaded, userLoaded, isSignedIn, syncWithBackend]);
+
+  // Register the token getter for use outside React components (e.g., in API utilities)
+  useEffect(() => {
+    if (isSignedIn) {
+      setClerkTokenGetter(async () => {
+        try {
+          return await clerkGetToken();
+        } catch {
+          return null;
+        }
+      });
+    } else {
+      clearClerkTokenGetter();
+    }
+
+    return () => {
+      clearClerkTokenGetter();
+    };
+  }, [isSignedIn, clerkGetToken]);
 
   const getToken = useCallback(async (): Promise<string | null> => {
     if (!isSignedIn) return null;

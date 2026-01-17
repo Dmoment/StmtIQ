@@ -456,7 +456,8 @@ CREATE TABLE public.clients (
     notes text,
     is_active boolean DEFAULT true,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    pan character varying(10)
 );
 
 
@@ -699,7 +700,9 @@ CREATE TABLE public.invoice_line_items (
     amount numeric(15,2) DEFAULT 0.0 NOT NULL,
     tax_rate numeric(5,2),
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    gst_rate numeric(5,2) DEFAULT 18.0,
+    tax_amount numeric(15,2) DEFAULT 0.0
 );
 
 
@@ -902,7 +905,12 @@ CREATE TABLE public.sales_invoices (
     recurring_invoice_id bigint,
     matched_transaction_id bigint,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    place_of_supply character varying(2),
+    is_reverse_charge boolean DEFAULT false NOT NULL,
+    cess_rate numeric(5,2) DEFAULT 0.0,
+    cess_amount numeric(15,2) DEFAULT 0.0,
+    custom_fields jsonb DEFAULT '[]'::jsonb
 );
 
 
@@ -2714,10 +2722,24 @@ CREATE INDEX index_sales_invoices_on_client_id_and_status ON public.sales_invoic
 
 
 --
+-- Name: index_sales_invoices_on_is_reverse_charge; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_is_reverse_charge ON public.sales_invoices USING btree (is_reverse_charge);
+
+
+--
 -- Name: index_sales_invoices_on_matched_transaction_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_sales_invoices_on_matched_transaction_id ON public.sales_invoices USING btree (matched_transaction_id);
+
+
+--
+-- Name: index_sales_invoices_on_place_of_supply; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sales_invoices_on_place_of_supply ON public.sales_invoices USING btree (place_of_supply);
 
 
 --
@@ -3843,6 +3865,9 @@ ALTER TABLE ONLY public.transactions
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260117122757'),
+('20260117112943'),
+('20260117100001'),
 ('20260114162821'),
 ('20260113125639'),
 ('20260113125609'),

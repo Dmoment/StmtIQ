@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Eye, EyeOff, Plus, ChevronDown, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { numberToWords } from '../../utils/numberToWords';
+import { InfoTooltip } from '../ui/InfoTooltip';
 
 interface TotalsSectionProps {
   subtotal: number;
@@ -20,6 +21,7 @@ interface TotalsSectionProps {
   currencySymbol: string;
   extraCharges?: number;
   onExtraChargesChange?: (amount: number) => void;
+  isReverseCharge?: boolean;
 }
 
 export function TotalsSection({
@@ -39,6 +41,7 @@ export function TotalsSection({
   currencySymbol,
   extraCharges = 0,
   onExtraChargesChange,
+  isReverseCharge = false,
 }: TotalsSectionProps) {
   const [showTotalInPdf, setShowTotalInPdf] = useState(true);
   const [showTotalInWords, setShowTotalInWords] = useState(true);
@@ -53,7 +56,14 @@ export function TotalsSection({
     })}`;
   };
 
-  const totalInWords = numberToWords(total, currency);
+  // Calculate total tax for RCM display
+  const totalTax = cgstAmount + sgstAmount + igstAmount + cessAmount;
+
+  // Amount payable to supplier (without tax) for RCM
+  const amountPayableToSupplier = subtotal - discount + extraCharges;
+
+  // For RCM, show amount payable to supplier in words, otherwise show total
+  const totalInWords = numberToWords(isReverseCharge ? amountPayableToSupplier : total, currency);
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -88,28 +98,48 @@ export function TotalsSection({
         {taxType === 'cgst_sgst' && (
           <>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">CGST ({gstRate / 2}%)</span>
-              <span className="text-slate-900">{formatCurrency(cgstAmount)}</span>
+              <span className={clsx("text-slate-600", isReverseCharge && "text-amber-700")}>
+                CGST ({gstRate / 2}%)
+                {isReverseCharge && <span className="text-xs ml-1">(RCM)</span>}
+              </span>
+              <span className={clsx("text-slate-900", isReverseCharge && "text-amber-700")}>
+                {formatCurrency(cgstAmount)}
+              </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">SGST ({gstRate / 2}%)</span>
-              <span className="text-slate-900">{formatCurrency(sgstAmount)}</span>
+              <span className={clsx("text-slate-600", isReverseCharge && "text-amber-700")}>
+                SGST ({gstRate / 2}%)
+                {isReverseCharge && <span className="text-xs ml-1">(RCM)</span>}
+              </span>
+              <span className={clsx("text-slate-900", isReverseCharge && "text-amber-700")}>
+                {formatCurrency(sgstAmount)}
+              </span>
             </div>
           </>
         )}
 
         {taxType === 'igst' && (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">IGST ({gstRate}%)</span>
-            <span className="text-slate-900">{formatCurrency(igstAmount)}</span>
+            <span className={clsx("text-slate-600", isReverseCharge && "text-amber-700")}>
+              IGST ({gstRate}%)
+              {isReverseCharge && <span className="text-xs ml-1">(RCM)</span>}
+            </span>
+            <span className={clsx("text-slate-900", isReverseCharge && "text-amber-700")}>
+              {formatCurrency(igstAmount)}
+            </span>
           </div>
         )}
 
         {/* Cess */}
         {cessAmount > 0 && (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">Cess</span>
-            <span className="text-slate-900">{formatCurrency(cessAmount)}</span>
+            <span className={clsx("text-slate-600", isReverseCharge && "text-amber-700")}>
+              Cess
+              {isReverseCharge && <span className="text-xs ml-1">(RCM)</span>}
+            </span>
+            <span className={clsx("text-slate-900", isReverseCharge && "text-amber-700")}>
+              {formatCurrency(cessAmount)}
+            </span>
           </div>
         )}
 
@@ -186,22 +216,46 @@ export function TotalsSection({
         {/* Action Links */}
         <div className="flex flex-wrap gap-2 pt-1">
           {!showDiscountInput && (
-            <button
-              onClick={() => setShowDiscountInput(true)}
-              className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 transition-colors"
-            >
-              <Plus className="w-3 h-3" />
-              Add Discounts
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowDiscountInput(true)}
+                className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                Add Discounts
+              </button>
+              <InfoTooltip
+                content={
+                  <>
+                    Apply discount as fixed amount or percentage.
+                    <br /><br />
+                    Discount is applied before tax calculation.
+                  </>
+                }
+                position="top"
+              />
+            </div>
           )}
           {!showExtraChargesInput && (
-            <button
-              onClick={() => setShowExtraChargesInput(true)}
-              className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 transition-colors"
-            >
-              <Plus className="w-3 h-3" />
-              Add Additional Charges
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowExtraChargesInput(true)}
+                className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                Add Additional Charges
+              </button>
+              <InfoTooltip
+                content={
+                  <>
+                    Add shipping, handling, or other charges.
+                    <br /><br />
+                    These are added to the subtotal before tax.
+                  </>
+                }
+                position="top"
+              />
+            </div>
           )}
         </div>
 
@@ -218,10 +272,29 @@ export function TotalsSection({
 
         {/* Total */}
         <div className="pt-3 border-t border-slate-200">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-900">Total ({currency})</span>
-            <span className="text-xl font-bold text-slate-900">{formatCurrency(total)}</span>
-          </div>
+          {isReverseCharge && taxType !== 'none' ? (
+            <>
+              {/* RCM Display */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-900">Amount Payable to Supplier</span>
+                  <span className="text-xl font-bold text-slate-900">{formatCurrency(amountPayableToSupplier)}</span>
+                </div>
+                <div className="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                  <span className="text-sm text-amber-800">Tax Payable by Recipient (RCM)</span>
+                  <span className="text-sm font-semibold text-amber-800">{formatCurrency(totalTax)}</span>
+                </div>
+                <p className="text-xs text-slate-500 italic">
+                  * Tax to be paid directly to Government by the recipient under Reverse Charge Mechanism
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-900">Total ({currency})</span>
+              <span className="text-xl font-bold text-slate-900">{formatCurrency(total)}</span>
+            </div>
+          )}
         </div>
 
         {/* Discount Applied */}

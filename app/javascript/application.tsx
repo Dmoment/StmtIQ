@@ -2,11 +2,16 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
 
 import { ClerkProvider } from './providers/ClerkProvider';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { Layout } from './components/Layout';
+import { initializeApiInterceptors } from './utils/api';
+
+// Initialize API interceptors for global error handling
+initializeApiInterceptors();
 import { Dashboard } from './pages/Dashboard';
 import { Upload } from './pages/Upload';
 import { Transactions } from './pages/Transactions';
@@ -53,6 +58,17 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1e293b',
+            color: '#f8fafc',
+            border: '1px solid #334155',
+          },
+        }}
+        richColors
+      />
       <ClerkProvider>
         <AuthProvider>
           <WorkspaceProvider>

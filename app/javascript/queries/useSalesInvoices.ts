@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SalesInvoicesService } from '../types/generated';
+import { SalesInvoicesService, postV1SalesInvoices, patchV1SalesInvoicesId } from '../types/generated';
+import { isAuthError, SAFE_QUERY_OPTIONS } from '../utils/api';
+
+// Sales invoice status type
+type SalesInvoiceStatus = 'draft' | 'sent' | 'viewed' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
 
 interface UseSalesInvoicesParams {
   page?: number;
@@ -11,19 +15,35 @@ interface UseSalesInvoicesParams {
 }
 
 export function useSalesInvoices(params: UseSalesInvoicesParams = {}) {
+  // Extract primitive values for stable query key
+  const page = params.page || 1;
+  const perPage = params.per_page || 25;
+  const status = params.status || '';
+  const clientId = params.client_id || 0;
+  const fromDate = params.from_date || '';
+  const toDate = params.to_date || '';
+
   return useQuery({
-    queryKey: ['salesInvoices', params],
+    queryKey: ['salesInvoices', page, perPage, status, clientId, fromDate, toDate],
     queryFn: async () => {
-      const response = await SalesInvoicesService.getV1SalesInvoices({
-        page: params.page || 1,
-        perPage: params.per_page || 25,
-        status: params.status as any,
-        clientId: params.client_id,
-        fromDate: params.from_date,
-        toDate: params.to_date,
-      });
-      return response;
+      try {
+        const response = await SalesInvoicesService.getV1SalesInvoices({
+          page,
+          perPage,
+          status: (status as SalesInvoiceStatus) || undefined,
+          clientId: clientId || undefined,
+          fromDate: fromDate || undefined,
+          toDate: toDate || undefined,
+        });
+        return response;
+      } catch (error: unknown) {
+        if (isAuthError(error)) {
+          return [];
+        }
+        throw error;
+      }
     },
+    ...SAFE_QUERY_OPTIONS,
   });
 }
 
@@ -31,9 +51,17 @@ export function useSalesInvoice(id: number) {
   return useQuery({
     queryKey: ['salesInvoices', id],
     queryFn: async () => {
-      return SalesInvoicesService.getV1SalesInvoicesId({ id });
+      try {
+        return await SalesInvoicesService.getV1SalesInvoicesId({ id });
+      } catch (error: unknown) {
+        if (isAuthError(error)) {
+          return null;
+        }
+        throw error;
+      }
     },
     enabled: !!id,
+    ...SAFE_QUERY_OPTIONS,
   });
 }
 
@@ -41,8 +69,16 @@ export function useSalesInvoiceStats() {
   return useQuery({
     queryKey: ['salesInvoices', 'stats'],
     queryFn: async () => {
-      return SalesInvoicesService.getV1SalesInvoicesStats();
+      try {
+        return await SalesInvoicesService.getV1SalesInvoicesStats();
+      } catch (error: unknown) {
+        if (isAuthError(error)) {
+          return { total: 0, total_amount: 0, total_paid: 0, total_outstanding: 0, by_status: {} };
+        }
+        throw error;
+      }
     },
+    ...SAFE_QUERY_OPTIONS,
   });
 }
 
@@ -50,17 +86,84 @@ export function useNextInvoiceNumber() {
   return useQuery({
     queryKey: ['salesInvoices', 'nextNumber'],
     queryFn: async () => {
-      return SalesInvoicesService.getV1SalesInvoicesNextNumber();
+      try {
+        return await SalesInvoicesService.getV1SalesInvoicesNextNumber();
+      } catch (error: unknown) {
+        // Return default if auth fails or no business profile exists (422)
+        if (isAuthError(error)) {
+          return { next_number: 'INV-00001' };
+        }
+        // Handle 422 - no business profile exists
+        const err = error as { status?: number };
+        if (err?.status === 422) {
+          return { next_number: 'INV-00001' };
+        }
+        throw error;
+      }
     },
+    ...SAFE_QUERY_OPTIONS,
   });
+}
+
+// Line item type for invoice mutations (extends generated type with additional fields)
+interface InvoiceLineItem {
+  id?: number;
+  description: string;
+  hsn_sac_code?: string;
+  quantity: number;
+  unit: string;
+  rate: number;
+  gst_rate: number;
+  _destroy?: boolean;
+}
+
+// Extended type that includes all possible fields for invoice creation
+interface CreateSalesInvoiceData {
+  client_id: number;
+  invoice_date?: string;
+  due_date?: string;
+  currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+  exchange_rate?: number;
+  exchange_rate_date?: string;
+  discount_amount?: number;
+  discount_type?: 'fixed' | 'percentage';
+  tax_type?: 'none' | 'cgst_sgst' | 'igst';
+  place_of_supply?: string;
+  is_reverse_charge?: boolean;
+  cess_rate?: number;
+  notes?: string;
+  terms?: string;
+  line_items?: InvoiceLineItem[];
+  custom_fields?: Array<{ label: string; value: string }>;
+}
+
+// Extended type that includes all possible fields for invoice update
+interface UpdateSalesInvoiceData {
+  id: number;
+  client_id?: number;
+  invoice_date?: string;
+  due_date?: string;
+  currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+  exchange_rate?: number;
+  exchange_rate_date?: string;
+  discount_amount?: number;
+  discount_type?: 'fixed' | 'percentage';
+  tax_type?: 'none' | 'cgst_sgst' | 'igst';
+  place_of_supply?: string;
+  is_reverse_charge?: boolean;
+  cess_rate?: number;
+  notes?: string;
+  terms?: string;
+  line_items?: InvoiceLineItem[];
+  custom_fields?: Array<{ label: string; value: string }>;
 }
 
 export function useCreateSalesInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: Record<string, any>) => {
-      return SalesInvoicesService.postV1SalesInvoices({ requestBody: data as any });
+    mutationFn: async (data: CreateSalesInvoiceData) => {
+      return SalesInvoicesService.postV1SalesInvoices({ requestBody: data as postV1SalesInvoices });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['salesInvoices'] });
@@ -72,8 +175,8 @@ export function useUpdateSalesInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & Record<string, unknown>) => {
-      return SalesInvoicesService.patchV1SalesInvoicesId({ id, requestBody: data });
+    mutationFn: async ({ id, ...data }: UpdateSalesInvoiceData) => {
+      return SalesInvoicesService.patchV1SalesInvoicesId({ id, requestBody: data as patchV1SalesInvoicesId });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['salesInvoices'] });

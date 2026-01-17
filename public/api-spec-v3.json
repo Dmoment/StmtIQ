@@ -84,6 +84,26 @@
         {
             "name": "exchange_rates",
             "description": "Operations about exchange_rates"
+        },
+        {
+            "name": "gst",
+            "description": "Operations about gsts"
+        },
+        {
+            "name": "folders",
+            "description": "Operations about folders"
+        },
+        {
+            "name": "documents",
+            "description": "Operations about documents"
+        },
+        {
+            "name": "buckets",
+            "description": "Operations about buckets"
+        },
+        {
+            "name": "workflows",
+            "description": "Operations about workflows"
         }
     ],
     "paths": {
@@ -1985,7 +2005,7 @@
         },
         "/v1/gmail/callback": {
             "get": {
-                "description": "Handle Gmail OAuth callback",
+                "description": "Handle Gmail OAuth callback (browser redirect from Google)",
                 "parameters": [
                     {
                         "in": "query",
@@ -2008,7 +2028,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Handle Gmail OAuth callback"
+                        "description": "Handle Gmail OAuth callback (browser redirect from Google)"
                     }
                 },
                 "tags": [
@@ -2115,9 +2135,23 @@
                 "operationId": "deleteV1GmailConnectionsId"
             }
         },
+        "/v1/gmail/sync_suggestions": {
+            "get": {
+                "description": "Get sync suggestions based on user transactions",
+                "responses": {
+                    "200": {
+                        "description": "Get sync suggestions based on user transactions"
+                    }
+                },
+                "tags": [
+                    "gmail"
+                ],
+                "operationId": "getV1GmailSyncSuggestions"
+            }
+        },
         "/v1/gmail/connections/{id}/sync": {
             "post": {
-                "description": "Trigger manual sync for a Gmail connection",
+                "description": "Trigger manual sync for a Gmail connection with filters",
                 "parameters": [
                     {
                         "in": "path",
@@ -2130,9 +2164,19 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1GmailConnectionsIdSync"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "responses": {
                     "201": {
-                        "description": "Trigger manual sync for a Gmail connection"
+                        "description": "Trigger manual sync for a Gmail connection with filters"
                     }
                 },
                 "tags": [
@@ -2462,6 +2506,64 @@
                     "clients"
                 ],
                 "operationId": "getV1ClientsIdInvoices"
+            }
+        },
+        "/v1/clients/{id}/logo": {
+            "post": {
+                "description": "Upload client logo",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1ClientsIdLogo"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upload client logo"
+                    }
+                },
+                "tags": [
+                    "clients"
+                ],
+                "operationId": "postV1ClientsIdLogo"
+            },
+            "delete": {
+                "description": "Delete client logo",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete client logo"
+                    }
+                },
+                "tags": [
+                    "clients"
+                ],
+                "operationId": "deleteV1ClientsIdLogo"
             }
         },
         "/v1/sales_invoices": {
@@ -3229,6 +3331,1645 @@
                 ],
                 "operationId": "getV1ExchangeRatesRate"
             }
+        },
+        "/v1/gst/lookup": {
+            "get": {
+                "description": "Lookup company details by GSTIN",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "gstin",
+                        "description": "GST Identification Number (15 characters)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lookup company details by GSTIN"
+                    }
+                },
+                "tags": [
+                    "gst"
+                ],
+                "operationId": "getV1GstLookup"
+            }
+        },
+        "/v1/gst/logo": {
+            "get": {
+                "description": "Get company logo by domain or email",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "domain",
+                        "description": "Company domain or email address",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "size",
+                        "description": "Logo size",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "enum": [
+                                32,
+                                64,
+                                128,
+                                256
+                            ],
+                            "default": 128
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get company logo by domain or email"
+                    }
+                },
+                "tags": [
+                    "gst"
+                ],
+                "operationId": "getV1GstLogo"
+            }
+        },
+        "/v1/gst/validate": {
+            "get": {
+                "description": "Validate GSTIN format",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "gstin",
+                        "description": "GST Identification Number",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Validate GSTIN format"
+                    }
+                },
+                "tags": [
+                    "gst"
+                ],
+                "operationId": "getV1GstValidate"
+            }
+        },
+        "/v1/gst/states": {
+            "get": {
+                "description": "Get list of Indian states with GST codes",
+                "responses": {
+                    "200": {
+                        "description": "Get list of Indian states with GST codes"
+                    }
+                },
+                "tags": [
+                    "gst"
+                ],
+                "operationId": "getV1GstStates"
+            }
+        },
+        "/v1/folders": {
+            "get": {
+                "description": "List folders with filtering",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "parent_id",
+                        "description": "Filter by parent folder (null for root)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_children",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List folders with filtering"
+                    }
+                },
+                "tags": [
+                    "folders"
+                ],
+                "operationId": "getV1Folders"
+            },
+            "post": {
+                "description": "Create a new folder",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Folders"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create a new folder"
+                    }
+                },
+                "tags": [
+                    "folders"
+                ],
+                "operationId": "postV1Folders"
+            }
+        },
+        "/v1/folders/tree": {
+            "get": {
+                "description": "Get folder tree (nested structure)",
+                "responses": {
+                    "200": {
+                        "description": "Get folder tree (nested structure)"
+                    }
+                },
+                "tags": [
+                    "folders"
+                ],
+                "operationId": "getV1FoldersTree"
+            }
+        },
+        "/v1/folders/{id}": {
+            "get": {
+                "description": "Get folder details",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get folder details"
+                    }
+                },
+                "tags": [
+                    "folders"
+                ],
+                "operationId": "getV1FoldersId"
+            },
+            "patch": {
+                "description": "Update a folder",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1FoldersId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update a folder"
+                    }
+                },
+                "tags": [
+                    "folders"
+                ],
+                "operationId": "patchV1FoldersId"
+            },
+            "delete": {
+                "description": "Delete a folder",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a folder"
+                    }
+                },
+                "tags": [
+                    "folders"
+                ],
+                "operationId": "deleteV1FoldersId"
+            }
+        },
+        "/v1/folders/{id}/documents": {
+            "get": {
+                "description": "List documents in folder",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 25
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List documents in folder"
+                    }
+                },
+                "tags": [
+                    "folders"
+                ],
+                "operationId": "getV1FoldersIdDocuments"
+            }
+        },
+        "/v1/documents": {
+            "get": {
+                "description": "List documents with filtering and pagination",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 25
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "folder_id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "document_type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "invoice",
+                                "purchase_invoice",
+                                "bank_statement",
+                                "firc",
+                                "receipt",
+                                "expense",
+                                "contract",
+                                "tax_document",
+                                "gst_return",
+                                "tds_certificate",
+                                "audit_report",
+                                "balance_sheet",
+                                "profit_loss",
+                                "other"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "financial_year",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end_date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List documents with filtering and pagination"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "getV1Documents"
+            },
+            "post": {
+                "description": "Upload a new document",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Documents"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upload a new document"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "postV1Documents"
+            }
+        },
+        "/v1/documents/{id}": {
+            "get": {
+                "description": "Get document details",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get document details"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "getV1DocumentsId"
+            },
+            "patch": {
+                "description": "Update document metadata",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1DocumentsId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update document metadata"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "patchV1DocumentsId"
+            },
+            "delete": {
+                "description": "Delete a document",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a document"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "deleteV1DocumentsId"
+            }
+        },
+        "/v1/documents/{id}/move": {
+            "post": {
+                "description": "Move document to folder",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1DocumentsIdMove"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Move document to folder"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "postV1DocumentsIdMove"
+            }
+        },
+        "/v1/documents/{id}/share": {
+            "post": {
+                "description": "Share document",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1DocumentsIdShare"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Share document"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "postV1DocumentsIdShare"
+            }
+        },
+        "/v1/documents/types/list": {
+            "get": {
+                "description": "List document types",
+                "responses": {
+                    "200": {
+                        "description": "List document types"
+                    }
+                },
+                "tags": [
+                    "documents"
+                ],
+                "operationId": "getV1DocumentsTypesList"
+            }
+        },
+        "/v1/buckets": {
+            "get": {
+                "description": "List buckets with filtering",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 25
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "financial_year",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "finalized",
+                                "shared"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "bucket_type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "monthly",
+                                "quarterly",
+                                "annual",
+                                "custom"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List buckets with filtering"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "getV1Buckets"
+            },
+            "post": {
+                "description": "Create a new bucket",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Buckets"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create a new bucket"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "postV1Buckets"
+            }
+        },
+        "/v1/buckets/monthly": {
+            "post": {
+                "description": "Get or create monthly bucket",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1BucketsMonthly"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Get or create monthly bucket"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "postV1BucketsMonthly"
+            }
+        },
+        "/v1/buckets/{id}": {
+            "get": {
+                "description": "Get bucket details",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get bucket details"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "getV1BucketsId"
+            },
+            "patch": {
+                "description": "Update a bucket",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1BucketsId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update a bucket"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "patchV1BucketsId"
+            },
+            "delete": {
+                "description": "Delete a bucket",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a bucket"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "deleteV1BucketsId"
+            }
+        },
+        "/v1/buckets/{id}/documents": {
+            "post": {
+                "description": "Add document to bucket",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1BucketsIdDocuments"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Add document to bucket"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "postV1BucketsIdDocuments"
+            }
+        },
+        "/v1/buckets/{id}/documents/{document_id}": {
+            "delete": {
+                "description": "Remove document from bucket",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "document_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Remove document from bucket"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "deleteV1BucketsIdDocumentsDocumentId"
+            }
+        },
+        "/v1/buckets/{id}/finalize": {
+            "post": {
+                "description": "Finalize bucket",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Finalize bucket"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "postV1BucketsIdFinalize"
+            }
+        },
+        "/v1/buckets/{id}/share": {
+            "post": {
+                "description": "Share bucket with CA",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1BucketsIdShare"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Share bucket with CA"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "postV1BucketsIdShare"
+            }
+        },
+        "/v1/buckets/{id}/auto-collect": {
+            "post": {
+                "description": "Auto-collect documents for month",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1BucketsIdAutoCollect"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Auto-collect documents for month"
+                    }
+                },
+                "tags": [
+                    "buckets"
+                ],
+                "operationId": "postV1BucketsIdAutoCollect"
+            }
+        },
+        "/v1/workflows": {
+            "get": {
+                "description": "List all workflows in workspace",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 25
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "active",
+                                "paused",
+                                "archived"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "trigger_type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "schedule",
+                                "event",
+                                "manual"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all workflows in workspace"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "getV1Workflows"
+            },
+            "post": {
+                "description": "Create a new workflow",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1Workflows"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create a new workflow"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1Workflows"
+            }
+        },
+        "/v1/workflows/{id}": {
+            "get": {
+                "description": "Get workflow details",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get workflow details"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "getV1WorkflowsId"
+            },
+            "patch": {
+                "description": "Update a workflow",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1WorkflowsId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update a workflow"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "patchV1WorkflowsId"
+            },
+            "delete": {
+                "description": "Delete a workflow",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a workflow"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "deleteV1WorkflowsId"
+            }
+        },
+        "/v1/workflows/{id}/activate": {
+            "post": {
+                "description": "Activate a workflow",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Activate a workflow"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsIdActivate"
+            }
+        },
+        "/v1/workflows/{id}/pause": {
+            "post": {
+                "description": "Pause a workflow",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Pause a workflow"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsIdPause"
+            }
+        },
+        "/v1/workflows/{id}/trigger": {
+            "post": {
+                "description": "Trigger workflow execution manually",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1WorkflowsIdTrigger"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Trigger workflow execution manually"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsIdTrigger"
+            }
+        },
+        "/v1/workflows/{id}/steps": {
+            "post": {
+                "description": "Add a step to workflow",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1WorkflowsIdSteps"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Add a step to workflow"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsIdSteps"
+            }
+        },
+        "/v1/workflows/{id}/steps/{step_id}": {
+            "patch": {
+                "description": "Update a workflow step",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "step_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/patchV1WorkflowsIdStepsStepId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update a workflow step"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "patchV1WorkflowsIdStepsStepId"
+            },
+            "delete": {
+                "description": "Delete a workflow step",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "step_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Delete a workflow step"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "deleteV1WorkflowsIdStepsStepId"
+            }
+        },
+        "/v1/workflows/{id}/steps/reorder": {
+            "post": {
+                "description": "Reorder workflow steps",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1WorkflowsIdStepsReorder"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reorder workflow steps"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsIdStepsReorder"
+            }
+        },
+        "/v1/workflows/{id}/executions": {
+            "get": {
+                "description": "Get workflow execution history",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "per_page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 20
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "running",
+                                "completed",
+                                "failed",
+                                "cancelled"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get workflow execution history"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "getV1WorkflowsIdExecutions"
+            }
+        },
+        "/v1/workflows/{id}/executions/{execution_id}": {
+            "get": {
+                "description": "Get specific execution details",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "execution_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get specific execution details"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "getV1WorkflowsIdExecutionsExecutionId"
+            }
+        },
+        "/v1/workflows/{id}/executions/{execution_id}/retry": {
+            "post": {
+                "description": "Retry a failed execution",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "execution_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Retry a failed execution"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsIdExecutionsExecutionIdRetry"
+            }
+        },
+        "/v1/workflows/{id}/executions/{execution_id}/cancel": {
+            "post": {
+                "description": "Cancel a running execution",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "execution_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Cancel a running execution"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsIdExecutionsExecutionIdCancel"
+            }
+        },
+        "/v1/workflows/meta/step_types": {
+            "get": {
+                "description": "Get available step types for building workflows",
+                "responses": {
+                    "200": {
+                        "description": "Get available step types for building workflows"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "getV1WorkflowsMetaStepTypes"
+            }
+        },
+        "/v1/workflows/meta/templates": {
+            "get": {
+                "description": "Get workflow templates",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "category",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "featured_only",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get workflow templates"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "getV1WorkflowsMetaTemplates"
+            }
+        },
+        "/v1/workflows/meta/templates/{template_id}": {
+            "get": {
+                "description": "Get template details",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "template_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get template details"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "getV1WorkflowsMetaTemplatesTemplateId"
+            }
+        },
+        "/v1/workflows/from_template/{template_id}": {
+            "post": {
+                "description": "Create workflow from template",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "template_id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1WorkflowsFromTemplateTemplateId"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create workflow from template"
+                    }
+                },
+                "tags": [
+                    "workflows"
+                ],
+                "operationId": "postV1WorkflowsFromTemplateTemplateId"
+            }
         }
     },
     "servers": [
@@ -3994,6 +5735,34 @@
                 },
                 "description": "Update Gmail connection settings"
             },
+            "postV1GmailConnectionsIdSync": {
+                "type": "object",
+                "properties": {
+                    "date_from": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Start date for email search"
+                    },
+                    "date_to": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "End date for email search"
+                    },
+                    "keywords": {
+                        "type": "array",
+                        "description": "Keywords to search in emails",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "include_attachments_only": {
+                        "type": "boolean",
+                        "description": "Only emails with attachments",
+                        "default": true
+                    }
+                },
+                "description": "Trigger manual sync for a Gmail connection with filters"
+            },
             "postV1BusinessProfile": {
                 "type": "object",
                 "properties": {
@@ -4201,6 +5970,9 @@
                     "gstin": {
                         "type": "string"
                     },
+                    "pan": {
+                        "type": "string"
+                    },
                     "billing_address_line1": {
                         "type": "string"
                     },
@@ -4280,6 +6052,9 @@
                     "gstin": {
                         "type": "string"
                     },
+                    "pan": {
+                        "type": "string"
+                    },
                     "billing_address_line1": {
                         "type": "string"
                     },
@@ -4339,6 +6114,19 @@
                     }
                 },
                 "description": "Update a client"
+            },
+            "postV1ClientsIdLogo": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "format": "binary"
+                    }
+                },
+                "required": [
+                    "file"
+                ],
+                "description": "Upload client logo"
             },
             "postV1SalesInvoices": {
                 "type": "object",
@@ -4406,6 +6194,18 @@
                         "type": "number",
                         "format": "float"
                     },
+                    "place_of_supply": {
+                        "type": "string"
+                    },
+                    "is_reverse_charge": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "cess_rate": {
+                        "type": "number",
+                        "format": "float",
+                        "default": 0
+                    },
                     "notes": {
                         "type": "string"
                     },
@@ -4441,6 +6241,11 @@
                                 "rate": {
                                     "type": "number",
                                     "format": "float"
+                                },
+                                "gst_rate": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "default": 18
                                 }
                             },
                             "required": [
@@ -4518,6 +6323,16 @@
                         "type": "number",
                         "format": "float"
                     },
+                    "place_of_supply": {
+                        "type": "string"
+                    },
+                    "is_reverse_charge": {
+                        "type": "boolean"
+                    },
+                    "cess_rate": {
+                        "type": "number",
+                        "format": "float"
+                    },
                     "notes": {
                         "type": "string"
                     },
@@ -4556,6 +6371,10 @@
                                     "type": "string"
                                 },
                                 "rate": {
+                                    "type": "number",
+                                    "format": "float"
+                                },
+                                "gst_rate": {
                                     "type": "number",
                                     "format": "float"
                                 }
@@ -4823,6 +6642,579 @@
                     }
                 },
                 "description": "Update a recurring invoice"
+            },
+            "postV1Folders": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "color": {
+                        "type": "string",
+                        "enum": [
+                            "slate",
+                            "gray",
+                            "red",
+                            "orange",
+                            "amber",
+                            "yellow",
+                            "lime",
+                            "green",
+                            "emerald",
+                            "teal",
+                            "cyan",
+                            "sky",
+                            "blue",
+                            "indigo",
+                            "violet",
+                            "purple",
+                            "fuchsia",
+                            "pink",
+                            "rose"
+                        ]
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "description": "Create a new folder"
+            },
+            "patchV1FoldersId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "color": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "description": "Update a folder"
+            },
+            "postV1Documents": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "folder_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "enum": [
+                            "invoice",
+                            "purchase_invoice",
+                            "bank_statement",
+                            "firc",
+                            "receipt",
+                            "expense",
+                            "contract",
+                            "tax_document",
+                            "gst_return",
+                            "tds_certificate",
+                            "audit_report",
+                            "balance_sheet",
+                            "profit_loss",
+                            "other"
+                        ],
+                        "default": "other"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "document_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "amount": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "enum": [
+                            "INR",
+                            "USD",
+                            "EUR",
+                            "GBP"
+                        ],
+                        "default": "INR"
+                    },
+                    "reference_number": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "metadata": {
+                        "type": "json"
+                    }
+                },
+                "required": [
+                    "file"
+                ],
+                "description": "Upload a new document"
+            },
+            "patchV1DocumentsId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "folder_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "document_type": {
+                        "type": "string",
+                        "enum": [
+                            "invoice",
+                            "purchase_invoice",
+                            "bank_statement",
+                            "firc",
+                            "receipt",
+                            "expense",
+                            "contract",
+                            "tax_document",
+                            "gst_return",
+                            "tds_certificate",
+                            "audit_report",
+                            "balance_sheet",
+                            "profit_loss",
+                            "other"
+                        ]
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "document_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "amount": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "reference_number": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "metadata": {
+                        "type": "json"
+                    }
+                },
+                "description": "Update document metadata"
+            },
+            "postV1DocumentsIdMove": {
+                "type": "object",
+                "properties": {
+                    "folder_id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Target folder ID (null for root)"
+                    }
+                },
+                "description": "Move document to folder"
+            },
+            "postV1DocumentsIdShare": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "permission": {
+                        "type": "string",
+                        "enum": [
+                            "view",
+                            "download"
+                        ],
+                        "default": "view"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "expires_in_days": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "required": [
+                    "email"
+                ],
+                "description": "Share document"
+            },
+            "postV1Buckets": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "bucket_type": {
+                        "type": "string",
+                        "enum": [
+                            "monthly",
+                            "quarterly",
+                            "annual",
+                            "custom"
+                        ],
+                        "default": "monthly"
+                    },
+                    "month": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 1,
+                        "maximum": 12
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "description": "Create a new bucket"
+            },
+            "postV1BucketsMonthly": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 1,
+                        "maximum": 12
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "required": [
+                    "month",
+                    "year"
+                ],
+                "description": "Get or create monthly bucket"
+            },
+            "patchV1BucketsId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "description": "Update a bucket"
+            },
+            "postV1BucketsIdDocuments": {
+                "type": "object",
+                "properties": {
+                    "document_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "notes": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "document_id"
+                ],
+                "description": "Add document to bucket"
+            },
+            "postV1BucketsIdShare": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "permission": {
+                        "type": "string",
+                        "enum": [
+                            "view",
+                            "download"
+                        ],
+                        "default": "download"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "expires_in_days": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "required": [
+                    "email"
+                ],
+                "description": "Share bucket with CA"
+            },
+            "postV1BucketsIdAutoCollect": {
+                "type": "object",
+                "properties": {
+                    "document_types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "description": "Auto-collect documents for month"
+            },
+            "postV1Workflows": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "trigger_type": {
+                        "type": "string",
+                        "enum": [
+                            "schedule",
+                            "event",
+                            "manual"
+                        ]
+                    },
+                    "trigger_config": {
+                        "type": "object"
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "step_type": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "position": {
+                                    "type": "integer",
+                                    "format": "int32"
+                                },
+                                "config": {
+                                    "type": "object"
+                                },
+                                "conditions": {
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "type": "boolean",
+                                    "default": true
+                                },
+                                "continue_on_failure": {
+                                    "type": "boolean",
+                                    "default": false
+                                }
+                            },
+                            "required": [
+                                "step_type",
+                                "position"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "trigger_type"
+                ],
+                "description": "Create a new workflow"
+            },
+            "patchV1WorkflowsId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "trigger_type": {
+                        "type": "string",
+                        "enum": [
+                            "schedule",
+                            "event",
+                            "manual"
+                        ]
+                    },
+                    "trigger_config": {
+                        "type": "object"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "paused",
+                            "archived"
+                        ]
+                    },
+                    "metadata": {
+                        "type": "object"
+                    }
+                },
+                "description": "Update a workflow"
+            },
+            "postV1WorkflowsIdTrigger": {
+                "type": "object",
+                "properties": {
+                    "trigger_data": {
+                        "type": "object",
+                        "description": "Additional data to pass to the workflow"
+                    }
+                },
+                "description": "Trigger workflow execution manually"
+            },
+            "postV1WorkflowsIdSteps": {
+                "type": "object",
+                "properties": {
+                    "step_type": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "config": {
+                        "type": "object"
+                    },
+                    "conditions": {
+                        "type": "object"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "continue_on_failure": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "step_type"
+                ],
+                "description": "Add a step to workflow"
+            },
+            "patchV1WorkflowsIdStepsStepId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "config": {
+                        "type": "object"
+                    },
+                    "conditions": {
+                        "type": "object"
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "continue_on_failure": {
+                        "type": "boolean"
+                    }
+                },
+                "description": "Update a workflow step"
+            },
+            "postV1WorkflowsIdStepsReorder": {
+                "type": "object",
+                "properties": {
+                    "step_ids": {
+                        "type": "array",
+                        "description": "Array of step IDs in desired order",
+                        "items": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                },
+                "required": [
+                    "step_ids"
+                ],
+                "description": "Reorder workflow steps"
+            },
+            "postV1WorkflowsFromTemplateTemplateId": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Override template name"
+                    },
+                    "trigger_config": {
+                        "type": "object",
+                        "description": "Override trigger configuration"
+                    }
+                },
+                "description": "Create workflow from template"
             }
         }
     }

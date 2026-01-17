@@ -9,7 +9,11 @@ module V1
       expose :phone
       expose :company_name
       expose :gstin
+      expose :pan
       expose :is_active
+
+      # Logo
+      expose :logo_url
 
       # Billing Address
       expose :billing_address_line1

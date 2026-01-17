@@ -71,10 +71,21 @@ export function BillingSection({ businessProfile, client, accentColor }: Billing
         </div>
         {client ? (
           <>
-            <div className="font-semibold text-slate-900 mb-1">
-              {client.display_name || client.company_name || client.name}
+            <div className="flex items-start gap-3 mb-2">
+              {client.logo_url && (
+                <img
+                  src={client.logo_url}
+                  alt={`${client.company_name || client.name} logo`}
+                  className="w-10 h-10 rounded-lg object-contain bg-white border border-slate-200 flex-shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-slate-900">
+                  {client.display_name || client.company_name || client.name}
+                </div>
+                {clientAddress && <div className="text-sm text-slate-600">{clientAddress}</div>}
+              </div>
             </div>
-            {clientAddress && <div className="text-sm text-slate-600 mb-2">{clientAddress}</div>}
             {client.gstin && (
               <div className="text-sm">
                 <span className="text-slate-500">GSTIN:</span>{' '}

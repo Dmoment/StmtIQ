@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Percent, Plus } from 'lucide-react';
+import { X, Percent, Plus, AlertCircle, CheckCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 
 // Indian state codes for GST
@@ -178,12 +178,25 @@ export function ConfigureTaxModal({
                     </option>
                   ))}
                 </select>
-                {businessStateCode && selectedStateName && (
-                  <p className="mt-1.5 text-xs text-slate-500">
-                    {businessStateCode === localConfig.placeOfSupply
-                      ? 'Same state as your business - CGST & SGST applies'
-                      : 'Different state - IGST applies'}
-                  </p>
+
+                {/* State comparison message */}
+                {businessStateCode && localConfig.placeOfSupply && (
+                  businessStateCode === localConfig.placeOfSupply ? (
+                    <div className="mt-2 flex items-start gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-emerald-700">
+                        <strong>Same state</strong> as your business. CGST + SGST will be applied (split equally).
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex items-start gap-2 p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
+                      <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-blue-700">
+                        <strong>Different state</strong> detected. <strong>IGST</strong> should be used for inter-state supplies.
+                        GST type has been automatically set to IGST.
+                      </p>
+                    </div>
+                  )
                 )}
               </div>
 
@@ -298,17 +311,33 @@ export function ConfigureTaxModal({
             </p>
           )}
 
-          {/* Info Banner */}
+          {/* Summary Banner */}
           {localConfig.taxType === 'gst_india' && localConfig.placeOfSupply && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
-              <p className="text-sm text-amber-800">
-                You are billing to a{' '}
-                <strong>
-                  {businessStateCode === localConfig.placeOfSupply
-                    ? 'Regular B2B client (Same State)'
-                    : 'Regular B2B client (Different State)'}
-                </strong>
-              </p>
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+              <p className="text-sm font-medium text-slate-800 mb-2">Tax Summary</p>
+              <div className="text-xs text-slate-600 space-y-1">
+                <p>
+                  <span className="text-slate-500">Supply Type:</span>{' '}
+                  <strong>
+                    {businessStateCode === localConfig.placeOfSupply
+                      ? 'Intra-State (Within State)'
+                      : 'Inter-State (Different State)'}
+                  </strong>
+                </p>
+                <p>
+                  <span className="text-slate-500">Tax Applied:</span>{' '}
+                  <strong>
+                    {localConfig.gstType === 'igst' ? 'IGST' : 'CGST + SGST'}
+                    {localConfig.cessRate > 0 && ` + ${localConfig.cessRate}% Cess`}
+                  </strong>
+                </p>
+                {localConfig.isReverseCharge && (
+                  <p>
+                    <span className="text-slate-500">Note:</span>{' '}
+                    <strong className="text-amber-700">Reverse Charge Applicable</strong>
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>

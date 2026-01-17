@@ -26,6 +26,10 @@ module V1
       expose :sgst_amount
       expose :igst_rate
       expose :igst_amount
+      expose :place_of_supply
+      expose :is_reverse_charge
+      expose :cess_rate
+      expose :cess_amount
 
       expose :tax_total
 
@@ -43,6 +47,9 @@ module V1
       # Content
       expose :notes
       expose :terms
+
+      # Custom fields (label/value pairs like LUT Number, PO Number, etc.)
+      expose :custom_fields
 
       # Status helpers
       expose :days_until_due

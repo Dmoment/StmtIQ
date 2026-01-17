@@ -17,14 +17,8 @@ module V1
       get do
         require_workspace!
 
-        invoices = policy_scope(SalesInvoice)
-                   .includes(:client, :line_items)
-                   .recent
-
-        invoices = invoices.where(status: params[:status]) if params[:status]
-        invoices = invoices.where(client_id: params[:client_id]) if params[:client_id]
-        invoices = invoices.where('invoice_date >= ?', params[:from_date]) if params[:from_date]
-        invoices = invoices.where('invoice_date <= ?', params[:to_date]) if params[:to_date]
+        filters = declared(params, include_missing: false).slice(:status, :client_id, :from_date, :to_date)
+        invoices = ::SalesInvoices::FilterService.new(policy_scope(SalesInvoice), filters).call
 
         paginated = invoices.page(params[:page]).per(params[:per_page])
 
@@ -52,23 +46,8 @@ module V1
       get :stats do
         require_workspace!
 
-        invoices = policy_scope(SalesInvoice)
-
-        status_counts = invoices.group(:status).count
-        total_by_status = invoices.group(:status).sum(:total_amount)
-
-        {
-          total: invoices.count,
-          total_amount: invoices.sum(:total_amount),
-          total_paid: invoices.paid.sum(:total_amount),
-          total_outstanding: invoices.outstanding.sum(:balance_due),
-          by_status: SalesInvoice::STATUSES.each_with_object({}) do |status, hash|
-            hash[status] = {
-              count: status_counts[status] || 0,
-              amount: total_by_status[status] || 0
-            }
-          end
-        }
+        stats = ::SalesInvoices::StatsService.new(policy_scope(SalesInvoice)).call
+        stats
       end
 
       desc 'Create a new sales invoice'
@@ -88,11 +67,20 @@ module V1
         optional :cgst_rate, type: Float
         optional :sgst_rate, type: Float
         optional :igst_rate, type: Float
+        optional :place_of_supply, type: String
+        optional :is_reverse_charge, type: Boolean, default: false
+        optional :cess_rate, type: Float, default: 0
 
         optional :notes, type: String
         optional :terms, type: String
         optional :primary_color, type: String
         optional :secondary_color, type: String
+
+        # Custom fields for additional info like LUT Number, PO Number, etc.
+        optional :custom_fields, type: Array do
+          requires :label, type: String
+          requires :value, type: String
+        end
 
         optional :line_items, type: Array do
           requires :description, type: String
@@ -100,42 +88,29 @@ module V1
           optional :quantity, type: Float, default: 1
           optional :unit, type: String, default: 'units'
           requires :rate, type: Float
+          optional :gst_rate, type: Float, default: 18
         end
       end
       post do
         require_workspace!
         authorize SalesInvoice, :create?
 
-        profile = current_workspace.business_profile
-        error!({ error: 'Business profile required to create invoices' }, 422) unless profile
-
+        # Security: Use policy_scope to prevent IDOR on client lookup
         client = policy_scope(Client).find(params[:client_id])
 
-        invoice_params = declared(params, include_missing: false).except(:line_items)
-        invoice = current_user.sales_invoices.build(
-          invoice_params.merge(
-            workspace: current_workspace,
-            client: client,
-            business_profile: profile,
-            status: 'draft'
-          )
-        )
+        invoice_params = declared(params, include_missing: false)
+        result = ::SalesInvoices::CreatorService.new(
+          user: current_user,
+          workspace: current_workspace,
+          client: client,
+          params: invoice_params
+        ).call
 
-        # Add line items
-        (params[:line_items] || []).each_with_index do |item, index|
-          invoice.line_items.build(
-            description: item[:description],
-            hsn_sac_code: item[:hsn_sac_code],
-            quantity: item[:quantity] || 1,
-            unit: item[:unit] || 'units',
-            rate: item[:rate],
-            position: index
-          )
+        if result.success?
+          present result.invoice, with: V1::Entities::SalesInvoice, full: true
+        else
+          error!({ errors: result.errors }, 422)
         end
-
-        invoice.save!
-
-        present invoice, with: V1::Entities::SalesInvoice, full: true
       end
 
       desc 'Get invoice details'
@@ -145,8 +120,9 @@ module V1
       get ':id' do
         require_workspace!
 
+        # Eager load associations to prevent N+1 queries
         invoice = policy_scope(SalesInvoice)
-                  .includes(:client, :business_profile, :line_items)
+                  .includes(:client, :business_profile, line_items: [])
                   .find(params[:id])
         authorize invoice, :show?
 
@@ -171,11 +147,20 @@ module V1
         optional :cgst_rate, type: Float
         optional :sgst_rate, type: Float
         optional :igst_rate, type: Float
+        optional :place_of_supply, type: String
+        optional :is_reverse_charge, type: Boolean
+        optional :cess_rate, type: Float
 
         optional :notes, type: String
         optional :terms, type: String
         optional :primary_color, type: String
         optional :secondary_color, type: String
+
+        # Custom fields for additional info like LUT Number, PO Number, etc.
+        optional :custom_fields, type: Array do
+          requires :label, type: String
+          requires :value, type: String
+        end
 
         optional :line_items, type: Array do
           optional :id, type: Integer
@@ -185,6 +170,7 @@ module V1
           optional :quantity, type: Float
           optional :unit, type: String
           requires :rate, type: Float
+          optional :gst_rate, type: Float
         end
       end
       patch ':id' do
@@ -193,52 +179,18 @@ module V1
         invoice = policy_scope(SalesInvoice).find(params[:id])
         authorize invoice, :update?
 
-        update_params = declared(params, include_missing: false).except(:id, :line_items)
+        update_params = declared(params, include_missing: false).except(:id)
+        result = ::SalesInvoices::UpdaterService.new(
+          invoice: invoice,
+          params: update_params,
+          client_scope: policy_scope(Client)
+        ).call
 
-        # Handle client change
-        if params[:client_id]
-          client = policy_scope(Client).find(params[:client_id])
-          update_params[:client] = client
+        if result.success?
+          present result.invoice, with: V1::Entities::SalesInvoice, full: true
+        else
+          error!({ errors: result.errors }, 422)
         end
-
-        invoice.assign_attributes(update_params)
-
-        # Handle line items
-        if params[:line_items]
-          # Remove existing line items not in the update
-          existing_ids = params[:line_items].map { |i| i[:id] }.compact
-          invoice.line_items.where.not(id: existing_ids).destroy_all
-
-          params[:line_items].each_with_index do |item, index|
-            if item[:id] && (line_item = invoice.line_items.find_by(id: item[:id]))
-              if item[:_destroy]
-                line_item.destroy
-              else
-                line_item.update!(
-                  description: item[:description],
-                  hsn_sac_code: item[:hsn_sac_code],
-                  quantity: item[:quantity],
-                  unit: item[:unit],
-                  rate: item[:rate],
-                  position: index
-                )
-              end
-            else
-              invoice.line_items.build(
-                description: item[:description],
-                hsn_sac_code: item[:hsn_sac_code],
-                quantity: item[:quantity] || 1,
-                unit: item[:unit] || 'units',
-                rate: item[:rate],
-                position: index
-              )
-            end
-          end
-        end
-
-        invoice.save!
-
-        present invoice, with: V1::Entities::SalesInvoice, full: true
       end
 
       desc 'Delete a draft invoice'
@@ -264,17 +216,16 @@ module V1
       post ':id/send' do
         require_workspace!
 
-        invoice = policy_scope(SalesInvoice).find(params[:id])
+        invoice = policy_scope(SalesInvoice)
+                  .includes(:client, :business_profile)
+                  .find(params[:id])
         authorize invoice, :send_invoice?
 
-        # Generate PDF if not exists
-        unless invoice.pdf_file.attached?
-          SalesInvoices::PdfGeneratorJob.perform_now(invoice.id)
-          invoice.reload
-        end
+        # Generate PDF if not exists (Open/Closed: Delegated to PdfManager)
+        ::SalesInvoices::PdfManager.new(invoice).ensure_pdf_exists
 
         # Send email
-        SalesInvoices::EmailService.new(invoice).send_invoice
+        ::SalesInvoices::EmailService.new(invoice).send_invoice
 
         invoice.mark_sent!
 
@@ -288,7 +239,9 @@ module V1
       post ':id/duplicate' do
         require_workspace!
 
-        invoice = policy_scope(SalesInvoice).find(params[:id])
+        invoice = policy_scope(SalesInvoice)
+                  .includes(:line_items, :business_profile)
+                  .find(params[:id])
         authorize invoice, :duplicate?
 
         new_invoice = invoice.duplicate
@@ -305,20 +258,18 @@ module V1
       get ':id/pdf' do
         require_workspace!
 
-        invoice = policy_scope(SalesInvoice).find(params[:id])
+        invoice = policy_scope(SalesInvoice)
+                  .includes(:business_profile)
+                  .find(params[:id])
         authorize invoice, :download?
 
-        # Generate PDF if not exists
-        unless invoice.pdf_file.attached?
-          SalesInvoices::PdfGeneratorJob.perform_now(invoice.id)
-          invoice.reload
-        end
+        pdf_manager = ::SalesInvoices::PdfManager.new(invoice)
 
         content_type 'application/pdf'
-        header 'Content-Disposition', "attachment; filename=\"#{invoice.invoice_number}.pdf\""
+        header 'Content-Disposition', "attachment; filename=\"#{pdf_manager.pdf_filename}\""
         env['api.format'] = :binary
 
-        invoice.pdf_file.download
+        pdf_manager.download_pdf
       end
 
       desc 'Record a payment'
@@ -335,8 +286,10 @@ module V1
         invoice = policy_scope(SalesInvoice).find(params[:id])
         authorize invoice, :record_payment?
 
-        if params[:amount] > invoice.balance_due
-          error!({ error: 'Payment amount exceeds balance due' }, 422)
+        # Security: Validate payment amount to prevent overflow and negative values
+        validator = ::SalesInvoices::InputValidator.new
+        unless validator.validate_payment_amount(params[:amount], invoice.balance_due)
+          error!({ errors: validator.errors }, 422)
         end
 
         invoice.record_payment!(params[:amount])
@@ -369,7 +322,16 @@ module V1
       post :calculate_gst do
         require_workspace!
 
-        result = SalesInvoices::GstCalculator.new(
+        # Security: Validate state codes to prevent invalid input
+        unless ::SalesInvoices::GstCalculator.valid_state_code?(params[:seller_state_code])
+          error!({ error: 'Invalid seller state code' }, 422)
+        end
+
+        unless ::SalesInvoices::GstCalculator.valid_state_code?(params[:buyer_state_code])
+          error!({ error: 'Invalid buyer state code' }, 422)
+        end
+
+        result = ::SalesInvoices::GstCalculator.new(
           subtotal: params[:subtotal],
           seller_state_code: params[:seller_state_code],
           buyer_state_code: params[:buyer_state_code],

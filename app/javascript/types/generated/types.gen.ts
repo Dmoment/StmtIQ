@@ -458,6 +458,28 @@ export type patchV1GmailConnectionsId = {
 };
 
 /**
+ * Trigger manual sync for a Gmail connection with filters
+ */
+export type postV1GmailConnectionsIdSync = {
+    /**
+     * Start date for email search
+     */
+    date_from?: string;
+    /**
+     * End date for email search
+     */
+    date_to?: string;
+    /**
+     * Keywords to search in emails
+     */
+    keywords?: Array<(string)>;
+    /**
+     * Only emails with attachments
+     */
+    include_attachments_only?: boolean;
+};
+
+/**
  * Create business profile for current workspace
  */
 export type postV1BusinessProfile = {
@@ -540,6 +562,7 @@ export type postV1Clients = {
     phone?: string;
     company_name?: string;
     gstin?: string;
+    pan?: string;
     billing_address_line1?: string;
     billing_address_line2?: string;
     billing_city?: string;
@@ -569,6 +592,7 @@ export type patchV1ClientsId = {
     phone?: string;
     company_name?: string;
     gstin?: string;
+    pan?: string;
     billing_address_line1?: string;
     billing_address_line2?: string;
     billing_city?: string;
@@ -589,6 +613,13 @@ export type patchV1ClientsId = {
 };
 
 /**
+ * Upload client logo
+ */
+export type postV1ClientsIdLogo = {
+    file: (Blob | File);
+};
+
+/**
  * Create a new sales invoice
  */
 export type postV1SalesInvoices = {
@@ -604,6 +635,9 @@ export type postV1SalesInvoices = {
     cgst_rate?: number;
     sgst_rate?: number;
     igst_rate?: number;
+    place_of_supply?: string;
+    is_reverse_charge?: boolean;
+    cess_rate?: number;
     notes?: string;
     terms?: string;
     primary_color?: string;
@@ -614,6 +648,7 @@ export type postV1SalesInvoices = {
         quantity?: number;
         unit?: string;
         rate: number;
+        gst_rate?: number;
     }>;
 };
 
@@ -637,6 +672,9 @@ export type patchV1SalesInvoicesId = {
     cgst_rate?: number;
     sgst_rate?: number;
     igst_rate?: number;
+    place_of_supply?: string;
+    is_reverse_charge?: boolean;
+    cess_rate?: number;
     notes?: string;
     terms?: string;
     primary_color?: string;
@@ -649,6 +687,7 @@ export type patchV1SalesInvoicesId = {
         quantity?: number;
         unit?: string;
         rate: number;
+        gst_rate?: number;
     }>;
 };
 
@@ -725,6 +764,263 @@ export type patchV1RecurringInvoicesId = {
             unit?: string;
             rate: number;
         }>;
+    };
+};
+
+/**
+ * Create a new folder
+ */
+export type postV1Folders = {
+    name: string;
+    parent_id?: number;
+    description?: string;
+    color?: 'slate' | 'gray' | 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal' | 'cyan' | 'sky' | 'blue' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose';
+    icon?: string;
+    position?: number;
+};
+
+export type color = 'slate' | 'gray' | 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal' | 'cyan' | 'sky' | 'blue' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose';
+
+/**
+ * Update a folder
+ */
+export type patchV1FoldersId = {
+    name?: string;
+    parent_id?: number;
+    description?: string;
+    color?: string;
+    icon?: string;
+    position?: number;
+};
+
+/**
+ * Upload a new document
+ */
+export type postV1Documents = {
+    file: (Blob | File);
+    name?: string;
+    folder_id?: number;
+    document_type?: 'invoice' | 'purchase_invoice' | 'bank_statement' | 'firc' | 'receipt' | 'expense' | 'contract' | 'tax_document' | 'gst_return' | 'tds_certificate' | 'audit_report' | 'balance_sheet' | 'profit_loss' | 'other';
+    description?: string;
+    document_date?: string;
+    tags?: Array<(string)>;
+    amount?: number;
+    currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
+    reference_number?: string;
+    source?: string;
+    metadata?: json;
+};
+
+export type document_type = 'invoice' | 'purchase_invoice' | 'bank_statement' | 'firc' | 'receipt' | 'expense' | 'contract' | 'tax_document' | 'gst_return' | 'tds_certificate' | 'audit_report' | 'balance_sheet' | 'profit_loss' | 'other';
+
+/**
+ * Update document metadata
+ */
+export type patchV1DocumentsId = {
+    name?: string;
+    folder_id?: number;
+    document_type?: 'invoice' | 'purchase_invoice' | 'bank_statement' | 'firc' | 'receipt' | 'expense' | 'contract' | 'tax_document' | 'gst_return' | 'tds_certificate' | 'audit_report' | 'balance_sheet' | 'profit_loss' | 'other';
+    description?: string;
+    document_date?: string;
+    tags?: Array<(string)>;
+    amount?: number;
+    currency?: string;
+    reference_number?: string;
+    source?: string;
+    metadata?: json;
+};
+
+/**
+ * Move document to folder
+ */
+export type postV1DocumentsIdMove = {
+    /**
+     * Target folder ID (null for root)
+     */
+    folder_id?: number;
+};
+
+/**
+ * Share document
+ */
+export type postV1DocumentsIdShare = {
+    email: string;
+    name?: string;
+    permission?: 'view' | 'download';
+    message?: string;
+    expires_in_days?: number;
+};
+
+export type permission = 'view' | 'download';
+
+/**
+ * Create a new bucket
+ */
+export type postV1Buckets = {
+    name?: string;
+    description?: string;
+    bucket_type?: 'monthly' | 'quarterly' | 'annual' | 'custom';
+    month?: number;
+    year?: number;
+};
+
+export type bucket_type = 'monthly' | 'quarterly' | 'annual' | 'custom';
+
+/**
+ * Get or create monthly bucket
+ */
+export type postV1BucketsMonthly = {
+    month: number;
+    year: number;
+};
+
+/**
+ * Update a bucket
+ */
+export type patchV1BucketsId = {
+    name?: string;
+    description?: string;
+};
+
+/**
+ * Add document to bucket
+ */
+export type postV1BucketsIdDocuments = {
+    document_id: number;
+    notes?: string;
+};
+
+/**
+ * Share bucket with CA
+ */
+export type postV1BucketsIdShare = {
+    email: string;
+    name?: string;
+    permission?: 'view' | 'download';
+    message?: string;
+    expires_in_days?: number;
+};
+
+/**
+ * Auto-collect documents for month
+ */
+export type postV1BucketsIdAutoCollect = {
+    document_types?: Array<(string)>;
+};
+
+/**
+ * Create a new workflow
+ */
+export type postV1Workflows = {
+    name: string;
+    description?: string;
+    trigger_type: 'schedule' | 'event' | 'manual';
+    trigger_config?: {
+        [key: string]: unknown;
+    };
+    steps?: Array<{
+        step_type: string;
+        name?: string;
+        position: number;
+        config?: {
+            [key: string]: unknown;
+        };
+        conditions?: {
+            [key: string]: unknown;
+        };
+        enabled?: boolean;
+        continue_on_failure?: boolean;
+    }>;
+};
+
+export type trigger_type = 'schedule' | 'event' | 'manual';
+
+/**
+ * Update a workflow
+ */
+export type patchV1WorkflowsId = {
+    name?: string;
+    description?: string;
+    trigger_type?: 'schedule' | 'event' | 'manual';
+    trigger_config?: {
+        [key: string]: unknown;
+    };
+    status?: 'draft' | 'active' | 'paused' | 'archived';
+    metadata?: {
+        [key: string]: unknown;
+    };
+};
+
+export type status = 'draft' | 'active' | 'paused' | 'archived';
+
+/**
+ * Trigger workflow execution manually
+ */
+export type postV1WorkflowsIdTrigger = {
+    /**
+     * Additional data to pass to the workflow
+     */
+    trigger_data?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Add a step to workflow
+ */
+export type postV1WorkflowsIdSteps = {
+    step_type: string;
+    name?: string;
+    position?: number;
+    config?: {
+        [key: string]: unknown;
+    };
+    conditions?: {
+        [key: string]: unknown;
+    };
+    enabled?: boolean;
+    continue_on_failure?: boolean;
+};
+
+/**
+ * Update a workflow step
+ */
+export type patchV1WorkflowsIdStepsStepId = {
+    name?: string;
+    position?: number;
+    config?: {
+        [key: string]: unknown;
+    };
+    conditions?: {
+        [key: string]: unknown;
+    };
+    enabled?: boolean;
+    continue_on_failure?: boolean;
+};
+
+/**
+ * Reorder workflow steps
+ */
+export type postV1WorkflowsIdStepsReorder = {
+    /**
+     * Array of step IDs in desired order
+     */
+    step_ids: Array<(number)>;
+};
+
+/**
+ * Create workflow from template
+ */
+export type postV1WorkflowsFromTemplateTemplateId = {
+    /**
+     * Override template name
+     */
+    name?: string;
+    /**
+     * Override trigger configuration
+     */
+    trigger_config?: {
+        [key: string]: unknown;
     };
 };
 
@@ -1241,11 +1537,14 @@ export type DeleteV1GmailConnectionsIdData = {
 
 export type DeleteV1GmailConnectionsIdResponse = void;
 
+export type GetV1GmailSyncSuggestionsResponse = unknown;
+
 export type PostV1GmailConnectionsIdSyncData = {
     /**
      * Connection ID
      */
     id: number;
+    requestBody: postV1GmailConnectionsIdSync;
 };
 
 export type PostV1GmailConnectionsIdSyncResponse = unknown;
@@ -1319,6 +1618,19 @@ export type GetV1ClientsIdInvoicesData = {
 };
 
 export type GetV1ClientsIdInvoicesResponse = unknown;
+
+export type PostV1ClientsIdLogoData = {
+    id: number;
+    requestBody: postV1ClientsIdLogo;
+};
+
+export type PostV1ClientsIdLogoResponse = unknown;
+
+export type DeleteV1ClientsIdLogoData = {
+    id: number;
+};
+
+export type DeleteV1ClientsIdLogoResponse = void;
 
 export type GetV1SalesInvoicesData = {
     clientId?: number;
@@ -1473,6 +1785,348 @@ export type GetV1ExchangeRatesRateData = {
 };
 
 export type GetV1ExchangeRatesRateResponse = unknown;
+
+export type GetV1GstLookupData = {
+    /**
+     * GST Identification Number (15 characters)
+     */
+    gstin: string;
+};
+
+export type GetV1GstLookupResponse = unknown;
+
+export type GetV1GstLogoData = {
+    /**
+     * Company domain or email address
+     */
+    domain: string;
+    /**
+     * Logo size
+     */
+    size?: 32 | 64 | 128 | 256;
+};
+
+export type GetV1GstLogoResponse = unknown;
+
+export type GetV1GstValidateData = {
+    /**
+     * GST Identification Number
+     */
+    gstin: string;
+};
+
+export type GetV1GstValidateResponse = unknown;
+
+export type GetV1GstStatesResponse = unknown;
+
+export type GetV1FoldersData = {
+    includeChildren?: boolean;
+    /**
+     * Filter by parent folder (null for root)
+     */
+    parentId?: number;
+};
+
+export type GetV1FoldersResponse = unknown;
+
+export type PostV1FoldersData = {
+    requestBody: postV1Folders;
+};
+
+export type PostV1FoldersResponse = unknown;
+
+export type GetV1FoldersTreeResponse = unknown;
+
+export type GetV1FoldersIdData = {
+    id: number;
+};
+
+export type GetV1FoldersIdResponse = unknown;
+
+export type PatchV1FoldersIdData = {
+    id: number;
+    requestBody: patchV1FoldersId;
+};
+
+export type PatchV1FoldersIdResponse = unknown;
+
+export type DeleteV1FoldersIdData = {
+    id: number;
+};
+
+export type DeleteV1FoldersIdResponse = void;
+
+export type GetV1FoldersIdDocumentsData = {
+    id: number;
+    page?: number;
+    perPage?: number;
+};
+
+export type GetV1FoldersIdDocumentsResponse = unknown;
+
+export type GetV1DocumentsData = {
+    documentType?: 'invoice' | 'purchase_invoice' | 'bank_statement' | 'firc' | 'receipt' | 'expense' | 'contract' | 'tax_document' | 'gst_return' | 'tds_certificate' | 'audit_report' | 'balance_sheet' | 'profit_loss' | 'other';
+    endDate?: string;
+    financialYear?: string;
+    folderId?: number;
+    page?: number;
+    perPage?: number;
+    search?: string;
+    startDate?: string;
+    tag?: string;
+};
+
+export type GetV1DocumentsResponse = unknown;
+
+export type PostV1DocumentsData = {
+    requestBody: postV1Documents;
+};
+
+export type PostV1DocumentsResponse = unknown;
+
+export type GetV1DocumentsIdData = {
+    id: number;
+};
+
+export type GetV1DocumentsIdResponse = unknown;
+
+export type PatchV1DocumentsIdData = {
+    id: number;
+    requestBody: patchV1DocumentsId;
+};
+
+export type PatchV1DocumentsIdResponse = unknown;
+
+export type DeleteV1DocumentsIdData = {
+    id: number;
+};
+
+export type DeleteV1DocumentsIdResponse = void;
+
+export type PostV1DocumentsIdMoveData = {
+    id: number;
+    requestBody: postV1DocumentsIdMove;
+};
+
+export type PostV1DocumentsIdMoveResponse = unknown;
+
+export type PostV1DocumentsIdShareData = {
+    id: number;
+    requestBody: postV1DocumentsIdShare;
+};
+
+export type PostV1DocumentsIdShareResponse = unknown;
+
+export type GetV1DocumentsTypesListResponse = unknown;
+
+export type GetV1BucketsData = {
+    bucketType?: 'monthly' | 'quarterly' | 'annual' | 'custom';
+    financialYear?: string;
+    page?: number;
+    perPage?: number;
+    status?: 'draft' | 'finalized' | 'shared';
+};
+
+export type GetV1BucketsResponse = unknown;
+
+export type PostV1BucketsData = {
+    requestBody: postV1Buckets;
+};
+
+export type PostV1BucketsResponse = unknown;
+
+export type PostV1BucketsMonthlyData = {
+    requestBody: postV1BucketsMonthly;
+};
+
+export type PostV1BucketsMonthlyResponse = unknown;
+
+export type GetV1BucketsIdData = {
+    id: number;
+};
+
+export type GetV1BucketsIdResponse = unknown;
+
+export type PatchV1BucketsIdData = {
+    id: number;
+    requestBody: patchV1BucketsId;
+};
+
+export type PatchV1BucketsIdResponse = unknown;
+
+export type DeleteV1BucketsIdData = {
+    id: number;
+};
+
+export type DeleteV1BucketsIdResponse = void;
+
+export type PostV1BucketsIdDocumentsData = {
+    id: number;
+    requestBody: postV1BucketsIdDocuments;
+};
+
+export type PostV1BucketsIdDocumentsResponse = unknown;
+
+export type DeleteV1BucketsIdDocumentsDocumentIdData = {
+    documentId: number;
+    id: number;
+};
+
+export type DeleteV1BucketsIdDocumentsDocumentIdResponse = void;
+
+export type PostV1BucketsIdFinalizeData = {
+    id: number;
+};
+
+export type PostV1BucketsIdFinalizeResponse = unknown;
+
+export type PostV1BucketsIdShareData = {
+    id: number;
+    requestBody: postV1BucketsIdShare;
+};
+
+export type PostV1BucketsIdShareResponse = unknown;
+
+export type PostV1BucketsIdAutoCollectData = {
+    id: number;
+    requestBody: postV1BucketsIdAutoCollect;
+};
+
+export type PostV1BucketsIdAutoCollectResponse = unknown;
+
+export type GetV1WorkflowsData = {
+    page?: number;
+    perPage?: number;
+    status?: 'draft' | 'active' | 'paused' | 'archived';
+    triggerType?: 'schedule' | 'event' | 'manual';
+};
+
+export type GetV1WorkflowsResponse = unknown;
+
+export type PostV1WorkflowsData = {
+    requestBody: postV1Workflows;
+};
+
+export type PostV1WorkflowsResponse = unknown;
+
+export type GetV1WorkflowsIdData = {
+    id: number;
+};
+
+export type GetV1WorkflowsIdResponse = unknown;
+
+export type PatchV1WorkflowsIdData = {
+    id: number;
+    requestBody: patchV1WorkflowsId;
+};
+
+export type PatchV1WorkflowsIdResponse = unknown;
+
+export type DeleteV1WorkflowsIdData = {
+    id: number;
+};
+
+export type DeleteV1WorkflowsIdResponse = void;
+
+export type PostV1WorkflowsIdActivateData = {
+    id: number;
+};
+
+export type PostV1WorkflowsIdActivateResponse = unknown;
+
+export type PostV1WorkflowsIdPauseData = {
+    id: number;
+};
+
+export type PostV1WorkflowsIdPauseResponse = unknown;
+
+export type PostV1WorkflowsIdTriggerData = {
+    id: number;
+    requestBody: postV1WorkflowsIdTrigger;
+};
+
+export type PostV1WorkflowsIdTriggerResponse = unknown;
+
+export type PostV1WorkflowsIdStepsData = {
+    id: number;
+    requestBody: postV1WorkflowsIdSteps;
+};
+
+export type PostV1WorkflowsIdStepsResponse = unknown;
+
+export type PatchV1WorkflowsIdStepsStepIdData = {
+    id: number;
+    requestBody: patchV1WorkflowsIdStepsStepId;
+    stepId: number;
+};
+
+export type PatchV1WorkflowsIdStepsStepIdResponse = unknown;
+
+export type DeleteV1WorkflowsIdStepsStepIdData = {
+    id: number;
+    stepId: number;
+};
+
+export type DeleteV1WorkflowsIdStepsStepIdResponse = void;
+
+export type PostV1WorkflowsIdStepsReorderData = {
+    id: number;
+    requestBody: postV1WorkflowsIdStepsReorder;
+};
+
+export type PostV1WorkflowsIdStepsReorderResponse = unknown;
+
+export type GetV1WorkflowsIdExecutionsData = {
+    id: number;
+    page?: number;
+    perPage?: number;
+    status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+};
+
+export type GetV1WorkflowsIdExecutionsResponse = unknown;
+
+export type GetV1WorkflowsIdExecutionsExecutionIdData = {
+    executionId: number;
+    id: number;
+};
+
+export type GetV1WorkflowsIdExecutionsExecutionIdResponse = unknown;
+
+export type PostV1WorkflowsIdExecutionsExecutionIdRetryData = {
+    executionId: number;
+    id: number;
+};
+
+export type PostV1WorkflowsIdExecutionsExecutionIdRetryResponse = unknown;
+
+export type PostV1WorkflowsIdExecutionsExecutionIdCancelData = {
+    executionId: number;
+    id: number;
+};
+
+export type PostV1WorkflowsIdExecutionsExecutionIdCancelResponse = unknown;
+
+export type GetV1WorkflowsMetaStepTypesResponse = unknown;
+
+export type GetV1WorkflowsMetaTemplatesData = {
+    category?: string;
+    featuredOnly?: boolean;
+};
+
+export type GetV1WorkflowsMetaTemplatesResponse = unknown;
+
+export type GetV1WorkflowsMetaTemplatesTemplateIdData = {
+    templateId: number;
+};
+
+export type GetV1WorkflowsMetaTemplatesTemplateIdResponse = unknown;
+
+export type PostV1WorkflowsFromTemplateTemplateIdData = {
+    requestBody: postV1WorkflowsFromTemplateTemplateId;
+    templateId: number;
+};
+
+export type PostV1WorkflowsFromTemplateTemplateIdResponse = unknown;
 
 export type $OpenApiTs = {
     '/v1/auth/send_otp': {
@@ -2449,7 +3103,7 @@ export type $OpenApiTs = {
             };
             res: {
                 /**
-                 * Handle Gmail OAuth callback
+                 * Handle Gmail OAuth callback (browser redirect from Google)
                  */
                 200: unknown;
             };
@@ -2510,6 +3164,16 @@ export type $OpenApiTs = {
             };
         };
     };
+    '/v1/gmail/sync_suggestions': {
+        get: {
+            res: {
+                /**
+                 * Get sync suggestions based on user transactions
+                 */
+                200: unknown;
+            };
+        };
+    };
     '/v1/gmail/connections/{id}/sync': {
         post: {
             req: {
@@ -2517,10 +3181,11 @@ export type $OpenApiTs = {
                  * Connection ID
                  */
                 id: number;
+                requestBody: postV1GmailConnectionsIdSync;
             };
             res: {
                 /**
-                 * Trigger manual sync for a Gmail connection
+                 * Trigger manual sync for a Gmail connection with filters
                  */
                 201: unknown;
             };
@@ -2669,6 +3334,31 @@ export type $OpenApiTs = {
                  * Get client invoice history
                  */
                 200: unknown;
+            };
+        };
+    };
+    '/v1/clients/{id}/logo': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1ClientsIdLogo;
+            };
+            res: {
+                /**
+                 * Upload client logo
+                 */
+                201: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete client logo
+                 */
+                204: void;
             };
         };
     };
@@ -2989,6 +3679,676 @@ export type $OpenApiTs = {
                  * Get rate for a specific currency pair
                  */
                 200: unknown;
+            };
+        };
+    };
+    '/v1/gst/lookup': {
+        get: {
+            req: {
+                /**
+                 * GST Identification Number (15 characters)
+                 */
+                gstin: string;
+            };
+            res: {
+                /**
+                 * Lookup company details by GSTIN
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/gst/logo': {
+        get: {
+            req: {
+                /**
+                 * Company domain or email address
+                 */
+                domain: string;
+                /**
+                 * Logo size
+                 */
+                size?: 32 | 64 | 128 | 256;
+            };
+            res: {
+                /**
+                 * Get company logo by domain or email
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/gst/validate': {
+        get: {
+            req: {
+                /**
+                 * GST Identification Number
+                 */
+                gstin: string;
+            };
+            res: {
+                /**
+                 * Validate GSTIN format
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/gst/states': {
+        get: {
+            res: {
+                /**
+                 * Get list of Indian states with GST codes
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/folders': {
+        get: {
+            req: {
+                includeChildren?: boolean;
+                /**
+                 * Filter by parent folder (null for root)
+                 */
+                parentId?: number;
+            };
+            res: {
+                /**
+                 * List folders with filtering
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1Folders;
+            };
+            res: {
+                /**
+                 * Create a new folder
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/folders/tree': {
+        get: {
+            res: {
+                /**
+                 * Get folder tree (nested structure)
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/folders/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get folder details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1FoldersId;
+            };
+            res: {
+                /**
+                 * Update a folder
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete a folder
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/folders/{id}/documents': {
+        get: {
+            req: {
+                id: number;
+                page?: number;
+                perPage?: number;
+            };
+            res: {
+                /**
+                 * List documents in folder
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/documents': {
+        get: {
+            req: {
+                documentType?: 'invoice' | 'purchase_invoice' | 'bank_statement' | 'firc' | 'receipt' | 'expense' | 'contract' | 'tax_document' | 'gst_return' | 'tds_certificate' | 'audit_report' | 'balance_sheet' | 'profit_loss' | 'other';
+                endDate?: string;
+                financialYear?: string;
+                folderId?: number;
+                page?: number;
+                perPage?: number;
+                search?: string;
+                startDate?: string;
+                tag?: string;
+            };
+            res: {
+                /**
+                 * List documents with filtering and pagination
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1Documents;
+            };
+            res: {
+                /**
+                 * Upload a new document
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/documents/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get document details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1DocumentsId;
+            };
+            res: {
+                /**
+                 * Update document metadata
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete a document
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/documents/{id}/move': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1DocumentsIdMove;
+            };
+            res: {
+                /**
+                 * Move document to folder
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/documents/{id}/share': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1DocumentsIdShare;
+            };
+            res: {
+                /**
+                 * Share document
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/documents/types/list': {
+        get: {
+            res: {
+                /**
+                 * List document types
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/buckets': {
+        get: {
+            req: {
+                bucketType?: 'monthly' | 'quarterly' | 'annual' | 'custom';
+                financialYear?: string;
+                page?: number;
+                perPage?: number;
+                status?: 'draft' | 'finalized' | 'shared';
+            };
+            res: {
+                /**
+                 * List buckets with filtering
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1Buckets;
+            };
+            res: {
+                /**
+                 * Create a new bucket
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/buckets/monthly': {
+        post: {
+            req: {
+                requestBody: postV1BucketsMonthly;
+            };
+            res: {
+                /**
+                 * Get or create monthly bucket
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/buckets/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get bucket details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1BucketsId;
+            };
+            res: {
+                /**
+                 * Update a bucket
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete a bucket
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/buckets/{id}/documents': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1BucketsIdDocuments;
+            };
+            res: {
+                /**
+                 * Add document to bucket
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/buckets/{id}/documents/{document_id}': {
+        delete: {
+            req: {
+                documentId: number;
+                id: number;
+            };
+            res: {
+                /**
+                 * Remove document from bucket
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/buckets/{id}/finalize': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Finalize bucket
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/buckets/{id}/share': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1BucketsIdShare;
+            };
+            res: {
+                /**
+                 * Share bucket with CA
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/buckets/{id}/auto-collect': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1BucketsIdAutoCollect;
+            };
+            res: {
+                /**
+                 * Auto-collect documents for month
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows': {
+        get: {
+            req: {
+                page?: number;
+                perPage?: number;
+                status?: 'draft' | 'active' | 'paused' | 'archived';
+                triggerType?: 'schedule' | 'event' | 'manual';
+            };
+            res: {
+                /**
+                 * List all workflows in workspace
+                 */
+                200: unknown;
+            };
+        };
+        post: {
+            req: {
+                requestBody: postV1Workflows;
+            };
+            res: {
+                /**
+                 * Create a new workflow
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}': {
+        get: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Get workflow details
+                 */
+                200: unknown;
+            };
+        };
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1WorkflowsId;
+            };
+            res: {
+                /**
+                 * Update a workflow
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Delete a workflow
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/workflows/{id}/activate': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Activate a workflow
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/pause': {
+        post: {
+            req: {
+                id: number;
+            };
+            res: {
+                /**
+                 * Pause a workflow
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/trigger': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1WorkflowsIdTrigger;
+            };
+            res: {
+                /**
+                 * Trigger workflow execution manually
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/steps': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1WorkflowsIdSteps;
+            };
+            res: {
+                /**
+                 * Add a step to workflow
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/steps/{step_id}': {
+        patch: {
+            req: {
+                id: number;
+                requestBody: patchV1WorkflowsIdStepsStepId;
+                stepId: number;
+            };
+            res: {
+                /**
+                 * Update a workflow step
+                 */
+                200: unknown;
+            };
+        };
+        delete: {
+            req: {
+                id: number;
+                stepId: number;
+            };
+            res: {
+                /**
+                 * Delete a workflow step
+                 */
+                204: void;
+            };
+        };
+    };
+    '/v1/workflows/{id}/steps/reorder': {
+        post: {
+            req: {
+                id: number;
+                requestBody: postV1WorkflowsIdStepsReorder;
+            };
+            res: {
+                /**
+                 * Reorder workflow steps
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/executions': {
+        get: {
+            req: {
+                id: number;
+                page?: number;
+                perPage?: number;
+                status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+            };
+            res: {
+                /**
+                 * Get workflow execution history
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/executions/{execution_id}': {
+        get: {
+            req: {
+                executionId: number;
+                id: number;
+            };
+            res: {
+                /**
+                 * Get specific execution details
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/executions/{execution_id}/retry': {
+        post: {
+            req: {
+                executionId: number;
+                id: number;
+            };
+            res: {
+                /**
+                 * Retry a failed execution
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/{id}/executions/{execution_id}/cancel': {
+        post: {
+            req: {
+                executionId: number;
+                id: number;
+            };
+            res: {
+                /**
+                 * Cancel a running execution
+                 */
+                201: unknown;
+            };
+        };
+    };
+    '/v1/workflows/meta/step_types': {
+        get: {
+            res: {
+                /**
+                 * Get available step types for building workflows
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workflows/meta/templates': {
+        get: {
+            req: {
+                category?: string;
+                featuredOnly?: boolean;
+            };
+            res: {
+                /**
+                 * Get workflow templates
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workflows/meta/templates/{template_id}': {
+        get: {
+            req: {
+                templateId: number;
+            };
+            res: {
+                /**
+                 * Get template details
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/v1/workflows/from_template/{template_id}': {
+        post: {
+            req: {
+                requestBody: postV1WorkflowsFromTemplateTemplateId;
+                templateId: number;
+            };
+            res: {
+                /**
+                 * Create workflow from template
+                 */
+                201: unknown;
             };
         };
     };

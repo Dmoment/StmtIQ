@@ -39,6 +39,7 @@ module V1
         optional :phone, type: String
         optional :company_name, type: String
         optional :gstin, type: String
+        optional :pan, type: String
 
         optional :billing_address_line1, type: String
         optional :billing_address_line2, type: String
@@ -94,6 +95,7 @@ module V1
         optional :phone, type: String
         optional :company_name, type: String
         optional :gstin, type: String
+        optional :pan, type: String
 
         optional :billing_address_line1, type: String
         optional :billing_address_line2, type: String
@@ -165,6 +167,50 @@ module V1
         header 'X-Total-Pages', paginated.total_pages.to_s
 
         present paginated, with: V1::Entities::SalesInvoice
+      end
+
+      desc 'Upload client logo'
+      params do
+        requires :id, type: Integer
+        requires :file, type: File
+      end
+      post ':id/logo' do
+        require_workspace!
+
+        client = policy_scope(Client).find(params[:id])
+        authorize client, :update?
+
+        uploaded_file = params[:file]
+        content_type = uploaded_file[:type]
+
+        unless %w[image/png image/jpeg image/jpg image/gif image/webp image/svg+xml].include?(content_type)
+          error!({ error: 'Invalid file type. Only PNG, JPEG, GIF, WebP, and SVG are allowed.' }, 422)
+        end
+
+        client.logo.attach(
+          io: uploaded_file[:tempfile],
+          filename: uploaded_file[:filename],
+          content_type: content_type
+        )
+
+        # Reload to ensure the attachment is reflected
+        client.reload
+        present client, with: V1::Entities::Client
+      end
+
+      desc 'Delete client logo'
+      params do
+        requires :id, type: Integer
+      end
+      delete ':id/logo' do
+        require_workspace!
+
+        client = policy_scope(Client).find(params[:id])
+        authorize client, :update?
+
+        client.logo.purge if client.logo.attached?
+
+        present client, with: V1::Entities::Client
       end
     end
   end

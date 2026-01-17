@@ -1,21 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BusinessProfileService } from '../types/generated';
+import { isAuthError, isNotFoundError, SAFE_QUERY_OPTIONS } from '../utils/api';
 
-export function useBusinessProfile() {
+export function useBusinessProfile(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['businessProfile'],
     queryFn: async () => {
       try {
         const response = await BusinessProfileService.getV1BusinessProfile();
         return response;
-      } catch (error: any) {
-        if (error?.status === 404) {
+      } catch (error: unknown) {
+        // Handle auth errors gracefully - return null instead of throwing
+        if (isAuthError(error) || isNotFoundError(error)) {
           return null;
         }
         throw error;
       }
     },
-    retry: false,
+    enabled: options?.enabled !== false,
+    ...SAFE_QUERY_OPTIONS,
   });
 }
 

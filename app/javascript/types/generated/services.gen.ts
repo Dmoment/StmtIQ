@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, PostV1OnboardingCompleteData, PostV1OnboardingCompleteResponse, GetV1OnboardingStatusResponse, GetV1WorkspacesResponse, PostV1WorkspacesData, PostV1WorkspacesResponse, GetV1WorkspacesCurrentResponse, PostV1WorkspacesIdSwitchData, PostV1WorkspacesIdSwitchResponse, GetV1WorkspacesIdData, GetV1WorkspacesIdResponse, PatchV1WorkspacesIdData, PatchV1WorkspacesIdResponse, DeleteV1WorkspacesIdData, DeleteV1WorkspacesIdResponse, GetV1WorkspacesIdMembersData, GetV1WorkspacesIdMembersResponse, PatchV1WorkspacesIdMembersMemberIdData, PatchV1WorkspacesIdMembersMemberIdResponse, DeleteV1WorkspacesIdMembersMemberIdData, DeleteV1WorkspacesIdMembersMemberIdResponse, PostV1WorkspacesIdLeaveData, PostV1WorkspacesIdLeaveResponse, GetV1WorkspacesIdInvitationsData, GetV1WorkspacesIdInvitationsResponse, PostV1WorkspacesIdInvitationsData, PostV1WorkspacesIdInvitationsResponse, DeleteV1WorkspacesIdInvitationsInvitationIdData, DeleteV1WorkspacesIdInvitationsInvitationIdResponse, PostV1InvitationsTokenAcceptData, PostV1InvitationsTokenAcceptResponse, GetV1InvitationsTokenData, GetV1InvitationsTokenResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1StatementsIdProgressData, GetV1StatementsIdProgressResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsData, GetV1TransactionsStatsResponse, GetV1TransactionsCategorizationProgressResponse, PostV1TransactionsCategorizeData, PostV1TransactionsCategorizeResponse, PostV1TransactionsIdFeedbackData, PostV1TransactionsIdFeedbackResponse, GetV1TransactionsRulesResponse, DeleteV1TransactionsRulesRuleIdData, DeleteV1TransactionsRulesRuleIdResponse, GetV1InvoicesData, GetV1InvoicesResponse, PostV1InvoicesData, PostV1InvoicesResponse, PostV1InvoicesUploadData, PostV1InvoicesUploadResponse, GetV1InvoicesIdData, GetV1InvoicesIdResponse, PatchV1InvoicesIdData, PatchV1InvoicesIdResponse, DeleteV1InvoicesIdData, DeleteV1InvoicesIdResponse, GetV1InvoicesIdSuggestionsData, GetV1InvoicesIdSuggestionsResponse, PostV1InvoicesIdLinkData, PostV1InvoicesIdLinkResponse, PostV1InvoicesIdUnlinkData, PostV1InvoicesIdUnlinkResponse, PostV1InvoicesIdRetryData, PostV1InvoicesIdRetryResponse, GetV1InvoicesStatsResponse, PostV1UploadsPresignData, PostV1UploadsPresignResponse, PostV1UploadsConfirmData, PostV1UploadsConfirmResponse, GetV1GmailAuthResponse, GetV1GmailCallbackData, GetV1GmailCallbackResponse, GetV1GmailConnectionsResponse, GetV1GmailConnectionsIdData, GetV1GmailConnectionsIdResponse, PatchV1GmailConnectionsIdData, PatchV1GmailConnectionsIdResponse, DeleteV1GmailConnectionsIdData, DeleteV1GmailConnectionsIdResponse, PostV1GmailConnectionsIdSyncData, PostV1GmailConnectionsIdSyncResponse, GetV1GmailStatusResponse, GetV1BusinessProfileResponse, PostV1BusinessProfileData, PostV1BusinessProfileResponse, PatchV1BusinessProfileData, PatchV1BusinessProfileResponse, PostV1BusinessProfileLogoData, PostV1BusinessProfileLogoResponse, PostV1BusinessProfileSignatureData, PostV1BusinessProfileSignatureResponse, GetV1ClientsData, GetV1ClientsResponse, PostV1ClientsData, PostV1ClientsResponse, GetV1ClientsIdData, GetV1ClientsIdResponse, PatchV1ClientsIdData, PatchV1ClientsIdResponse, DeleteV1ClientsIdData, DeleteV1ClientsIdResponse, GetV1ClientsIdInvoicesData, GetV1ClientsIdInvoicesResponse, GetV1SalesInvoicesData, GetV1SalesInvoicesResponse, PostV1SalesInvoicesData, PostV1SalesInvoicesResponse, GetV1SalesInvoicesNextNumberResponse, GetV1SalesInvoicesStatsResponse, GetV1SalesInvoicesIdData, GetV1SalesInvoicesIdResponse, PatchV1SalesInvoicesIdData, PatchV1SalesInvoicesIdResponse, DeleteV1SalesInvoicesIdData, DeleteV1SalesInvoicesIdResponse, PostV1SalesInvoicesIdSendData, PostV1SalesInvoicesIdSendResponse, PostV1SalesInvoicesIdDuplicateData, PostV1SalesInvoicesIdDuplicateResponse, GetV1SalesInvoicesIdPdfData, GetV1SalesInvoicesIdPdfResponse, PostV1SalesInvoicesIdRecordPaymentData, PostV1SalesInvoicesIdRecordPaymentResponse, PostV1SalesInvoicesIdCancelData, PostV1SalesInvoicesIdCancelResponse, PostV1SalesInvoicesCalculateGstData, PostV1SalesInvoicesCalculateGstResponse, GetV1RecurringInvoicesData, GetV1RecurringInvoicesResponse, PostV1RecurringInvoicesData, PostV1RecurringInvoicesResponse, GetV1RecurringInvoicesIdData, GetV1RecurringInvoicesIdResponse, PatchV1RecurringInvoicesIdData, PatchV1RecurringInvoicesIdResponse, DeleteV1RecurringInvoicesIdData, DeleteV1RecurringInvoicesIdResponse, PostV1RecurringInvoicesIdPauseData, PostV1RecurringInvoicesIdPauseResponse, PostV1RecurringInvoicesIdResumeData, PostV1RecurringInvoicesIdResumeResponse, PostV1RecurringInvoicesIdGenerateData, PostV1RecurringInvoicesIdGenerateResponse, GetV1RecurringInvoicesIdInvoicesData, GetV1RecurringInvoicesIdInvoicesResponse, GetV1ExchangeRatesCurrentResponse, GetV1ExchangeRatesConvertData, GetV1ExchangeRatesConvertResponse, GetV1ExchangeRatesRateData, GetV1ExchangeRatesRateResponse } from './types.gen';
+import type { PostV1AuthSendOtpData, PostV1AuthSendOtpResponse, PostV1AuthVerifyOtpData, PostV1AuthVerifyOtpResponse, PostV1AuthResendOtpData, PostV1AuthResendOtpResponse, DeleteV1AuthLogoutResponse, GetV1AuthMeResponse, PatchV1AuthMeData, PatchV1AuthMeResponse, GetV1HealthResponse, GetV1UsersMeResponse, PatchV1UsersMeData, PatchV1UsersMeResponse, PostV1OnboardingCompleteData, PostV1OnboardingCompleteResponse, GetV1OnboardingStatusResponse, GetV1WorkspacesResponse, PostV1WorkspacesData, PostV1WorkspacesResponse, GetV1WorkspacesCurrentResponse, PostV1WorkspacesIdSwitchData, PostV1WorkspacesIdSwitchResponse, GetV1WorkspacesIdData, GetV1WorkspacesIdResponse, PatchV1WorkspacesIdData, PatchV1WorkspacesIdResponse, DeleteV1WorkspacesIdData, DeleteV1WorkspacesIdResponse, GetV1WorkspacesIdMembersData, GetV1WorkspacesIdMembersResponse, PatchV1WorkspacesIdMembersMemberIdData, PatchV1WorkspacesIdMembersMemberIdResponse, DeleteV1WorkspacesIdMembersMemberIdData, DeleteV1WorkspacesIdMembersMemberIdResponse, PostV1WorkspacesIdLeaveData, PostV1WorkspacesIdLeaveResponse, GetV1WorkspacesIdInvitationsData, GetV1WorkspacesIdInvitationsResponse, PostV1WorkspacesIdInvitationsData, PostV1WorkspacesIdInvitationsResponse, DeleteV1WorkspacesIdInvitationsInvitationIdData, DeleteV1WorkspacesIdInvitationsInvitationIdResponse, PostV1InvitationsTokenAcceptData, PostV1InvitationsTokenAcceptResponse, GetV1InvitationsTokenData, GetV1InvitationsTokenResponse, GetV1BankTemplatesResponse, GetV1BankTemplatesIdData, GetV1BankTemplatesIdResponse, GetV1BankTemplatesBankBankCodeData, GetV1BankTemplatesBankBankCodeResponse, GetV1CategoriesData, GetV1CategoriesResponse, PostV1CategoriesData, PostV1CategoriesResponse, GetV1CategoriesIdData, GetV1CategoriesIdResponse, PatchV1CategoriesIdData, PatchV1CategoriesIdResponse, DeleteV1CategoriesIdData, DeleteV1CategoriesIdResponse, GetV1AccountsData, GetV1AccountsResponse, PostV1AccountsData, PostV1AccountsResponse, GetV1AccountsIdData, GetV1AccountsIdResponse, PatchV1AccountsIdData, PatchV1AccountsIdResponse, DeleteV1AccountsIdData, DeleteV1AccountsIdResponse, GetV1AccountsIdSummaryData, GetV1AccountsIdSummaryResponse, GetV1StatementsData, GetV1StatementsResponse, PostV1StatementsData, PostV1StatementsResponse, GetV1StatementsIdData, GetV1StatementsIdResponse, DeleteV1StatementsIdData, DeleteV1StatementsIdResponse, PostV1StatementsIdReparseData, PostV1StatementsIdReparseResponse, GetV1StatementsIdSummaryData, GetV1StatementsIdSummaryResponse, GetV1StatementsIdProgressData, GetV1StatementsIdProgressResponse, GetV1TransactionsData, GetV1TransactionsResponse, GetV1TransactionsIdData, GetV1TransactionsIdResponse, PatchV1TransactionsIdData, PatchV1TransactionsIdResponse, PatchV1TransactionsBulkData, PatchV1TransactionsBulkResponse, GetV1TransactionsStatsData, GetV1TransactionsStatsResponse, GetV1TransactionsCategorizationProgressResponse, PostV1TransactionsCategorizeData, PostV1TransactionsCategorizeResponse, PostV1TransactionsIdFeedbackData, PostV1TransactionsIdFeedbackResponse, GetV1TransactionsRulesResponse, DeleteV1TransactionsRulesRuleIdData, DeleteV1TransactionsRulesRuleIdResponse, GetV1InvoicesData, GetV1InvoicesResponse, PostV1InvoicesData, PostV1InvoicesResponse, PostV1InvoicesUploadData, PostV1InvoicesUploadResponse, GetV1InvoicesIdData, GetV1InvoicesIdResponse, PatchV1InvoicesIdData, PatchV1InvoicesIdResponse, DeleteV1InvoicesIdData, DeleteV1InvoicesIdResponse, GetV1InvoicesIdSuggestionsData, GetV1InvoicesIdSuggestionsResponse, PostV1InvoicesIdLinkData, PostV1InvoicesIdLinkResponse, PostV1InvoicesIdUnlinkData, PostV1InvoicesIdUnlinkResponse, PostV1InvoicesIdRetryData, PostV1InvoicesIdRetryResponse, GetV1InvoicesStatsResponse, PostV1UploadsPresignData, PostV1UploadsPresignResponse, PostV1UploadsConfirmData, PostV1UploadsConfirmResponse, GetV1GmailAuthResponse, GetV1GmailCallbackData, GetV1GmailCallbackResponse, GetV1GmailConnectionsResponse, GetV1GmailConnectionsIdData, GetV1GmailConnectionsIdResponse, PatchV1GmailConnectionsIdData, PatchV1GmailConnectionsIdResponse, DeleteV1GmailConnectionsIdData, DeleteV1GmailConnectionsIdResponse, GetV1GmailSyncSuggestionsResponse, PostV1GmailConnectionsIdSyncData, PostV1GmailConnectionsIdSyncResponse, GetV1GmailStatusResponse, GetV1BusinessProfileResponse, PostV1BusinessProfileData, PostV1BusinessProfileResponse, PatchV1BusinessProfileData, PatchV1BusinessProfileResponse, PostV1BusinessProfileLogoData, PostV1BusinessProfileLogoResponse, PostV1BusinessProfileSignatureData, PostV1BusinessProfileSignatureResponse, GetV1ClientsData, GetV1ClientsResponse, PostV1ClientsData, PostV1ClientsResponse, GetV1ClientsIdData, GetV1ClientsIdResponse, PatchV1ClientsIdData, PatchV1ClientsIdResponse, DeleteV1ClientsIdData, DeleteV1ClientsIdResponse, GetV1ClientsIdInvoicesData, GetV1ClientsIdInvoicesResponse, PostV1ClientsIdLogoData, PostV1ClientsIdLogoResponse, DeleteV1ClientsIdLogoData, DeleteV1ClientsIdLogoResponse, GetV1SalesInvoicesData, GetV1SalesInvoicesResponse, PostV1SalesInvoicesData, PostV1SalesInvoicesResponse, GetV1SalesInvoicesNextNumberResponse, GetV1SalesInvoicesStatsResponse, GetV1SalesInvoicesIdData, GetV1SalesInvoicesIdResponse, PatchV1SalesInvoicesIdData, PatchV1SalesInvoicesIdResponse, DeleteV1SalesInvoicesIdData, DeleteV1SalesInvoicesIdResponse, PostV1SalesInvoicesIdSendData, PostV1SalesInvoicesIdSendResponse, PostV1SalesInvoicesIdDuplicateData, PostV1SalesInvoicesIdDuplicateResponse, GetV1SalesInvoicesIdPdfData, GetV1SalesInvoicesIdPdfResponse, PostV1SalesInvoicesIdRecordPaymentData, PostV1SalesInvoicesIdRecordPaymentResponse, PostV1SalesInvoicesIdCancelData, PostV1SalesInvoicesIdCancelResponse, PostV1SalesInvoicesCalculateGstData, PostV1SalesInvoicesCalculateGstResponse, GetV1RecurringInvoicesData, GetV1RecurringInvoicesResponse, PostV1RecurringInvoicesData, PostV1RecurringInvoicesResponse, GetV1RecurringInvoicesIdData, GetV1RecurringInvoicesIdResponse, PatchV1RecurringInvoicesIdData, PatchV1RecurringInvoicesIdResponse, DeleteV1RecurringInvoicesIdData, DeleteV1RecurringInvoicesIdResponse, PostV1RecurringInvoicesIdPauseData, PostV1RecurringInvoicesIdPauseResponse, PostV1RecurringInvoicesIdResumeData, PostV1RecurringInvoicesIdResumeResponse, PostV1RecurringInvoicesIdGenerateData, PostV1RecurringInvoicesIdGenerateResponse, GetV1RecurringInvoicesIdInvoicesData, GetV1RecurringInvoicesIdInvoicesResponse, GetV1ExchangeRatesCurrentResponse, GetV1ExchangeRatesConvertData, GetV1ExchangeRatesConvertResponse, GetV1ExchangeRatesRateData, GetV1ExchangeRatesRateResponse, GetV1GstLookupData, GetV1GstLookupResponse, GetV1GstLogoData, GetV1GstLogoResponse, GetV1GstValidateData, GetV1GstValidateResponse, GetV1GstStatesResponse, GetV1FoldersData, GetV1FoldersResponse, PostV1FoldersData, PostV1FoldersResponse, GetV1FoldersTreeResponse, GetV1FoldersIdData, GetV1FoldersIdResponse, PatchV1FoldersIdData, PatchV1FoldersIdResponse, DeleteV1FoldersIdData, DeleteV1FoldersIdResponse, GetV1FoldersIdDocumentsData, GetV1FoldersIdDocumentsResponse, GetV1DocumentsData, GetV1DocumentsResponse, PostV1DocumentsData, PostV1DocumentsResponse, GetV1DocumentsIdData, GetV1DocumentsIdResponse, PatchV1DocumentsIdData, PatchV1DocumentsIdResponse, DeleteV1DocumentsIdData, DeleteV1DocumentsIdResponse, PostV1DocumentsIdMoveData, PostV1DocumentsIdMoveResponse, PostV1DocumentsIdShareData, PostV1DocumentsIdShareResponse, GetV1DocumentsTypesListResponse, GetV1BucketsData, GetV1BucketsResponse, PostV1BucketsData, PostV1BucketsResponse, PostV1BucketsMonthlyData, PostV1BucketsMonthlyResponse, GetV1BucketsIdData, GetV1BucketsIdResponse, PatchV1BucketsIdData, PatchV1BucketsIdResponse, DeleteV1BucketsIdData, DeleteV1BucketsIdResponse, PostV1BucketsIdDocumentsData, PostV1BucketsIdDocumentsResponse, DeleteV1BucketsIdDocumentsDocumentIdData, DeleteV1BucketsIdDocumentsDocumentIdResponse, PostV1BucketsIdFinalizeData, PostV1BucketsIdFinalizeResponse, PostV1BucketsIdShareData, PostV1BucketsIdShareResponse, PostV1BucketsIdAutoCollectData, PostV1BucketsIdAutoCollectResponse, GetV1WorkflowsData, GetV1WorkflowsResponse, PostV1WorkflowsData, PostV1WorkflowsResponse, GetV1WorkflowsIdData, GetV1WorkflowsIdResponse, PatchV1WorkflowsIdData, PatchV1WorkflowsIdResponse, DeleteV1WorkflowsIdData, DeleteV1WorkflowsIdResponse, PostV1WorkflowsIdActivateData, PostV1WorkflowsIdActivateResponse, PostV1WorkflowsIdPauseData, PostV1WorkflowsIdPauseResponse, PostV1WorkflowsIdTriggerData, PostV1WorkflowsIdTriggerResponse, PostV1WorkflowsIdStepsData, PostV1WorkflowsIdStepsResponse, PatchV1WorkflowsIdStepsStepIdData, PatchV1WorkflowsIdStepsStepIdResponse, DeleteV1WorkflowsIdStepsStepIdData, DeleteV1WorkflowsIdStepsStepIdResponse, PostV1WorkflowsIdStepsReorderData, PostV1WorkflowsIdStepsReorderResponse, GetV1WorkflowsIdExecutionsData, GetV1WorkflowsIdExecutionsResponse, GetV1WorkflowsIdExecutionsExecutionIdData, GetV1WorkflowsIdExecutionsExecutionIdResponse, PostV1WorkflowsIdExecutionsExecutionIdRetryData, PostV1WorkflowsIdExecutionsExecutionIdRetryResponse, PostV1WorkflowsIdExecutionsExecutionIdCancelData, PostV1WorkflowsIdExecutionsExecutionIdCancelResponse, GetV1WorkflowsMetaStepTypesResponse, GetV1WorkflowsMetaTemplatesData, GetV1WorkflowsMetaTemplatesResponse, GetV1WorkflowsMetaTemplatesTemplateIdData, GetV1WorkflowsMetaTemplatesTemplateIdResponse, PostV1WorkflowsFromTemplateTemplateIdData, PostV1WorkflowsFromTemplateTemplateIdResponse } from './types.gen';
 
 export class AuthService {
     /**
@@ -1257,11 +1257,11 @@ export class GmailService {
     }
     
     /**
-     * Handle Gmail OAuth callback
+     * Handle Gmail OAuth callback (browser redirect from Google)
      * @param data The data for the request.
      * @param data.code Authorization code from Google
      * @param data.state CSRF state token
-     * @returns unknown Handle Gmail OAuth callback
+     * @returns unknown Handle Gmail OAuth callback (browser redirect from Google)
      * @throws ApiError
      */
     public static getV1GmailCallback(data: GetV1GmailCallbackData): CancelablePromise<GetV1GmailCallbackResponse> {
@@ -1342,10 +1342,23 @@ export class GmailService {
     }
     
     /**
-     * Trigger manual sync for a Gmail connection
+     * Get sync suggestions based on user transactions
+     * @returns unknown Get sync suggestions based on user transactions
+     * @throws ApiError
+     */
+    public static getV1GmailSyncSuggestions(): CancelablePromise<GetV1GmailSyncSuggestionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gmail/sync_suggestions'
+        });
+    }
+    
+    /**
+     * Trigger manual sync for a Gmail connection with filters
      * @param data The data for the request.
      * @param data.id Connection ID
-     * @returns unknown Trigger manual sync for a Gmail connection
+     * @param data.requestBody
+     * @returns unknown Trigger manual sync for a Gmail connection with filters
      * @throws ApiError
      */
     public static postV1GmailConnectionsIdSync(data: PostV1GmailConnectionsIdSyncData): CancelablePromise<PostV1GmailConnectionsIdSyncResponse> {
@@ -1354,7 +1367,9 @@ export class GmailService {
             url: '/v1/gmail/connections/{id}/sync',
             path: {
                 id: data.id
-            }
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
         });
     }
     
@@ -1564,6 +1579,43 @@ export class ClientsService {
             query: {
                 page: data.page,
                 per_page: data.perPage
+            }
+        });
+    }
+    
+    /**
+     * Upload client logo
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Upload client logo
+     * @throws ApiError
+     */
+    public static postV1ClientsIdLogo(data: PostV1ClientsIdLogoData): CancelablePromise<PostV1ClientsIdLogoResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/clients/{id}/logo',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete client logo
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete client logo
+     * @throws ApiError
+     */
+    public static deleteV1ClientsIdLogo(data: DeleteV1ClientsIdLogoData): CancelablePromise<DeleteV1ClientsIdLogoResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/clients/{id}/logo',
+            path: {
+                id: data.id
             }
         });
     }
@@ -2018,6 +2070,950 @@ export class ExchangeRatesService {
                 from: data.from,
                 to: data.to
             }
+        });
+    }
+    
+}
+
+export class GstService {
+    /**
+     * Lookup company details by GSTIN
+     * @param data The data for the request.
+     * @param data.gstin GST Identification Number (15 characters)
+     * @returns unknown Lookup company details by GSTIN
+     * @throws ApiError
+     */
+    public static getV1GstLookup(data: GetV1GstLookupData): CancelablePromise<GetV1GstLookupResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gst/lookup',
+            query: {
+                gstin: data.gstin
+            }
+        });
+    }
+    
+    /**
+     * Get company logo by domain or email
+     * @param data The data for the request.
+     * @param data.domain Company domain or email address
+     * @param data.size Logo size
+     * @returns unknown Get company logo by domain or email
+     * @throws ApiError
+     */
+    public static getV1GstLogo(data: GetV1GstLogoData): CancelablePromise<GetV1GstLogoResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gst/logo',
+            query: {
+                domain: data.domain,
+                size: data.size
+            }
+        });
+    }
+    
+    /**
+     * Validate GSTIN format
+     * @param data The data for the request.
+     * @param data.gstin GST Identification Number
+     * @returns unknown Validate GSTIN format
+     * @throws ApiError
+     */
+    public static getV1GstValidate(data: GetV1GstValidateData): CancelablePromise<GetV1GstValidateResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gst/validate',
+            query: {
+                gstin: data.gstin
+            }
+        });
+    }
+    
+    /**
+     * Get list of Indian states with GST codes
+     * @returns unknown Get list of Indian states with GST codes
+     * @throws ApiError
+     */
+    public static getV1GstStates(): CancelablePromise<GetV1GstStatesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/gst/states'
+        });
+    }
+    
+}
+
+export class FoldersService {
+    /**
+     * List folders with filtering
+     * @param data The data for the request.
+     * @param data.parentId Filter by parent folder (null for root)
+     * @param data.includeChildren
+     * @returns unknown List folders with filtering
+     * @throws ApiError
+     */
+    public static getV1Folders(data: GetV1FoldersData = {}): CancelablePromise<GetV1FoldersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/folders',
+            query: {
+                parent_id: data.parentId,
+                include_children: data.includeChildren
+            }
+        });
+    }
+    
+    /**
+     * Create a new folder
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create a new folder
+     * @throws ApiError
+     */
+    public static postV1Folders(data: PostV1FoldersData): CancelablePromise<PostV1FoldersResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/folders',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get folder tree (nested structure)
+     * @returns unknown Get folder tree (nested structure)
+     * @throws ApiError
+     */
+    public static getV1FoldersTree(): CancelablePromise<GetV1FoldersTreeResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/folders/tree'
+        });
+    }
+    
+    /**
+     * Get folder details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get folder details
+     * @throws ApiError
+     */
+    public static getV1FoldersId(data: GetV1FoldersIdData): CancelablePromise<GetV1FoldersIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/folders/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update a folder
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update a folder
+     * @throws ApiError
+     */
+    public static patchV1FoldersId(data: PatchV1FoldersIdData): CancelablePromise<PatchV1FoldersIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/folders/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a folder
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete a folder
+     * @throws ApiError
+     */
+    public static deleteV1FoldersId(data: DeleteV1FoldersIdData): CancelablePromise<DeleteV1FoldersIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/folders/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * List documents in folder
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.page
+     * @param data.perPage
+     * @returns unknown List documents in folder
+     * @throws ApiError
+     */
+    public static getV1FoldersIdDocuments(data: GetV1FoldersIdDocumentsData): CancelablePromise<GetV1FoldersIdDocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/folders/{id}/documents',
+            path: {
+                id: data.id
+            },
+            query: {
+                page: data.page,
+                per_page: data.perPage
+            }
+        });
+    }
+    
+}
+
+export class DocumentsService {
+    /**
+     * List documents with filtering and pagination
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @param data.folderId
+     * @param data.documentType
+     * @param data.financialYear
+     * @param data.tag
+     * @param data.search
+     * @param data.startDate
+     * @param data.endDate
+     * @returns unknown List documents with filtering and pagination
+     * @throws ApiError
+     */
+    public static getV1Documents(data: GetV1DocumentsData = {}): CancelablePromise<GetV1DocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/documents',
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                folder_id: data.folderId,
+                document_type: data.documentType,
+                financial_year: data.financialYear,
+                tag: data.tag,
+                search: data.search,
+                start_date: data.startDate,
+                end_date: data.endDate
+            }
+        });
+    }
+    
+    /**
+     * Upload a new document
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Upload a new document
+     * @throws ApiError
+     */
+    public static postV1Documents(data: PostV1DocumentsData): CancelablePromise<PostV1DocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/documents',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get document details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get document details
+     * @throws ApiError
+     */
+    public static getV1DocumentsId(data: GetV1DocumentsIdData): CancelablePromise<GetV1DocumentsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/documents/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update document metadata
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update document metadata
+     * @throws ApiError
+     */
+    public static patchV1DocumentsId(data: PatchV1DocumentsIdData): CancelablePromise<PatchV1DocumentsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/documents/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a document
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete a document
+     * @throws ApiError
+     */
+    public static deleteV1DocumentsId(data: DeleteV1DocumentsIdData): CancelablePromise<DeleteV1DocumentsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/documents/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Move document to folder
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Move document to folder
+     * @throws ApiError
+     */
+    public static postV1DocumentsIdMove(data: PostV1DocumentsIdMoveData): CancelablePromise<PostV1DocumentsIdMoveResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/documents/{id}/move',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Share document
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Share document
+     * @throws ApiError
+     */
+    public static postV1DocumentsIdShare(data: PostV1DocumentsIdShareData): CancelablePromise<PostV1DocumentsIdShareResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/documents/{id}/share',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * List document types
+     * @returns unknown List document types
+     * @throws ApiError
+     */
+    public static getV1DocumentsTypesList(): CancelablePromise<GetV1DocumentsTypesListResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/documents/types/list'
+        });
+    }
+    
+}
+
+export class BucketsService {
+    /**
+     * List buckets with filtering
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @param data.financialYear
+     * @param data.status
+     * @param data.bucketType
+     * @returns unknown List buckets with filtering
+     * @throws ApiError
+     */
+    public static getV1Buckets(data: GetV1BucketsData = {}): CancelablePromise<GetV1BucketsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/buckets',
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                financial_year: data.financialYear,
+                status: data.status,
+                bucket_type: data.bucketType
+            }
+        });
+    }
+    
+    /**
+     * Create a new bucket
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create a new bucket
+     * @throws ApiError
+     */
+    public static postV1Buckets(data: PostV1BucketsData): CancelablePromise<PostV1BucketsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/buckets',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get or create monthly bucket
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Get or create monthly bucket
+     * @throws ApiError
+     */
+    public static postV1BucketsMonthly(data: PostV1BucketsMonthlyData): CancelablePromise<PostV1BucketsMonthlyResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/buckets/monthly',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get bucket details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get bucket details
+     * @throws ApiError
+     */
+    public static getV1BucketsId(data: GetV1BucketsIdData): CancelablePromise<GetV1BucketsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/buckets/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update a bucket
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update a bucket
+     * @throws ApiError
+     */
+    public static patchV1BucketsId(data: PatchV1BucketsIdData): CancelablePromise<PatchV1BucketsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/buckets/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a bucket
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete a bucket
+     * @throws ApiError
+     */
+    public static deleteV1BucketsId(data: DeleteV1BucketsIdData): CancelablePromise<DeleteV1BucketsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/buckets/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Add document to bucket
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Add document to bucket
+     * @throws ApiError
+     */
+    public static postV1BucketsIdDocuments(data: PostV1BucketsIdDocumentsData): CancelablePromise<PostV1BucketsIdDocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/buckets/{id}/documents',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Remove document from bucket
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.documentId
+     * @returns void Remove document from bucket
+     * @throws ApiError
+     */
+    public static deleteV1BucketsIdDocumentsDocumentId(data: DeleteV1BucketsIdDocumentsDocumentIdData): CancelablePromise<DeleteV1BucketsIdDocumentsDocumentIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/buckets/{id}/documents/{document_id}',
+            path: {
+                id: data.id,
+                document_id: data.documentId
+            }
+        });
+    }
+    
+    /**
+     * Finalize bucket
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Finalize bucket
+     * @throws ApiError
+     */
+    public static postV1BucketsIdFinalize(data: PostV1BucketsIdFinalizeData): CancelablePromise<PostV1BucketsIdFinalizeResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/buckets/{id}/finalize',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Share bucket with CA
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Share bucket with CA
+     * @throws ApiError
+     */
+    public static postV1BucketsIdShare(data: PostV1BucketsIdShareData): CancelablePromise<PostV1BucketsIdShareResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/buckets/{id}/share',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Auto-collect documents for month
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Auto-collect documents for month
+     * @throws ApiError
+     */
+    public static postV1BucketsIdAutoCollect(data: PostV1BucketsIdAutoCollectData): CancelablePromise<PostV1BucketsIdAutoCollectResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/buckets/{id}/auto-collect',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+}
+
+export class WorkflowsService {
+    /**
+     * List all workflows in workspace
+     * @param data The data for the request.
+     * @param data.page
+     * @param data.perPage
+     * @param data.status
+     * @param data.triggerType
+     * @returns unknown List all workflows in workspace
+     * @throws ApiError
+     */
+    public static getV1Workflows(data: GetV1WorkflowsData = {}): CancelablePromise<GetV1WorkflowsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workflows',
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                status: data.status,
+                trigger_type: data.triggerType
+            }
+        });
+    }
+    
+    /**
+     * Create a new workflow
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Create a new workflow
+     * @throws ApiError
+     */
+    public static postV1Workflows(data: PostV1WorkflowsData): CancelablePromise<PostV1WorkflowsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows',
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get workflow details
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Get workflow details
+     * @throws ApiError
+     */
+    public static getV1WorkflowsId(data: GetV1WorkflowsIdData): CancelablePromise<GetV1WorkflowsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workflows/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Update a workflow
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Update a workflow
+     * @throws ApiError
+     */
+    public static patchV1WorkflowsId(data: PatchV1WorkflowsIdData): CancelablePromise<PatchV1WorkflowsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/workflows/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a workflow
+     * @param data The data for the request.
+     * @param data.id
+     * @returns void Delete a workflow
+     * @throws ApiError
+     */
+    public static deleteV1WorkflowsId(data: DeleteV1WorkflowsIdData): CancelablePromise<DeleteV1WorkflowsIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/workflows/{id}',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Activate a workflow
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Activate a workflow
+     * @throws ApiError
+     */
+    public static postV1WorkflowsIdActivate(data: PostV1WorkflowsIdActivateData): CancelablePromise<PostV1WorkflowsIdActivateResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/{id}/activate',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Pause a workflow
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Pause a workflow
+     * @throws ApiError
+     */
+    public static postV1WorkflowsIdPause(data: PostV1WorkflowsIdPauseData): CancelablePromise<PostV1WorkflowsIdPauseResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/{id}/pause',
+            path: {
+                id: data.id
+            }
+        });
+    }
+    
+    /**
+     * Trigger workflow execution manually
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Trigger workflow execution manually
+     * @throws ApiError
+     */
+    public static postV1WorkflowsIdTrigger(data: PostV1WorkflowsIdTriggerData): CancelablePromise<PostV1WorkflowsIdTriggerResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/{id}/trigger',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Add a step to workflow
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Add a step to workflow
+     * @throws ApiError
+     */
+    public static postV1WorkflowsIdSteps(data: PostV1WorkflowsIdStepsData): CancelablePromise<PostV1WorkflowsIdStepsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/{id}/steps',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Update a workflow step
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.stepId
+     * @param data.requestBody
+     * @returns unknown Update a workflow step
+     * @throws ApiError
+     */
+    public static patchV1WorkflowsIdStepsStepId(data: PatchV1WorkflowsIdStepsStepIdData): CancelablePromise<PatchV1WorkflowsIdStepsStepIdResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/v1/workflows/{id}/steps/{step_id}',
+            path: {
+                id: data.id,
+                step_id: data.stepId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Delete a workflow step
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.stepId
+     * @returns void Delete a workflow step
+     * @throws ApiError
+     */
+    public static deleteV1WorkflowsIdStepsStepId(data: DeleteV1WorkflowsIdStepsStepIdData): CancelablePromise<DeleteV1WorkflowsIdStepsStepIdResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/v1/workflows/{id}/steps/{step_id}',
+            path: {
+                id: data.id,
+                step_id: data.stepId
+            }
+        });
+    }
+    
+    /**
+     * Reorder workflow steps
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns unknown Reorder workflow steps
+     * @throws ApiError
+     */
+    public static postV1WorkflowsIdStepsReorder(data: PostV1WorkflowsIdStepsReorderData): CancelablePromise<PostV1WorkflowsIdStepsReorderResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/{id}/steps/reorder',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
+        });
+    }
+    
+    /**
+     * Get workflow execution history
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.page
+     * @param data.perPage
+     * @param data.status
+     * @returns unknown Get workflow execution history
+     * @throws ApiError
+     */
+    public static getV1WorkflowsIdExecutions(data: GetV1WorkflowsIdExecutionsData): CancelablePromise<GetV1WorkflowsIdExecutionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workflows/{id}/executions',
+            path: {
+                id: data.id
+            },
+            query: {
+                page: data.page,
+                per_page: data.perPage,
+                status: data.status
+            }
+        });
+    }
+    
+    /**
+     * Get specific execution details
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.executionId
+     * @returns unknown Get specific execution details
+     * @throws ApiError
+     */
+    public static getV1WorkflowsIdExecutionsExecutionId(data: GetV1WorkflowsIdExecutionsExecutionIdData): CancelablePromise<GetV1WorkflowsIdExecutionsExecutionIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workflows/{id}/executions/{execution_id}',
+            path: {
+                id: data.id,
+                execution_id: data.executionId
+            }
+        });
+    }
+    
+    /**
+     * Retry a failed execution
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.executionId
+     * @returns unknown Retry a failed execution
+     * @throws ApiError
+     */
+    public static postV1WorkflowsIdExecutionsExecutionIdRetry(data: PostV1WorkflowsIdExecutionsExecutionIdRetryData): CancelablePromise<PostV1WorkflowsIdExecutionsExecutionIdRetryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/{id}/executions/{execution_id}/retry',
+            path: {
+                id: data.id,
+                execution_id: data.executionId
+            }
+        });
+    }
+    
+    /**
+     * Cancel a running execution
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.executionId
+     * @returns unknown Cancel a running execution
+     * @throws ApiError
+     */
+    public static postV1WorkflowsIdExecutionsExecutionIdCancel(data: PostV1WorkflowsIdExecutionsExecutionIdCancelData): CancelablePromise<PostV1WorkflowsIdExecutionsExecutionIdCancelResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/{id}/executions/{execution_id}/cancel',
+            path: {
+                id: data.id,
+                execution_id: data.executionId
+            }
+        });
+    }
+    
+    /**
+     * Get available step types for building workflows
+     * @returns unknown Get available step types for building workflows
+     * @throws ApiError
+     */
+    public static getV1WorkflowsMetaStepTypes(): CancelablePromise<GetV1WorkflowsMetaStepTypesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workflows/meta/step_types'
+        });
+    }
+    
+    /**
+     * Get workflow templates
+     * @param data The data for the request.
+     * @param data.category
+     * @param data.featuredOnly
+     * @returns unknown Get workflow templates
+     * @throws ApiError
+     */
+    public static getV1WorkflowsMetaTemplates(data: GetV1WorkflowsMetaTemplatesData = {}): CancelablePromise<GetV1WorkflowsMetaTemplatesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workflows/meta/templates',
+            query: {
+                category: data.category,
+                featured_only: data.featuredOnly
+            }
+        });
+    }
+    
+    /**
+     * Get template details
+     * @param data The data for the request.
+     * @param data.templateId
+     * @returns unknown Get template details
+     * @throws ApiError
+     */
+    public static getV1WorkflowsMetaTemplatesTemplateId(data: GetV1WorkflowsMetaTemplatesTemplateIdData): CancelablePromise<GetV1WorkflowsMetaTemplatesTemplateIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/v1/workflows/meta/templates/{template_id}',
+            path: {
+                template_id: data.templateId
+            }
+        });
+    }
+    
+    /**
+     * Create workflow from template
+     * @param data The data for the request.
+     * @param data.templateId
+     * @param data.requestBody
+     * @returns unknown Create workflow from template
+     * @throws ApiError
+     */
+    public static postV1WorkflowsFromTemplateTemplateId(data: PostV1WorkflowsFromTemplateTemplateIdData): CancelablePromise<PostV1WorkflowsFromTemplateTemplateIdResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/v1/workflows/from_template/{template_id}',
+            path: {
+                template_id: data.templateId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
         });
     }
     

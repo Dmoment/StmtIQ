@@ -9,6 +9,11 @@ import { BillingSection } from './preview/BillingSection';
 import { LineItemsTable } from './preview/LineItemsTable';
 import { TotalsSummary } from './preview/TotalsSummary';
 
+interface CustomField {
+  label: string;
+  value: string;
+}
+
 interface InvoicePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,6 +34,7 @@ interface InvoicePreviewModalProps {
   accentColor: string;
   terms?: string;
   notes?: string;
+  customFields?: CustomField[];
 }
 
 export function InvoicePreviewModal({
@@ -51,6 +57,7 @@ export function InvoicePreviewModal({
   accentColor,
   terms,
   notes,
+  customFields,
 }: InvoicePreviewModalProps) {
   const modalRef = useModalFocus(isOpen, onClose);
 
@@ -150,7 +157,7 @@ export function InvoicePreviewModal({
 
               {/* Terms & Notes */}
               {hasTermsOrNotes && (
-                <div className="grid grid-cols-2 gap-6 text-sm">
+                <div className="grid grid-cols-2 gap-6 text-sm mb-6">
                   {terms && (
                     <section>
                       <h3 className="font-semibold mb-2" style={{ color: accentColor }}>
@@ -167,6 +174,23 @@ export function InvoicePreviewModal({
                       <p className="text-slate-600 whitespace-pre-wrap">{notes}</p>
                     </section>
                   )}
+                </div>
+              )}
+
+              {/* Additional Information - at bottom */}
+              {customFields && customFields.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-base font-semibold text-slate-900 mb-4">
+                    Additional Information
+                  </h3>
+                  <div className="space-y-3">
+                    {customFields.map((field, index) => (
+                      <div key={index} className="flex">
+                        <span className="w-48 text-slate-400 text-sm">{field.label}</span>
+                        <span className="text-slate-900 font-medium text-sm">{field.value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

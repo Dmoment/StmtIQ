@@ -26,6 +26,7 @@ module V1
     mount V1::SalesInvoices
     mount V1::RecurringInvoices
     mount V1::ExchangeRates
+    mount V1::Gst
 
     # Document Storage endpoints
     mount V1::Folders

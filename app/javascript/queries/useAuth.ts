@@ -3,6 +3,7 @@ import { AuthService } from "../types/generated/services.gen";
 import type { User, OtpResponse, AuthResponse } from "../types/api";
 import type { PostV1AuthSendOtpData, PostV1AuthVerifyOtpData, PostV1AuthResendOtpData, PatchV1AuthMeData } from "../types/generated/types.gen";
 import { authKeys } from "./keys";
+import { isAuthError, SAFE_QUERY_OPTIONS } from "../utils/api";
 
 // ============================================
 // Queries
@@ -16,11 +17,19 @@ export const useCurrentUser = (enabled = true) => {
   return useQuery({
     queryKey: authKeys.me(),
     queryFn: async () => {
-      const response = await AuthService.getV1AuthMe();
-      return response as unknown as User;
+      try {
+        const response = await AuthService.getV1AuthMe();
+        return response as unknown as User;
+      } catch (error: unknown) {
+        // Handle auth errors gracefully - user is not logged in
+        if (isAuthError(error)) {
+          return null;
+        }
+        throw error;
+      }
     },
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    ...SAFE_QUERY_OPTIONS,
   });
 };
 

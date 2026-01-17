@@ -8,12 +8,19 @@ class Client < ApplicationRecord
   has_many :sales_invoices, dependent: :restrict_with_error
   has_many :recurring_invoices, dependent: :restrict_with_error
 
+  # Active Storage
+  has_one_attached :logo
+
   # Validations
   validates :name, presence: true, length: { maximum: 200 }
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :gstin, format: {
     with: /\A\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}\z/,
     message: 'is not a valid GSTIN format (e.g., 22AAAAA0000A1Z5)'
+  }, allow_blank: true
+  validates :pan, format: {
+    with: /\A[A-Z]{5}\d{4}[A-Z]\z/,
+    message: 'is not a valid PAN format (e.g., ABCDE1234F)'
   }, allow_blank: true
   validates :default_currency, inclusion: { in: %w[INR USD EUR GBP] }
   validates :billing_state_code, length: { is: 2 }, allow_blank: true
@@ -72,6 +79,17 @@ class Client < ApplicationRecord
 
   def total_outstanding
     sales_invoices.where(status: %w[sent viewed overdue]).sum(:balance_due)
+  end
+
+  def logo_url
+    return nil unless logo.attached?
+
+    # Generate a signed URL for inline display (not download)
+    logo.url(
+      expires_in: 1.hour,
+      disposition: 'inline',
+      content_type: logo.content_type
+    )
   end
 
   private

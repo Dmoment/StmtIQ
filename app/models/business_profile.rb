@@ -52,13 +52,23 @@ class BusinessProfile < ApplicationRecord
   def logo_url
     return nil unless logo.attached?
 
-    Rails.application.routes.url_helpers.rails_blob_path(logo, only_path: true)
+    # Generate a signed URL for inline display (not download)
+    logo.url(
+      expires_in: 1.hour,
+      disposition: 'inline',
+      content_type: logo.content_type
+    )
   end
 
   def signature_url
     return nil unless signature.attached?
 
-    Rails.application.routes.url_helpers.rails_blob_path(signature, only_path: true)
+    # Generate a signed URL for inline display (not download)
+    signature.url(
+      expires_in: 1.hour,
+      disposition: 'inline',
+      content_type: signature.content_type
+    )
   end
 
   private

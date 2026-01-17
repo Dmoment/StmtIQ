@@ -11,6 +11,8 @@ module V1
       expose :unit
       expose :rate
       expose :amount
+      expose :gst_rate
+      expose :tax_amount
       expose :tax_rate
 
       expose :unit_display

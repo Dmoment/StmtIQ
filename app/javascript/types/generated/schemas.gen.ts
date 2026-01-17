@@ -666,6 +666,35 @@ export const $patchV1GmailConnectionsId = {
     description: 'Update Gmail connection settings'
 } as const;
 
+export const $postV1GmailConnectionsIdSync = {
+    type: 'object',
+    properties: {
+        date_from: {
+            type: 'string',
+            format: 'date',
+            description: 'Start date for email search'
+        },
+        date_to: {
+            type: 'string',
+            format: 'date',
+            description: 'End date for email search'
+        },
+        keywords: {
+            type: 'array',
+            description: 'Keywords to search in emails',
+            items: {
+                type: 'string'
+            }
+        },
+        include_attachments_only: {
+            type: 'boolean',
+            description: 'Only emails with attachments',
+            default: true
+        }
+    },
+    description: 'Trigger manual sync for a Gmail connection with filters'
+} as const;
+
 export const $postV1BusinessProfile = {
     type: 'object',
     properties: {
@@ -871,6 +900,9 @@ export const $postV1Clients = {
         gstin: {
             type: 'string'
         },
+        pan: {
+            type: 'string'
+        },
         billing_address_line1: {
             type: 'string'
         },
@@ -944,6 +976,9 @@ export const $patchV1ClientsId = {
         gstin: {
             type: 'string'
         },
+        pan: {
+            type: 'string'
+        },
         billing_address_line1: {
             type: 'string'
         },
@@ -1000,6 +1035,18 @@ export const $patchV1ClientsId = {
     description: 'Update a client'
 } as const;
 
+export const $postV1ClientsIdLogo = {
+    type: 'object',
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary'
+        }
+    },
+    required: ['file'],
+    description: 'Upload client logo'
+} as const;
+
 export const $postV1SalesInvoices = {
     type: 'object',
     properties: {
@@ -1054,6 +1101,18 @@ export const $postV1SalesInvoices = {
             type: 'number',
             format: 'float'
         },
+        place_of_supply: {
+            type: 'string'
+        },
+        is_reverse_charge: {
+            type: 'boolean',
+            default: false
+        },
+        cess_rate: {
+            type: 'number',
+            format: 'float',
+            default: 0
+        },
         notes: {
             type: 'string'
         },
@@ -1089,6 +1148,11 @@ export const $postV1SalesInvoices = {
                     rate: {
                         type: 'number',
                         format: 'float'
+                    },
+                    gst_rate: {
+                        type: 'number',
+                        format: 'float',
+                        default: 18
                     }
                 },
                 required: ['description', 'rate']
@@ -1150,6 +1214,16 @@ export const $patchV1SalesInvoicesId = {
             type: 'number',
             format: 'float'
         },
+        place_of_supply: {
+            type: 'string'
+        },
+        is_reverse_charge: {
+            type: 'boolean'
+        },
+        cess_rate: {
+            type: 'number',
+            format: 'float'
+        },
         notes: {
             type: 'string'
         },
@@ -1188,6 +1262,10 @@ export const $patchV1SalesInvoicesId = {
                         type: 'string'
                     },
                     rate: {
+                        type: 'number',
+                        format: 'float'
+                    },
+                    gst_rate: {
                         type: 'number',
                         format: 'float'
                     }
@@ -1414,4 +1492,494 @@ export const $patchV1RecurringInvoicesId = {
         }
     },
     description: 'Update a recurring invoice'
+} as const;
+
+export const $postV1Folders = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        parent_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        description: {
+            type: 'string'
+        },
+        color: {
+            type: 'string',
+            enum: ['slate', 'gray', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
+        },
+        icon: {
+            type: 'string'
+        },
+        position: {
+            type: 'integer',
+            format: 'int32'
+        }
+    },
+    required: ['name'],
+    description: 'Create a new folder'
+} as const;
+
+export const $patchV1FoldersId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        parent_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        description: {
+            type: 'string'
+        },
+        color: {
+            type: 'string'
+        },
+        icon: {
+            type: 'string'
+        },
+        position: {
+            type: 'integer',
+            format: 'int32'
+        }
+    },
+    description: 'Update a folder'
+} as const;
+
+export const $postV1Documents = {
+    type: 'object',
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary'
+        },
+        name: {
+            type: 'string'
+        },
+        folder_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        document_type: {
+            type: 'string',
+            enum: ['invoice', 'purchase_invoice', 'bank_statement', 'firc', 'receipt', 'expense', 'contract', 'tax_document', 'gst_return', 'tds_certificate', 'audit_report', 'balance_sheet', 'profit_loss', 'other'],
+            default: 'other'
+        },
+        description: {
+            type: 'string'
+        },
+        document_date: {
+            type: 'string',
+            format: 'date'
+        },
+        tags: {
+            type: 'array',
+            items: {
+                type: 'string'
+            }
+        },
+        amount: {
+            type: 'number',
+            format: 'double'
+        },
+        currency: {
+            type: 'string',
+            enum: ['INR', 'USD', 'EUR', 'GBP'],
+            default: 'INR'
+        },
+        reference_number: {
+            type: 'string'
+        },
+        source: {
+            type: 'string'
+        },
+        metadata: {
+            type: 'json'
+        }
+    },
+    required: ['file'],
+    description: 'Upload a new document'
+} as const;
+
+export const $patchV1DocumentsId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        folder_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        document_type: {
+            type: 'string',
+            enum: ['invoice', 'purchase_invoice', 'bank_statement', 'firc', 'receipt', 'expense', 'contract', 'tax_document', 'gst_return', 'tds_certificate', 'audit_report', 'balance_sheet', 'profit_loss', 'other']
+        },
+        description: {
+            type: 'string'
+        },
+        document_date: {
+            type: 'string',
+            format: 'date'
+        },
+        tags: {
+            type: 'array',
+            items: {
+                type: 'string'
+            }
+        },
+        amount: {
+            type: 'number',
+            format: 'double'
+        },
+        currency: {
+            type: 'string'
+        },
+        reference_number: {
+            type: 'string'
+        },
+        source: {
+            type: 'string'
+        },
+        metadata: {
+            type: 'json'
+        }
+    },
+    description: 'Update document metadata'
+} as const;
+
+export const $postV1DocumentsIdMove = {
+    type: 'object',
+    properties: {
+        folder_id: {
+            type: 'integer',
+            format: 'int32',
+            description: 'Target folder ID (null for root)'
+        }
+    },
+    description: 'Move document to folder'
+} as const;
+
+export const $postV1DocumentsIdShare = {
+    type: 'object',
+    properties: {
+        email: {
+            type: 'string'
+        },
+        name: {
+            type: 'string'
+        },
+        permission: {
+            type: 'string',
+            enum: ['view', 'download'],
+            default: 'view'
+        },
+        message: {
+            type: 'string'
+        },
+        expires_in_days: {
+            type: 'integer',
+            format: 'int32'
+        }
+    },
+    required: ['email'],
+    description: 'Share document'
+} as const;
+
+export const $postV1Buckets = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        description: {
+            type: 'string'
+        },
+        bucket_type: {
+            type: 'string',
+            enum: ['monthly', 'quarterly', 'annual', 'custom'],
+            default: 'monthly'
+        },
+        month: {
+            type: 'integer',
+            format: 'int32',
+            minimum: 1,
+            maximum: 12
+        },
+        year: {
+            type: 'integer',
+            format: 'int32'
+        }
+    },
+    description: 'Create a new bucket'
+} as const;
+
+export const $postV1BucketsMonthly = {
+    type: 'object',
+    properties: {
+        month: {
+            type: 'integer',
+            format: 'int32',
+            minimum: 1,
+            maximum: 12
+        },
+        year: {
+            type: 'integer',
+            format: 'int32'
+        }
+    },
+    required: ['month', 'year'],
+    description: 'Get or create monthly bucket'
+} as const;
+
+export const $patchV1BucketsId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        description: {
+            type: 'string'
+        }
+    },
+    description: 'Update a bucket'
+} as const;
+
+export const $postV1BucketsIdDocuments = {
+    type: 'object',
+    properties: {
+        document_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        notes: {
+            type: 'string'
+        }
+    },
+    required: ['document_id'],
+    description: 'Add document to bucket'
+} as const;
+
+export const $postV1BucketsIdShare = {
+    type: 'object',
+    properties: {
+        email: {
+            type: 'string'
+        },
+        name: {
+            type: 'string'
+        },
+        permission: {
+            type: 'string',
+            enum: ['view', 'download'],
+            default: 'download'
+        },
+        message: {
+            type: 'string'
+        },
+        expires_in_days: {
+            type: 'integer',
+            format: 'int32'
+        }
+    },
+    required: ['email'],
+    description: 'Share bucket with CA'
+} as const;
+
+export const $postV1BucketsIdAutoCollect = {
+    type: 'object',
+    properties: {
+        document_types: {
+            type: 'array',
+            items: {
+                type: 'string'
+            }
+        }
+    },
+    description: 'Auto-collect documents for month'
+} as const;
+
+export const $postV1Workflows = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        description: {
+            type: 'string'
+        },
+        trigger_type: {
+            type: 'string',
+            enum: ['schedule', 'event', 'manual']
+        },
+        trigger_config: {
+            type: 'object'
+        },
+        steps: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    step_type: {
+                        type: 'string'
+                    },
+                    name: {
+                        type: 'string'
+                    },
+                    position: {
+                        type: 'integer',
+                        format: 'int32'
+                    },
+                    config: {
+                        type: 'object'
+                    },
+                    conditions: {
+                        type: 'object'
+                    },
+                    enabled: {
+                        type: 'boolean',
+                        default: true
+                    },
+                    continue_on_failure: {
+                        type: 'boolean',
+                        default: false
+                    }
+                },
+                required: ['step_type', 'position']
+            }
+        }
+    },
+    required: ['name', 'trigger_type'],
+    description: 'Create a new workflow'
+} as const;
+
+export const $patchV1WorkflowsId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        description: {
+            type: 'string'
+        },
+        trigger_type: {
+            type: 'string',
+            enum: ['schedule', 'event', 'manual']
+        },
+        trigger_config: {
+            type: 'object'
+        },
+        status: {
+            type: 'string',
+            enum: ['draft', 'active', 'paused', 'archived']
+        },
+        metadata: {
+            type: 'object'
+        }
+    },
+    description: 'Update a workflow'
+} as const;
+
+export const $postV1WorkflowsIdTrigger = {
+    type: 'object',
+    properties: {
+        trigger_data: {
+            type: 'object',
+            description: 'Additional data to pass to the workflow'
+        }
+    },
+    description: 'Trigger workflow execution manually'
+} as const;
+
+export const $postV1WorkflowsIdSteps = {
+    type: 'object',
+    properties: {
+        step_type: {
+            type: 'string'
+        },
+        name: {
+            type: 'string'
+        },
+        position: {
+            type: 'integer',
+            format: 'int32'
+        },
+        config: {
+            type: 'object'
+        },
+        conditions: {
+            type: 'object'
+        },
+        enabled: {
+            type: 'boolean',
+            default: true
+        },
+        continue_on_failure: {
+            type: 'boolean',
+            default: false
+        }
+    },
+    required: ['step_type'],
+    description: 'Add a step to workflow'
+} as const;
+
+export const $patchV1WorkflowsIdStepsStepId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string'
+        },
+        position: {
+            type: 'integer',
+            format: 'int32'
+        },
+        config: {
+            type: 'object'
+        },
+        conditions: {
+            type: 'object'
+        },
+        enabled: {
+            type: 'boolean'
+        },
+        continue_on_failure: {
+            type: 'boolean'
+        }
+    },
+    description: 'Update a workflow step'
+} as const;
+
+export const $postV1WorkflowsIdStepsReorder = {
+    type: 'object',
+    properties: {
+        step_ids: {
+            type: 'array',
+            description: 'Array of step IDs in desired order',
+            items: {
+                type: 'integer',
+                format: 'int32'
+            }
+        }
+    },
+    required: ['step_ids'],
+    description: 'Reorder workflow steps'
+} as const;
+
+export const $postV1WorkflowsFromTemplateTemplateId = {
+    type: 'object',
+    properties: {
+        name: {
+            type: 'string',
+            description: 'Override template name'
+        },
+        trigger_config: {
+            type: 'object',
+            description: 'Override trigger configuration'
+        }
+    },
+    description: 'Create workflow from template'
 } as const;

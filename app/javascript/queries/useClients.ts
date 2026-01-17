@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ClientsService } from '../types/generated';
+import { getClerkToken } from '../types/generated/core/OpenAPI';
+import { isAuthError, SAFE_QUERY_OPTIONS, getCsrfToken } from '../utils/api';
 
 interface UseClientsParams {
   page?: number;
@@ -9,17 +11,32 @@ interface UseClientsParams {
 }
 
 export function useClients(params: UseClientsParams = {}) {
+  // Extract primitive values for stable query key (avoids infinite re-renders)
+  const page = params.page || 1;
+  const perPage = params.per_page || 25;
+  const search = params.search || '';
+  const activeOnly = params.active_only ?? true;
+
   return useQuery({
-    queryKey: ['clients', params],
+    queryKey: ['clients', page, perPage, search, activeOnly],
     queryFn: async () => {
-      const response = await ClientsService.getV1Clients({
-        page: params.page || 1,
-        perPage: params.per_page || 25,
-        search: params.search,
-        activeOnly: params.active_only ?? true,
-      });
-      return response;
+      try {
+        const response = await ClientsService.getV1Clients({
+          page,
+          perPage,
+          search: search || undefined,
+          activeOnly,
+        });
+        return response;
+      } catch (error: unknown) {
+        // Handle auth errors gracefully - return empty array instead of throwing
+        if (isAuthError(error)) {
+          return [];
+        }
+        throw error;
+      }
     },
+    ...SAFE_QUERY_OPTIONS,
   });
 }
 
@@ -27,23 +44,42 @@ export function useClient(id: number) {
   return useQuery({
     queryKey: ['clients', id],
     queryFn: async () => {
-      return ClientsService.getV1ClientsId({ id });
+      try {
+        return await ClientsService.getV1ClientsId({ id });
+      } catch (error: unknown) {
+        if (isAuthError(error)) {
+          return null;
+        }
+        throw error;
+      }
     },
     enabled: !!id,
+    ...SAFE_QUERY_OPTIONS,
   });
 }
 
 export function useClientInvoices(id: number, params: { page?: number; per_page?: number } = {}) {
+  const page = params.page || 1;
+  const perPage = params.per_page || 25;
+
   return useQuery({
-    queryKey: ['clients', id, 'invoices', params],
+    queryKey: ['clients', id, 'invoices', page, perPage],
     queryFn: async () => {
-      return ClientsService.getV1ClientsIdInvoices({
-        id,
-        page: params.page || 1,
-        perPage: params.per_page || 25,
-      });
+      try {
+        return await ClientsService.getV1ClientsIdInvoices({
+          id,
+          page,
+          perPage,
+        });
+      } catch (error: unknown) {
+        if (isAuthError(error)) {
+          return [];
+        }
+        throw error;
+      }
     },
     enabled: !!id,
+    ...SAFE_QUERY_OPTIONS,
   });
 }
 
@@ -83,6 +119,45 @@ export function useDeleteClient() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+    },
+  });
+}
+
+export function useUploadClientLogo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, file }: { id: number; file: File }) => {
+      const token = await getClerkToken();
+
+      const headers: Record<string, string> = {
+        'X-CSRF-Token': getCsrfToken(),
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`/api/v1/clients/${id}/logo`, {
+        method: 'POST',
+        headers,
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(error.error || `HTTP ${response.status}`);
+      }
+
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['clients', variables.id] });
     },
   });
 }

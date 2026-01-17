@@ -15,21 +15,33 @@ export interface LineItem {
 }
 
 export interface BusinessProfile {
+  id?: number;
   business_name?: string;
+  legal_name?: string;
+  email?: string;
+  phone?: string;
   address_line1?: string;
   address_line2?: string;
   city?: string;
   state?: string;
+  state_code?: string;
   pincode?: string;
+  country?: string;
   gstin?: string;
   pan?: string;
-  state_code?: string;
+  bank_name?: string;
+  account_number?: string;
+  ifsc_code?: string;
+  upi_id?: string;
+  logo_url?: string;
+  signature_url?: string;
 }
 
 export interface Client {
   id: number;
   name: string;
   email?: string;
+  phone?: string;
   company_name?: string;
   gstin?: string;
   pan?: string;
@@ -39,7 +51,14 @@ export interface Client {
   billing_state?: string;
   billing_pincode?: string;
   billing_state_code?: string;
+  billing_country?: string;
   display_name?: string;
+  notes?: string;
+  logo_url?: string;
+  total_invoiced?: {
+    count: number;
+    amount: number;
+  };
 }
 
 export interface InvoiceCalculations {
