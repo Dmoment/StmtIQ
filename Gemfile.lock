@@ -503,7 +503,7 @@ GEM
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
     ruby-ole (1.2.13.1)
-    ruby-openai (7.4.0)
+    ruby-openai (8.3.0)
       event_stream_parser (>= 0.3.0, < 2.0.0)
       faraday (>= 1)
       faraday-multipart (>= 1)
@@ -640,7 +640,7 @@ DEPENDENCIES
   roo-xls (~> 1.2)
   rspec-rails (~> 7.0)
   rubocop-rails-omakase
-  ruby-openai (~> 7.0)
+  ruby-openai (~> 8.3)
   shoulda-matchers (~> 6.0)
   sidekiq (~> 7.0)
   sidekiq-cron (~> 1.12)
