@@ -16,7 +16,7 @@ gem "cssbundling-rails"
 # ============================================
 # API & Serialization
 # ============================================
-gem "grape", "~> 2.0"
+gem "grape", "~> 3.0"
 gem "grape-swagger", "~> 2.0"
 gem "grape-swagger-entity", "~> 0.5"
 gem "grape-entity", "~> 1.0"
