@@ -298,7 +298,7 @@ GEM
     marcel (1.1.0)
     matrix (0.4.3)
     mini_mime (1.1.5)
-    minitest (6.0.0)
+    minitest (6.0.1)
       prism (~> 1.5)
     msgpack (1.8.0)
     multi_json (1.19.0)
@@ -512,8 +512,8 @@ GEM
     ruby2_keywords (0.0.5)
     rubyzip (2.4.1)
     securerandom (0.4.1)
-    shoulda-matchers (6.5.0)
-      activesupport (>= 5.2.0)
+    shoulda-matchers (7.0.1)
+      activesupport (>= 7.1)
     sidekiq (7.3.9)
       base64
       connection_pool (>= 2.3.0)
@@ -641,7 +641,7 @@ DEPENDENCIES
   rspec-rails (~> 7.0)
   rubocop-rails-omakase
   ruby-openai (~> 7.0)
-  shoulda-matchers (~> 6.0)
+  shoulda-matchers (~> 7.0)
   sidekiq (~> 7.0)
   sidekiq-cron (~> 1.12)
   solid_cable
