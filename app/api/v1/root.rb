@@ -43,9 +43,9 @@ module V1
       mount_path: '/swagger_doc',
       hide_format: true,
       info: {
-        title: 'StmtIQ API',
-        description: 'Expense Management & Bank Statement Parser API',
-        contact_name: 'StmtIQ Team'
+        title: 'KhataTrack API',
+        description: 'Professional Invoicing & Expense Management API',
+        contact_name: 'KhataTrack Team'
       }
     )
   end

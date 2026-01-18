@@ -104,10 +104,10 @@ export function Onboarding() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 mb-4">
             <span className="text-2xl font-bold text-slate-900" aria-hidden="true">
-              S
+              K
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome to StmtIQ</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Welcome to KhataTrack</h1>
           <p className="text-slate-400">Let's set up your account in just a few steps</p>
         </div>
 

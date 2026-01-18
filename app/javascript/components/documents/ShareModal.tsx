@@ -35,7 +35,7 @@ export function ShareModal({ isOpen, onClose, item, type }: ShareModalProps) {
     try {
       const data = {
         id: item.id,
-        email: 'link-share@stmtiq.app', // Placeholder email for link-only shares
+        email: 'link-share@khatatrack.com', // Placeholder email for link-only shares
         permission,
         expires_in_days: expiresInDays || undefined,
       };

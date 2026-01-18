@@ -282,7 +282,7 @@ export function Login() {
     >
       {/* Logo */}
       <div className="absolute top-8 left-8">
-        <h1 className="text-2xl font-bold text-slate-800">StmtIQ</h1>
+        <h1 className="text-2xl font-bold text-slate-800">KhataTrack</h1>
       </div>
 
       {/* Main Content */}
@@ -294,7 +294,7 @@ export function Login() {
             {step === 'choose' && (
               <div>
                 <div className="mb-8">
-                  <p className="text-slate-500 text-sm">Welcome to StmtIQ,</p>
+                  <p className="text-slate-500 text-sm">Welcome to KhataTrack,</p>
                   <h2 className="text-2xl font-semibold text-slate-900 mt-1">Sign in to continue</h2>
                 </div>
 
@@ -495,7 +495,7 @@ export function Login() {
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
               <p className="text-xl leading-relaxed italic mb-6">
-                StmtIQ transformed how we manage our business expenses. Upload statements, get instant insights, and match invoices automatically.
+                KhataTrack transformed how we manage our business expenses. Create professional invoices, track expenses automatically, and stay GST-compliant effortlessly.
               </p>
               <p className="text-lg leading-relaxed text-slate-600">
                 Its smart categorization and analytics give us complete visibility into our spending patterns.

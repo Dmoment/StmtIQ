@@ -138,7 +138,7 @@ export function OnboardingModal() {
             <Wallet className="w-6 h-6 text-orange-500" aria-hidden="true" />
             <div>
               <h2 id="onboarding-title" className="text-lg font-bold text-slate-900">
-                Welcome to StmtIQ
+                Welcome to KhataTrack
               </h2>
               <p className="text-sm text-slate-600">Quick setup to get you started</p>
             </div>

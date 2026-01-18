@@ -1,5 +1,5 @@
-<% content_for :title, "StmtIQ - Understand where your money goes" %>
-<% content_for :description, "Upload your bank statement. Get clarity on your spending. A simple tool for people who want to understand their finances better." %>
+<% content_for :title, "KhataTrack - Smart Business Invoicing & Expense Tracking" %>
+<% content_for :description, "Professional invoicing with GST compliance, automated expense tracking, and smart business insights. Built for Indian businesses and freelancers." %>
 
 <style>
   /* Custom fonts */
@@ -474,14 +474,15 @@
 
 <!-- Navigation -->
 <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-slate-100">
-  <div class="max-w-4xl mx-auto px-6 py-4">
+  <div class="max-w-5xl mx-auto px-6 py-4">
     <div class="flex items-center justify-between">
       <a href="/" class="font-mono text-lg font-semibold text-slate-900 tracking-tight">
-        stmt<span class="text-amber-500">IQ</span>
+        Khata<span class="text-amber-500">Track</span>
       </a>
       <div class="flex items-center gap-8">
-        <a href="#how" class="text-sm text-slate-600 hover:text-slate-900 transition-colors link-underline">How it works</a>
         <a href="#features" class="text-sm text-slate-600 hover:text-slate-900 transition-colors link-underline">Features</a>
+        <a href="#how" class="text-sm text-slate-600 hover:text-slate-900 transition-colors link-underline">How it works</a>
+        <a href="#pricing" class="text-sm text-slate-600 hover:text-slate-900 transition-colors link-underline">Pricing</a>
         <a href="/app" class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors">Open App &rarr;</a>
       </div>
     </div>
@@ -490,27 +491,48 @@
 
 <!-- Hero -->
 <section class="min-h-screen flex items-center pt-20">
-  <div class="max-w-4xl mx-auto px-6 py-20">
+  <div class="max-w-5xl mx-auto px-6 py-20">
     <div class="max-w-2xl">
-      <p class="font-mono text-sm text-amber-600 mb-6 animate-in">A tool for understanding your money</p>
+      <p class="font-mono text-sm text-amber-600 mb-6 animate-in">Business accounting made simple</p>
 
       <h1 class="font-serif text-5xl md:text-6xl font-semibold text-slate-900 leading-tight mb-8 animate-in delay-1">
-        Upload a bank statement.<br>
-        See where it all goes.
+        Professional invoicing.<br>
+        Smart expense tracking.
       </h1>
 
       <p class="text-xl text-slate-600 leading-relaxed mb-10 animate-in delay-2">
-        StmtIQ reads your bank statements and categorizes every transaction automatically.
-        No manual entry. No complicated setup. Just drag, drop, and understand.
+        Create GST-compliant invoices, track expenses automatically, manage clients, and gain insights into your business finances. Built for Indian businesses and freelancers.
       </p>
 
       <div class="flex flex-col sm:flex-row gap-4 animate-in delay-3">
-        <a href="/app" class="inline-flex items-center justify-center px-6 py-3 bg-amber-200 text-slate-900 font-medium rounded-lg hover:bg-amber-300 transition-colors">
-          Try it free
+        <a href="/app" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 transition-colors shadow-lg shadow-amber-500/25">
+          Start Free Trial
         </a>
-        <a href="#how" class="inline-flex items-center justify-center px-6 py-3 text-slate-700 font-medium hover:text-slate-900 transition-colors">
-          See how it works
+        <a href="#features" class="inline-flex items-center justify-center px-6 py-3 text-slate-700 font-medium hover:text-slate-900 transition-colors">
+          See all features
         </a>
+      </div>
+
+      <!-- Trust badges -->
+      <div class="flex flex-wrap items-center gap-6 mt-10 pt-8 border-t border-slate-200 animate-in delay-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-sm text-slate-600">GST Compliant</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-sm text-slate-600">Bank-level Security</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-sm text-slate-600">Made in India</span>
+        </div>
       </div>
     </div>
 
@@ -843,7 +865,7 @@
           <div class="flex-1">
             <h3 class="font-semibold text-slate-900 mb-1">Gets smarter with every statement</h3>
             <p class="text-sm text-slate-600 leading-relaxed">
-              The more you use StmtIQ, the better it understands <em>your</em> spending. Your local chai wala isn't "Transfer" — it's "Food."
+              The more you use KhataTrack, the better it understands <em>your</em> spending. Your local chai wala isn't "Transfer" — it's "Food."
               Correct it once, and it remembers. Our AI adapts to your unique financial patterns.
             </p>
           </div>
@@ -1005,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="font-mono text-6xl font-bold text-amber-200 mb-4">01</div>
         <h3 class="font-semibold text-slate-900 mb-2">Upload your statement</h3>
         <p class="text-slate-600 leading-relaxed">
-          Download a PDF or CSV from your bank's website. Drag it into StmtIQ. We support ICICI, HDFC, SBI, Axis, and 15+ other banks.
+          Download a PDF or CSV from your bank's website. Drag it into KhataTrack. We support ICICI, HDFC, SBI, Axis, and 15+ other banks.
         </p>
       </div>
 
@@ -1046,53 +1068,111 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- Features -->
 <section id="features" class="py-32">
-  <div class="max-w-4xl mx-auto px-6">
-    <p class="font-mono text-sm text-amber-600 mb-4">What you get</p>
-    <h2 class="font-serif text-4xl font-semibold text-slate-900 mb-6">Built for real people,<br>not finance experts</h2>
+  <div class="max-w-5xl mx-auto px-6">
+    <p class="font-mono text-sm text-amber-600 mb-4">Everything you need</p>
+    <h2 class="font-serif text-4xl font-semibold text-slate-900 mb-6">Complete business<br>financial toolkit</h2>
     <p class="text-xl text-slate-600 mb-16 max-w-xl">
-      We built StmtIQ because existing tools were either too complicated or too basic. This one's just right.
+      From professional invoicing to expense tracking — everything a modern Indian business needs, in one place.
     </p>
 
+    <!-- Primary Features Grid -->
+    <div class="grid md:grid-cols-3 gap-8 mb-16">
+      <!-- Invoicing -->
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+        <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-lg mb-2">Professional Invoicing</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Create beautiful, GST-compliant invoices in seconds. Add your logo, customize colors, and send via email with one click.
+        </p>
+        <ul class="space-y-2 text-sm text-slate-500">
+          <li class="flex items-center gap-2"><span class="text-amber-500">✓</span> Auto-generated invoice numbers</li>
+          <li class="flex items-center gap-2"><span class="text-amber-500">✓</span> PDF generation & email delivery</li>
+          <li class="flex items-center gap-2"><span class="text-amber-500">✓</span> Custom branding & templates</li>
+        </ul>
+      </div>
+
+      <!-- GST Compliance -->
+      <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
+        <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-lg mb-2">GST Compliance</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Automatic CGST, SGST, and IGST calculations based on place of supply. HSN/SAC codes, reverse charge, and cess support.
+        </p>
+        <ul class="space-y-2 text-sm text-slate-500">
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Auto tax calculation (CGST/SGST/IGST)</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> HSN/SAC code support</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Multi-currency with exchange rates</li>
+        </ul>
+      </div>
+
+      <!-- Recurring Invoices -->
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-lg mb-2">Recurring Invoices</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Set up monthly, quarterly, or custom schedules. Invoices are generated and sent automatically — no manual work needed.
+        </p>
+        <ul class="space-y-2 text-sm text-slate-500">
+          <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Flexible scheduling options</li>
+          <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Auto-send via email</li>
+          <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> End date & occurrence limits</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Secondary Features Grid -->
     <div class="grid md:grid-cols-2 gap-x-16 gap-y-12">
       <div class="border-l-2 border-amber-200 pl-6">
-        <h3 class="font-semibold text-slate-900 mb-2">Automatic categorization</h3>
+        <h3 class="font-semibold text-slate-900 mb-2">Client Management</h3>
         <p class="text-slate-600 leading-relaxed">
-          95% of transactions are categorized automatically using rules, machine learning, and AI. The remaining 5%? One click to fix.
+          Keep all client details organized — GSTIN, billing addresses, payment terms. Quick access when creating invoices.
         </p>
       </div>
 
       <div class="border-l-2 border-amber-200 pl-6">
-        <h3 class="font-semibold text-slate-900 mb-2">Works with your bank</h3>
+        <h3 class="font-semibold text-slate-900 mb-2">Bank Statement Analysis</h3>
         <p class="text-slate-600 leading-relaxed">
-          ICICI, HDFC, SBI, Axis, Kotak, Yes Bank, IDFC First, and more. Credit cards too. If your bank isn't supported, tell us.
+          Upload statements from 20+ Indian banks. AI categorizes every transaction automatically. See where your money goes.
         </p>
       </div>
 
       <div class="border-l-2 border-amber-200 pl-6">
-        <h3 class="font-semibold text-slate-900 mb-2">Learns your preferences</h3>
+        <h3 class="font-semibold text-slate-900 mb-2">Document Storage</h3>
         <p class="text-slate-600 leading-relaxed">
-          Correct a category once, and StmtIQ remembers. Your local chai wala isn't "Transfer" — it's "Food." We get it.
+          Store receipts, contracts, and business documents securely. Everything organized and searchable when you need it.
         </p>
       </div>
 
       <div class="border-l-2 border-amber-200 pl-6">
-        <h3 class="font-semibold text-slate-900 mb-2">Private by default</h3>
+        <h3 class="font-semibold text-slate-900 mb-2">Business Insights</h3>
         <p class="text-slate-600 leading-relaxed">
-          Your data stays yours. We don't sell it, share it, or use it to train models. Encrypted at rest and in transit.
+          Dashboard with revenue trends, outstanding payments, and expense breakdowns. Make informed decisions with real data.
         </p>
       </div>
 
       <div class="border-l-2 border-amber-200 pl-6">
-        <h3 class="font-semibold text-slate-900 mb-2">Subcategories that make sense</h3>
+        <h3 class="font-semibold text-slate-900 mb-2">Payment Tracking</h3>
         <p class="text-slate-600 leading-relaxed">
-          "Food" splits into Delivery, Dining Out, and Groceries. "Transfer" becomes P2P, Self, or Wallet. The detail you need.
+          Track invoice status — draft, sent, viewed, paid. Record partial payments. Never lose track of outstanding amounts.
         </p>
       </div>
 
       <div class="border-l-2 border-amber-200 pl-6">
-        <h3 class="font-semibold text-slate-900 mb-2">Export anytime</h3>
+        <h3 class="font-semibold text-slate-900 mb-2">Export & Reports</h3>
         <p class="text-slate-600 leading-relaxed">
-          Download your categorized data as CSV or Excel. Your data, your format, your terms. No lock-in.
+          Download invoices as PDF. Export transaction data as CSV or Excel. Generate reports for your CA anytime.
         </p>
       </div>
     </div>
@@ -1232,7 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>
         <h3 class="font-semibold text-slate-900 mb-3">Do you have a mobile app?</h3>
         <p class="text-slate-600 leading-relaxed">
-          Not yet. StmtIQ works great on mobile browsers though. A native app is on the roadmap for later this year.
+          Not yet. KhataTrack works great on mobile browsers though. A native app is on the roadmap for later this year.
         </p>
       </div>
     </div>
@@ -1247,7 +1327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Upload your first statement in 30 seconds. No credit card required.
     </p>
     <a href="/app" class="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-900 font-medium rounded-lg hover:bg-slate-100 transition-colors">
-      Open StmtIQ &rarr;
+      Open KhataTrack &rarr;
     </a>
   </div>
 </section>
@@ -1258,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
       <div>
         <a href="/" class="font-mono text-lg font-semibold text-slate-900 tracking-tight">
-          stmt<span class="text-amber-500">IQ</span>
+          Khata<span class="text-amber-500">Track</span>
         </a>
         <p class="text-sm text-slate-500 mt-2">Understand where your money goes.</p>
       </div>
@@ -1274,12 +1354,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <p class="text-sm text-slate-400">
-        &copy; 2026 StmtIQ. Made in India.
+        &copy; 2026 KhataTrack. Made in India.
       </p>
       <div class="flex gap-6 text-sm text-slate-400">
         <a href="#" class="hover:text-slate-600 transition-colors">Privacy</a>
         <a href="#" class="hover:text-slate-600 transition-colors">Terms</a>
-        <a href="mailto:hello@stmtiq.com" class="hover:text-slate-600 transition-colors">Contact</a>
+        <a href="mailto:hello@khatatrack.com" class="hover:text-slate-600 transition-colors">Contact</a>
       </div>
     </div>
   </div>

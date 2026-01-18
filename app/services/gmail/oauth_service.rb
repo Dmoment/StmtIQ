@@ -123,7 +123,7 @@ module Gmail
         if Rails.env.development?
           'http://localhost:3000/app/gmail/callback'
         else
-          "#{ENV.fetch('APP_HOST', 'https://stmtiq.com')}/app/gmail/callback"
+          "#{ENV.fetch('APP_HOST', 'https://khatatrack.com')}/app/gmail/callback"
         end
       end
     end
