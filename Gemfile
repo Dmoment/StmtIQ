@@ -43,7 +43,7 @@ gem "fugit", "~> 1.9"                 # Cron parsing for workflow scheduler
 # ============================================
 # File Processing & Parsing
 # ============================================
-gem "pdf-reader", "~> 2.11"        # PDF text extraction
+gem "pdf-reader", "~> 2.15"        # PDF text extraction
 gem "prawn", "~> 2.4"              # PDF generation
 gem "prawn-table", "~> 0.2"        # Tables for PDF invoices
 gem "matrix"                       # Required by prawn in Ruby 3.1+
