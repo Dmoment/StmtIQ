@@ -35,7 +35,7 @@ gem "jwt", "~> 2.7"               # Clerk JWT verification
 # ============================================
 # Background Jobs
 # ============================================
-gem "sidekiq", "~> 7.0"
+gem "sidekiq", "~> 8.1"
 gem "sidekiq-cron", "~> 1.12"
 gem "redis", "~> 5.0"
 gem "fugit", "~> 1.9"                 # Cron parsing for workflow scheduler
