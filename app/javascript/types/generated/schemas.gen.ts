@@ -771,6 +771,15 @@ export const $postV1BusinessProfile = {
         },
         default_terms: {
             type: 'string'
+        },
+        invoice_email_subject: {
+            type: 'string'
+        },
+        invoice_email_body: {
+            type: 'string'
+        },
+        invoice_email_cc: {
+            type: 'string'
         }
     },
     required: ['business_name'],
@@ -852,6 +861,15 @@ export const $patchV1BusinessProfile = {
             type: 'string'
         },
         default_terms: {
+            type: 'string'
+        },
+        invoice_email_subject: {
+            type: 'string'
+        },
+        invoice_email_body: {
+            type: 'string'
+        },
+        invoice_email_cc: {
             type: 'string'
         }
     },
@@ -1125,6 +1143,21 @@ export const $postV1SalesInvoices = {
         secondary_color: {
             type: 'string'
         },
+        custom_fields: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    label: {
+                        type: 'string'
+                    },
+                    value: {
+                        type: 'string'
+                    }
+                },
+                required: ['label', 'value']
+            }
+        },
         line_items: {
             type: 'array',
             items: {
@@ -1236,6 +1269,25 @@ export const $patchV1SalesInvoicesId = {
         secondary_color: {
             type: 'string'
         },
+        recurring_invoice_id: {
+            type: 'integer',
+            format: 'int32'
+        },
+        custom_fields: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    label: {
+                        type: 'string'
+                    },
+                    value: {
+                        type: 'string'
+                    }
+                },
+                required: ['label', 'value']
+            }
+        },
         line_items: {
             type: 'array',
             items: {
@@ -1275,6 +1327,29 @@ export const $patchV1SalesInvoicesId = {
         }
     },
     description: 'Update an invoice'
+} as const;
+
+export const $postV1SalesInvoicesIdSend = {
+    type: 'object',
+    properties: {
+        to: {
+            type: 'string',
+            description: 'Recipient email (overrides client email)'
+        },
+        cc: {
+            type: 'string',
+            description: 'CC email addresses (comma-separated)'
+        },
+        subject: {
+            type: 'string',
+            description: 'Email subject (overrides template)'
+        },
+        body: {
+            type: 'string',
+            description: 'Email body (overrides template)'
+        }
+    },
+    description: 'Send invoice to client'
 } as const;
 
 export const $postV1SalesInvoicesIdRecordPayment = {
@@ -1352,6 +1427,18 @@ export const $postV1RecurringInvoices = {
             type: 'integer',
             format: 'int32',
             default: 0
+        },
+        send_to_email: {
+            type: 'string'
+        },
+        send_cc_emails: {
+            type: 'string'
+        },
+        send_email_subject: {
+            type: 'string'
+        },
+        send_email_body: {
+            type: 'string'
         },
         currency: {
             type: 'string',
@@ -1440,6 +1527,18 @@ export const $patchV1RecurringInvoicesId = {
         send_days_before_due: {
             type: 'integer',
             format: 'int32'
+        },
+        send_to_email: {
+            type: 'string'
+        },
+        send_cc_emails: {
+            type: 'string'
+        },
+        send_email_subject: {
+            type: 'string'
+        },
+        send_email_body: {
+            type: 'string'
         },
         currency: {
             type: 'string',

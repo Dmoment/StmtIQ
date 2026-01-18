@@ -2793,6 +2793,16 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/postV1SalesInvoicesIdSend"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "responses": {
                     "201": {
                         "description": "Send invoice to client"
@@ -5839,6 +5849,15 @@
                     },
                     "default_terms": {
                         "type": "string"
+                    },
+                    "invoice_email_subject": {
+                        "type": "string"
+                    },
+                    "invoice_email_body": {
+                        "type": "string"
+                    },
+                    "invoice_email_cc": {
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -5921,6 +5940,15 @@
                         "type": "string"
                     },
                     "default_terms": {
+                        "type": "string"
+                    },
+                    "invoice_email_subject": {
+                        "type": "string"
+                    },
+                    "invoice_email_body": {
+                        "type": "string"
+                    },
+                    "invoice_email_cc": {
                         "type": "string"
                     }
                 },
@@ -6218,6 +6246,24 @@
                     "secondary_color": {
                         "type": "string"
                     },
+                    "custom_fields": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "label",
+                                "value"
+                            ]
+                        }
+                    },
                     "line_items": {
                         "type": "array",
                         "items": {
@@ -6345,6 +6391,28 @@
                     "secondary_color": {
                         "type": "string"
                     },
+                    "recurring_invoice_id": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "custom_fields": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "label",
+                                "value"
+                            ]
+                        }
+                    },
                     "line_items": {
                         "type": "array",
                         "items": {
@@ -6387,6 +6455,28 @@
                     }
                 },
                 "description": "Update an invoice"
+            },
+            "postV1SalesInvoicesIdSend": {
+                "type": "object",
+                "properties": {
+                    "to": {
+                        "type": "string",
+                        "description": "Recipient email (overrides client email)"
+                    },
+                    "cc": {
+                        "type": "string",
+                        "description": "CC email addresses (comma-separated)"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "description": "Email subject (overrides template)"
+                    },
+                    "body": {
+                        "type": "string",
+                        "description": "Email body (overrides template)"
+                    }
+                },
+                "description": "Send invoice to client"
             },
             "postV1SalesInvoicesIdRecordPayment": {
                 "type": "object",
@@ -6473,6 +6563,18 @@
                         "type": "integer",
                         "format": "int32",
                         "default": 0
+                    },
+                    "send_to_email": {
+                        "type": "string"
+                    },
+                    "send_cc_emails": {
+                        "type": "string"
+                    },
+                    "send_email_subject": {
+                        "type": "string"
+                    },
+                    "send_email_body": {
+                        "type": "string"
                     },
                     "currency": {
                         "type": "string",
@@ -6582,6 +6684,18 @@
                     "send_days_before_due": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "send_to_email": {
+                        "type": "string"
+                    },
+                    "send_cc_emails": {
+                        "type": "string"
+                    },
+                    "send_email_subject": {
+                        "type": "string"
+                    },
+                    "send_email_body": {
+                        "type": "string"
                     },
                     "currency": {
                         "type": "string",

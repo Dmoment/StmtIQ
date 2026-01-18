@@ -1748,6 +1748,7 @@ export class SalesInvoicesService {
      * Send invoice to client
      * @param data The data for the request.
      * @param data.id
+     * @param data.requestBody
      * @returns unknown Send invoice to client
      * @throws ApiError
      */
@@ -1757,7 +1758,9 @@ export class SalesInvoicesService {
             url: '/v1/sales_invoices/{id}/send',
             path: {
                 id: data.id
-            }
+            },
+            body: data.requestBody,
+            mediaType: 'application/json'
         });
     }
     

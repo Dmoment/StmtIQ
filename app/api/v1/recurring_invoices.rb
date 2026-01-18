@@ -40,6 +40,10 @@ module V1
         optional :end_date, type: Date
         optional :auto_send, type: Boolean, default: false
         optional :send_days_before_due, type: Integer, default: 0
+        optional :send_to_email, type: String
+        optional :send_cc_emails, type: String
+        optional :send_email_subject, type: String
+        optional :send_email_body, type: String
         optional :currency, type: String, values: SalesInvoice::CURRENCIES, default: 'INR'
         optional :payment_terms_days, type: Integer, default: 30
         optional :tax_rate, type: Float
@@ -102,6 +106,10 @@ module V1
         optional :end_date, type: Date
         optional :auto_send, type: Boolean
         optional :send_days_before_due, type: Integer
+        optional :send_to_email, type: String
+        optional :send_cc_emails, type: String
+        optional :send_email_subject, type: String
+        optional :send_email_body, type: String
         optional :currency, type: String, values: SalesInvoice::CURRENCIES
         optional :payment_terms_days, type: Integer
         optional :tax_rate, type: Float

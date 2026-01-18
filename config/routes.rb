@@ -2,6 +2,11 @@ Rails.application.routes.draw do
   # Mount Grape API
   mount BaseAPI => '/api'
 
+  # Letter Opener Web - view sent emails in development
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: '/letter_opener'
+  end
+
   # SSE endpoint for statement progress (must be before catch-all route)
   namespace :api do
     namespace :v1 do

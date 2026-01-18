@@ -365,7 +365,17 @@ CREATE TABLE public.business_profiles (
     default_notes text,
     default_terms text,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    invoice_email_subject character varying DEFAULT 'Invoice {invoice_number} from {business_name}'::character varying,
+    invoice_email_body text DEFAULT 'Dear {client_name},
+
+Please find attached invoice {invoice_number} for {amount}.
+
+Payment is due by {due_date}.
+
+Best regards,
+{business_name}'::text,
+    invoice_email_cc character varying
 );
 
 
@@ -841,7 +851,11 @@ CREATE TABLE public.recurring_invoices (
     invoice_count integer DEFAULT 0,
     last_run_at timestamp(6) without time zone,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    send_to_email character varying,
+    send_cc_emails text,
+    send_email_subject character varying,
+    send_email_body text
 );
 
 
@@ -3865,6 +3879,9 @@ ALTER TABLE ONLY public.transactions
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260118100001'),
+('20260117161632'),
+('20260117160525'),
 ('20260117122757'),
 ('20260117112943'),
 ('20260117100001'),

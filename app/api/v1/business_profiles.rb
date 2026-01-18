@@ -47,6 +47,10 @@ module V1
         optional :default_payment_terms_days, type: Integer
         optional :default_notes, type: String
         optional :default_terms, type: String
+
+        optional :invoice_email_subject, type: String
+        optional :invoice_email_body, type: String
+        optional :invoice_email_cc, type: String
       end
       post do
         require_workspace!
@@ -91,6 +95,10 @@ module V1
         optional :default_payment_terms_days, type: Integer
         optional :default_notes, type: String
         optional :default_terms, type: String
+
+        optional :invoice_email_subject, type: String
+        optional :invoice_email_body, type: String
+        optional :invoice_email_cc, type: String
       end
       patch do
         require_workspace!

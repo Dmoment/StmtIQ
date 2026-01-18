@@ -507,6 +507,9 @@ export type postV1BusinessProfile = {
     default_payment_terms_days?: number;
     default_notes?: string;
     default_terms?: string;
+    invoice_email_subject?: string;
+    invoice_email_body?: string;
+    invoice_email_cc?: string;
 };
 
 /**
@@ -537,6 +540,9 @@ export type patchV1BusinessProfile = {
     default_payment_terms_days?: number;
     default_notes?: string;
     default_terms?: string;
+    invoice_email_subject?: string;
+    invoice_email_body?: string;
+    invoice_email_cc?: string;
 };
 
 /**
@@ -642,6 +648,10 @@ export type postV1SalesInvoices = {
     terms?: string;
     primary_color?: string;
     secondary_color?: string;
+    custom_fields?: Array<{
+        label: string;
+        value: string;
+    }>;
     line_items?: Array<{
         description: string;
         hsn_sac_code?: string;
@@ -679,6 +689,11 @@ export type patchV1SalesInvoicesId = {
     terms?: string;
     primary_color?: string;
     secondary_color?: string;
+    recurring_invoice_id?: number;
+    custom_fields?: Array<{
+        label: string;
+        value: string;
+    }>;
     line_items?: Array<{
         id?: number;
         _destroy?: boolean;
@@ -689,6 +704,28 @@ export type patchV1SalesInvoicesId = {
         rate: number;
         gst_rate?: number;
     }>;
+};
+
+/**
+ * Send invoice to client
+ */
+export type postV1SalesInvoicesIdSend = {
+    /**
+     * Recipient email (overrides client email)
+     */
+    to?: string;
+    /**
+     * CC email addresses (comma-separated)
+     */
+    cc?: string;
+    /**
+     * Email subject (overrides template)
+     */
+    subject?: string;
+    /**
+     * Email body (overrides template)
+     */
+    body?: string;
 };
 
 /**
@@ -722,6 +759,10 @@ export type postV1RecurringInvoices = {
     end_date?: string;
     auto_send?: boolean;
     send_days_before_due?: number;
+    send_to_email?: string;
+    send_cc_emails?: string;
+    send_email_subject?: string;
+    send_email_body?: string;
     currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
     payment_terms_days?: number;
     tax_rate?: number;
@@ -751,6 +792,10 @@ export type patchV1RecurringInvoicesId = {
     end_date?: string;
     auto_send?: boolean;
     send_days_before_due?: number;
+    send_to_email?: string;
+    send_cc_emails?: string;
+    send_email_subject?: string;
+    send_email_body?: string;
     currency?: 'INR' | 'USD' | 'EUR' | 'GBP';
     payment_terms_days?: number;
     tax_rate?: number;
@@ -1674,6 +1719,7 @@ export type DeleteV1SalesInvoicesIdResponse = void;
 
 export type PostV1SalesInvoicesIdSendData = {
     id: number;
+    requestBody: postV1SalesInvoicesIdSend;
 };
 
 export type PostV1SalesInvoicesIdSendResponse = unknown;
@@ -3451,6 +3497,7 @@ export type $OpenApiTs = {
         post: {
             req: {
                 id: number;
+                requestBody: postV1SalesInvoicesIdSend;
             };
             res: {
                 /**

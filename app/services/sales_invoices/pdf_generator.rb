@@ -9,12 +9,15 @@ module SalesInvoices
 
     attr_reader :invoice
 
+    FONTS_PATH = Rails.root.join('app', 'assets', 'fonts')
+
     def initialize(invoice)
       @invoice = invoice
       @document = Prawn::Document.new(
         page_size: 'A4',
         margin: [40, 40, 40, 40]
       )
+      setup_fonts
     end
 
     def generate
@@ -46,6 +49,17 @@ module SalesInvoices
       @document
     end
 
+    def setup_fonts
+      # Register Noto Sans font for full UTF-8 support (including ₹ symbol)
+      document.font_families.update(
+        'NotoSans' => {
+          normal: FONTS_PATH.join('NotoSans-Regular.ttf').to_s,
+          bold: FONTS_PATH.join('NotoSans-Bold.ttf').to_s
+        }
+      )
+      document.font 'NotoSans'
+    end
+
     def profile
       @profile ||= invoice.business_profile
     end
@@ -55,11 +69,11 @@ module SalesInvoices
     end
 
     def primary_color
-      hex_to_rgb(invoice.effective_primary_color)
+      hex_to_rgb(invoice.effective_primary_color || '#F59E0B')
     end
 
     def secondary_color
-      hex_to_rgb(invoice.effective_secondary_color)
+      hex_to_rgb(invoice.effective_secondary_color || '#D97706')
     end
 
     def add_header
@@ -75,7 +89,7 @@ module SalesInvoices
 
       # Company name and details
       move_down 10
-      text profile.business_name, size: 18, style: :bold, color: secondary_color.join
+      text profile.business_name, size: 18, style: :bold, color: secondary_color
       text profile.full_address, size: 9, color: '666666'
 
       if profile.gstin.present?
@@ -92,7 +106,7 @@ module SalesInvoices
 
     def add_invoice_details
       # Invoice title bar
-      fill_color(*primary_color)
+      fill_color primary_color
       fill_rectangle([0, cursor], bounds.width, 30)
       fill_color '000000'
 
@@ -165,17 +179,11 @@ module SalesInvoices
         ]
       end
 
-      table(items_data, width: bounds.width) do |t|
+      table(items_data, width: bounds.width, column_widths: calculate_column_widths) do |t|
         t.row(0).font_style = :bold
-        t.row(0).background_color = secondary_color.join
+        t.row(0).background_color = secondary_color
         t.row(0).text_color = 'FFFFFF'
-        t.columns(0).width = 30
-        t.columns(1).width = 200
-        t.columns(2).width = 70
-        t.columns(3).width = 60
-        t.columns(4).width = 80
-        t.columns(5).width = 80
-        t.cells.padding = [8, 5]
+        t.cells.padding = [6, 4]
         t.cells.borders = [:bottom]
         t.cells.border_width = 0.5
         t.cells.border_color = 'DDDDDD'
@@ -299,9 +307,23 @@ module SalesInvoices
       "#{symbol}#{format('%.2f', amount)}"
     end
 
+    def calculate_column_widths
+      # Calculate widths that fit within bounds.width (515.28 for A4 with 40pt margins)
+      available_width = bounds.width
+      # #, Description, HSN/SAC, Qty, Rate, Amount
+      {
+        0 => 20,                          # # column
+        1 => available_width - 280,       # Description (flexible)
+        2 => 50,                          # HSN/SAC
+        3 => 50,                          # Qty
+        4 => 80,                          # Rate
+        5 => 80                           # Amount
+      }
+    end
+
     def hex_to_rgb(hex)
-      hex = hex.gsub('#', '')
-      [hex[0..1], hex[2..3], hex[4..5]].map { |c| c.to_i(16).to_s(16).rjust(2, '0') }
+      # Prawn expects a 6-character hex string without the # prefix
+      hex.to_s.gsub('#', '').upcase
     end
   end
 end

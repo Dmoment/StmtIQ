@@ -29,53 +29,22 @@ function getCsrfToken(): string {
   return meta?.getAttribute('content') || '';
 }
 
-// Store reference to getToken function from React context
-let clerkGetTokenFn: (() => Promise<string | null>) | null = null;
+// Clerk token management
+type ClerkTokenGetter = () => Promise<string | null>;
+let clerkTokenGetter: ClerkTokenGetter | null = null;
 
-/**
- * Set the Clerk getToken function from React context.
- * Called by AuthProvider when it mounts.
- */
-export function setClerkTokenGetter(fn: () => Promise<string | null>): void {
-  clerkGetTokenFn = fn;
+export function setClerkTokenGetter(getter: ClerkTokenGetter): void {
+  clerkTokenGetter = getter;
 }
 
-/**
- * Clear the Clerk getToken function.
- * Called when user logs out.
- */
 export function clearClerkTokenGetter(): void {
-  clerkGetTokenFn = null;
+  clerkTokenGetter = null;
 }
 
 export async function getClerkToken(): Promise<string | null> {
-  // Use the React context's getToken function if available
-  if (clerkGetTokenFn) {
-    try {
-      return await clerkGetTokenFn();
-    } catch (error) {
-      console.warn('[getClerkToken] Failed to get token from context:', error);
-    }
+  if (clerkTokenGetter) {
+    return clerkTokenGetter();
   }
-
-  // Fallback: Try to access Clerk instance directly from window
-  try {
-    const clerk = (window as any).Clerk;
-
-    // Wait for Clerk to be loaded if it exists but isn't ready
-    if (clerk && typeof clerk.load === 'function' && !clerk.loaded) {
-      await clerk.load();
-    }
-
-    // Try to get token from active session
-    if (clerk?.session) {
-      const token = await clerk.session.getToken();
-      return token || null;
-    }
-  } catch (error) {
-    console.warn('[getClerkToken] Failed to get token from window.Clerk:', error);
-  }
-
   return null;
 }
 
@@ -104,8 +73,10 @@ export const OpenAPI: OpenAPIConfig = {
 		'Content-Type': 'application/json',
 	},
 	PASSWORD: undefined,
-	// Use the getClerkToken function to provide auth token for all API requests
-	TOKEN: getClerkToken,
+	TOKEN: async () => {
+		const token = await getClerkToken();
+		return token || '';
+	},
 	USERNAME: undefined,
 	VERSION: '0.0.1',
 	WITH_CREDENTIALS: false,

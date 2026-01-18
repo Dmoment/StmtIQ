@@ -198,14 +198,35 @@ export function useDeleteSalesInvoice() {
   });
 }
 
+// Email options for sending invoice
+interface SendInvoiceOptions {
+  id: number;
+  to?: string;
+  cc?: string;
+  subject?: string;
+  body?: string;
+}
+
 export function useSendInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      return SalesInvoicesService.postV1SalesInvoicesIdSend({ id });
+    mutationFn: async (options: SendInvoiceOptions | number) => {
+      // Support both old (just id) and new (options object) signatures
+      if (typeof options === 'number') {
+        return SalesInvoicesService.postV1SalesInvoicesIdSend({
+          id: options,
+          requestBody: {},
+        });
+      }
+      const { id, ...emailOptions } = options;
+      return SalesInvoicesService.postV1SalesInvoicesIdSend({
+        id,
+        requestBody: emailOptions,
+      });
     },
-    onSuccess: (_, id) => {
+    onSuccess: (_, options) => {
+      const id = typeof options === 'number' ? options : options.id;
       queryClient.invalidateQueries({ queryKey: ['salesInvoices'] });
       queryClient.invalidateQueries({ queryKey: ['salesInvoices', id] });
     },

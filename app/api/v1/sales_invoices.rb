@@ -122,7 +122,7 @@ module V1
 
         # Eager load associations to prevent N+1 queries
         invoice = policy_scope(SalesInvoice)
-                  .includes(:client, :business_profile, line_items: [])
+                  .includes(:client, :business_profile, :recurring_invoice, line_items: [])
                   .find(params[:id])
         authorize invoice, :show?
 
@@ -155,6 +155,9 @@ module V1
         optional :terms, type: String
         optional :primary_color, type: String
         optional :secondary_color, type: String
+
+        # Link to recurring invoice
+        optional :recurring_invoice_id, type: Integer
 
         # Custom fields for additional info like LUT Number, PO Number, etc.
         optional :custom_fields, type: Array do
@@ -212,6 +215,10 @@ module V1
       desc 'Send invoice to client'
       params do
         requires :id, type: Integer
+        optional :to, type: String, desc: 'Recipient email (overrides client email)'
+        optional :cc, type: String, desc: 'CC email addresses (comma-separated)'
+        optional :subject, type: String, desc: 'Email subject (overrides template)'
+        optional :body, type: String, desc: 'Email body (overrides template)'
       end
       post ':id/send' do
         require_workspace!
@@ -224,8 +231,16 @@ module V1
         # Generate PDF if not exists (Open/Closed: Delegated to PdfManager)
         ::SalesInvoices::PdfManager.new(invoice).ensure_pdf_exists
 
-        # Send email
-        ::SalesInvoices::EmailService.new(invoice).send_invoice
+        # Build email options from params
+        email_options = {
+          to: params[:to],
+          cc: params[:cc],
+          subject: params[:subject],
+          body: params[:body]
+        }.compact
+
+        # Send email with optional overrides
+        ::SalesInvoices::EmailService.new(invoice).send_invoice(email_options)
 
         invoice.mark_sent!
 

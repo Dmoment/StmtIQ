@@ -13,6 +13,10 @@ module V1
 
       expose :auto_send
       expose :send_days_before_due
+      expose :send_to_email
+      expose :send_cc_emails
+      expose :send_email_subject
+      expose :send_email_body
 
       expose :currency
       expose :payment_terms_days

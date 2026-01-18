@@ -1221,8 +1221,8 @@ function SentInvoicesContent({
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+          <div className="overflow-x-auto overflow-y-visible">
             <table className="w-full" aria-label="Sent invoices table">
               <caption className="sr-only">List of sent invoices with their details and actions</caption>
               <thead className="bg-slate-50/50 border-b border-slate-200/80">
@@ -1355,7 +1355,10 @@ function SentInvoicesContent({
                           {/* More Actions */}
                           <div className="relative">
                             <button
-                              onClick={() => setActionMenuId(actionMenuId === invoice.id ? null : invoice.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActionMenuId(actionMenuId === invoice.id ? null : invoice.id);
+                              }}
                               className="h-9 w-9 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors flex items-center justify-center"
                               title="More actions"
                             >
@@ -1366,13 +1369,30 @@ function SentInvoicesContent({
                               <>
                                 <div
                                   className="fixed inset-0 z-10"
-                                  onClick={() => setActionMenuId(null)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActionMenuId(null);
+                                  }}
                                 />
                                 <div
                                   role="menu"
                                   aria-label="Invoice actions"
-                                  className="absolute right-0 mt-1 w-40 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden"
+                                  className="absolute right-0 top-full mt-1 w-40 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden"
+                                  style={{ position: 'absolute' }}
+                                  onClick={(e) => e.stopPropagation()}
                                 >
+                                  {/* Resend (for non-draft invoices) */}
+                                  {statusKey !== 'draft' && statusKey !== 'cancelled' && (
+                                    <button
+                                      role="menuitem"
+                                      onClick={() => handleSendInvoice(invoice.id)}
+                                      disabled={sendInvoice.isPending}
+                                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 flex items-center gap-2 disabled:opacity-50"
+                                    >
+                                      <Send className="w-4 h-4 text-blue-500" aria-hidden="true" />
+                                      Resend
+                                    </button>
+                                  )}
                                   <button
                                     role="menuitem"
                                     onClick={() => handleDuplicateInvoice(invoice.id)}

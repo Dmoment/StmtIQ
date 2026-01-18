@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Palette,
   Eye,
+  Mail,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useClients } from '../queries/useClients';
@@ -28,6 +29,7 @@ import {
   useNextInvoiceNumber,
   useSendInvoice,
 } from '../queries/useSalesInvoices';
+import { useCreateRecurringInvoice, useUpdateRecurringInvoice } from '../queries/useRecurringInvoices';
 import { useBusinessProfile } from '../queries/useBusinessProfile';
 import { useExchangeRate } from '../queries/useExchangeRates';
 import { ConfigureTaxModal, TaxConfig } from '../components/invoice/ConfigureTaxModal';
@@ -36,6 +38,8 @@ import { BilledToCard } from '../components/invoice/BilledToCard';
 import { TotalsSection } from '../components/invoice/TotalsSection';
 import { FooterActions } from '../components/invoice/FooterActions';
 import { InvoicePreviewModal } from '../components/invoice/InvoicePreviewModal';
+import { RecurringInvoiceSettings, type RecurringSettings } from '../components/invoice/RecurringInvoiceSettings';
+import { SendInvoiceModal } from '../components/invoice/SendInvoiceModal';
 import { InfoTooltip } from '../components/ui/InfoTooltip';
 import { LineItem, Client, BusinessProfile, InvoiceCalculations } from '../types/invoice';
 
@@ -56,6 +60,23 @@ interface ExchangeRateResponse {
   rate: number;
   from_currency: string;
   to_currency: string;
+}
+
+// Type for recurring invoice from API
+interface ExistingRecurringInvoice {
+  id: number;
+  name: string;
+  frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
+  status: string;
+  start_date: string;
+  end_date?: string | null;
+  auto_send: boolean;
+  send_to_email?: string | null;
+  send_cc_emails?: string | null;
+  send_email_subject?: string | null;
+  send_email_body?: string | null;
+  currency: string;
+  payment_terms_days: number;
 }
 
 // Type for existing sales invoice
@@ -85,6 +106,8 @@ interface ExistingSalesInvoice {
     gst_rate: number;
   }>;
   custom_fields?: Array<{ label: string; value: string }>;
+  recurring_invoice_id?: number | null;
+  recurring_invoice?: ExistingRecurringInvoice | null;
 }
 
 // Indian state codes for GST
@@ -155,6 +178,8 @@ export function CreateInvoice() {
   const createInvoice = useCreateSalesInvoice();
   const updateInvoice = useUpdateSalesInvoice();
   const sendInvoice = useSendInvoice();
+  const createRecurringInvoice = useCreateRecurringInvoice();
+  const updateRecurringInvoice = useUpdateRecurringInvoice();
 
   // Form state
   const [invoiceTitle, setInvoiceTitle] = useState('Tax Invoice');
@@ -172,7 +197,6 @@ export function CreateInvoice() {
   const [extraCharges, setExtraCharges] = useState(0);
   const [notes, setNotes] = useState('');
   const [terms, setTerms] = useState('');
-  const [isRecurring, setIsRecurring] = useState(false);
 
   // Tax configuration
   const [taxConfig, setTaxConfig] = useState<TaxConfig>({
@@ -188,6 +212,20 @@ export function CreateInvoice() {
   const [additionalFields, setAdditionalFields] = useState<{ label: string; value: string }[]>([]);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
+  // Recurring invoice settings
+  const [recurringSettings, setRecurringSettings] = useState<RecurringSettings>({
+    isRecurring: false,
+    frequency: 'monthly',
+    startDate: new Date().toISOString().split('T')[0],
+    endType: 'never',
+    autoSend: false,
+    sendToEmail: '',
+    sendCcEmails: '',
+    sendEmailSubject: '',
+    sendEmailBody: '',
+  });
+  const [existingRecurringInvoiceId, setExistingRecurringInvoiceId] = useState<number | null>(null);
+
   // Line item display options
   const [showHsnSac, setShowHsnSac] = useState(false);
 
@@ -199,8 +237,9 @@ export function CreateInvoice() {
   const [primaryColor, setPrimaryColor] = useState('#f59e0b');
   const [accentColor, setAccentColor] = useState('#d97706');
 
-  // Preview modal
+  // Preview and Send modals
   const [showPreview, setShowPreview] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
 
   const profile = businessProfile as ExtendedBusinessProfile | undefined;
   const typedNextNumber = nextNumberData as NextInvoiceNumberResponse | undefined;
@@ -276,6 +315,27 @@ export function CreateInvoice() {
       // Load custom fields (additional info)
       if (invoice.custom_fields && invoice.custom_fields.length > 0) {
         setAdditionalFields(invoice.custom_fields);
+      }
+
+      // Load recurring invoice settings if this invoice was generated from a recurring schedule
+      if (invoice.recurring_invoice) {
+        const recurring = invoice.recurring_invoice;
+        setExistingRecurringInvoiceId(recurring.id);
+        setRecurringSettings({
+          isRecurring: true,
+          frequency: recurring.frequency,
+          startDate: recurring.start_date,
+          endType: recurring.end_date ? 'end_on_date' : 'never',
+          endDate: recurring.end_date || undefined,
+          autoSend: recurring.auto_send,
+          sendToEmail: recurring.send_to_email || '',
+          sendCcEmails: recurring.send_cc_emails || '',
+          sendEmailSubject: recurring.send_email_subject || '',
+          sendEmailBody: recurring.send_email_body || '',
+        });
+      } else if (invoice.recurring_invoice_id) {
+        // If we only have the ID but not the full object, still track it
+        setExistingRecurringInvoiceId(invoice.recurring_invoice_id);
       }
     }
   }, [existingInvoice, isEditing]);
@@ -398,19 +458,22 @@ export function CreateInvoice() {
     setAdditionalFields((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = (isRecurring = false): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!selectedClient) {
       newErrors.client = 'Please select a client';
     }
 
-    if (!invoiceDate) {
-      newErrors.invoiceDate = 'Invoice date is required';
-    }
+    // For recurring invoices, dates are generated automatically on each occurrence
+    if (!isRecurring) {
+      if (!invoiceDate) {
+        newErrors.invoiceDate = 'Invoice date is required';
+      }
 
-    if (!dueDate) {
-      newErrors.dueDate = 'Due date is required';
+      if (!dueDate) {
+        newErrors.dueDate = 'Due date is required';
+      }
     }
 
     const validLineItems = lineItems.filter((item) => !item._destroy);
@@ -428,11 +491,110 @@ export function CreateInvoice() {
   };
 
   const handleSave = async (send = false) => {
-    if (!validateForm()) return;
+    // Validate form - skip date validation for recurring invoices
+    if (!validateForm(recurringSettings.isRecurring)) return;
+
+    // If recurring invoice, validate recurring settings
+    if (recurringSettings.isRecurring && !recurringSettings.startDate) {
+      setErrors({ ...errors, startDate: 'Start date is required for recurring invoices' });
+      return;
+    }
 
     setIsSaving(true);
 
     try {
+      // If recurring invoice, create or update the recurring schedule
+      if (recurringSettings.isRecurring) {
+        const templateData = {
+          notes: notes || undefined,
+          terms: terms || undefined,
+          line_items: lineItems
+            .filter((item) => !item._destroy)
+            .map((item) => ({
+              description: item.description,
+              hsn_sac_code: item.hsn_sac_code || undefined,
+              quantity: Number(item.quantity),
+              unit: item.unit,
+              rate: Number(item.rate),
+            })),
+        };
+
+        // Validate email is provided if auto-send is enabled
+        if (recurringSettings.autoSend && !recurringSettings.sendToEmail) {
+          setErrors({ ...errors, email: 'Email address is required for auto-send' });
+          setIsSaving(false);
+          return;
+        }
+
+        const recurringPayload = {
+          name: `${selectedClient?.display_name} - ${invoiceTitle}`,
+          client_id: selectedClient!.id,
+          frequency: recurringSettings.frequency,
+          start_date: recurringSettings.startDate,
+          end_date: recurringSettings.endType === 'end_on_date' ? recurringSettings.endDate : undefined,
+          currency,
+          payment_terms_days: profile?.default_payment_terms_days || 30,
+          auto_send: recurringSettings.autoSend,
+          send_to_email: recurringSettings.sendToEmail || undefined,
+          send_cc_emails: recurringSettings.sendCcEmails || undefined,
+          send_email_subject: recurringSettings.sendEmailSubject || undefined,
+          send_email_body: recurringSettings.sendEmailBody || undefined,
+          template_data: templateData,
+        };
+
+        try {
+          let recurringId: number;
+
+          // Check if we're updating an existing recurring invoice or creating a new one
+          if (existingRecurringInvoiceId) {
+            console.log('Updating existing recurring invoice:', existingRecurringInvoiceId, recurringPayload);
+            await updateRecurringInvoice.mutateAsync({
+              id: existingRecurringInvoiceId,
+              ...recurringPayload,
+            });
+            console.log('Recurring invoice updated successfully');
+            recurringId = existingRecurringInvoiceId;
+          } else {
+            console.log('Creating new recurring invoice:', recurringPayload);
+            const result = await createRecurringInvoice.mutateAsync({ requestBody: recurringPayload });
+            console.log('Recurring invoice created successfully:', result);
+            recurringId = (result as { id: number }).id;
+
+            // If editing an existing invoice, link the new recurring invoice to it
+            if (isEditing && id && recurringId) {
+              const salesInvoiceId = parseInt(id, 10);
+              console.log('Linking recurring invoice', recurringId, 'to sales invoice', salesInvoiceId);
+              try {
+                await updateInvoice.mutateAsync({
+                  id: salesInvoiceId,
+                  recurring_invoice_id: recurringId,
+                });
+                console.log('Sales invoice linked successfully');
+              } catch (linkError) {
+                console.error('Failed to link recurring invoice to sales invoice:', linkError);
+                // Don't fail the whole operation, just log the error
+              }
+            }
+          }
+
+          // Show success and navigate to invoices page
+          const message = existingRecurringInvoiceId
+            ? 'Recurring invoice schedule updated successfully!'
+            : isEditing
+              ? 'Recurring invoice schedule created and linked to this invoice!'
+              : 'Recurring invoice schedule created successfully!';
+          alert(message);
+          navigate('/invoices?tab=sent');
+        } catch (error) {
+          console.error('Failed to save recurring invoice:', error);
+          setErrors({ ...errors, submit: 'Failed to save recurring invoice. Please try again.' });
+        } finally {
+          setIsSaving(false);
+        }
+        return;
+      }
+
+      // Otherwise, create/update regular invoice
       const typedExchangeRate = exchangeRateData as ExchangeRateResponse | undefined;
       const invoiceData = {
         client_id: selectedClient!.id,
@@ -553,16 +715,32 @@ export function CreateInvoice() {
           </div>
         </div>
 
-        {/* Preview Button */}
-        <button
-          onClick={() => setShowPreview(true)}
-          aria-label="Preview invoice before saving"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium transition-colors hover:opacity-90"
-          style={{ backgroundColor: primaryColor }}
-        >
-          <Eye className="w-4 h-4" aria-hidden="true" />
-          Preview Invoice
-        </button>
+        {/* Preview and Send Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowPreview(true)}
+            aria-label="Preview invoice before saving"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium transition-colors hover:opacity-90"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <Eye className="w-4 h-4" aria-hidden="true" />
+            Preview
+          </button>
+          <button
+            onClick={() => setShowSendModal(true)}
+            disabled={!isEditing}
+            aria-label={isEditing ? 'Send invoice via email' : 'Save invoice first to send'}
+            title={isEditing ? undefined : 'Save invoice first to send'}
+            className={clsx(
+              'flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium transition-colors',
+              isEditing ? 'hover:opacity-90' : 'opacity-50 cursor-not-allowed'
+            )}
+            style={{ backgroundColor: '#3b82f6' }}
+          >
+            <Mail className="w-4 h-4" aria-hidden="true" />
+            Send
+          </button>
+        </div>
       </div>
 
       {/* Validation Errors */}
@@ -1234,43 +1412,23 @@ export function CreateInvoice() {
           </button>
         </div>
 
-        {/* Recurring Invoice Option */}
-        <div className="p-6 border-b border-slate-100">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isRecurring}
-              onChange={(e) => setIsRecurring(e.target.checked)}
-              className="w-4 h-4 mt-0.5 rounded text-amber-500 focus:ring-amber-500"
-            />
-            <div className="flex-1">
-              <div className="flex items-center gap-1">
-                <span className="text-sm font-medium text-slate-900">
-                  This is a Recurring invoice
-                </span>
-                <InfoTooltip
-                  title="Recurring Invoice"
-                  content={
-                    <>
-                      Automatically create invoices on a schedule.
-                      <br /><br />
-                      <strong>How it works:</strong>
-                      <br />• Draft invoice created each period
-                      <br />• Same line items and amounts
-                      <br />• Review before sending
-                      <br /><br />
-                      <strong>Best for:</strong> Monthly retainers, subscriptions, maintenance contracts
-                    </>
-                  }
-                  position="right"
-                />
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                A draft invoice will be created with the same details every next period.
-              </p>
-            </div>
-          </label>
-        </div>
+        {/* Recurring Invoice Settings */}
+        <RecurringInvoiceSettings
+          settings={recurringSettings}
+          onSettingsChange={setRecurringSettings}
+          primaryColor={primaryColor}
+          accentColor={accentColor}
+          clientEmail={selectedClient?.email}
+          clientName={selectedClient?.display_name}
+          businessName={profile?.business_name}
+          invoiceNumber={invoiceNumber}
+          totalAmount={new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+          }).format(calculations.total)}
+        />
 
         {/* Advanced Options */}
         <div className="p-6">
@@ -1401,6 +1559,38 @@ export function CreateInvoice() {
         terms={terms}
         notes={notes}
         customFields={additionalFields.filter(f => f.label && f.value)}
+      />
+
+      {/* Send Invoice Modal */}
+      <SendInvoiceModal
+        isOpen={showSendModal}
+        onClose={() => setShowSendModal(false)}
+        onSend={(emailOptions) => {
+          if (isEditing && existingInvoice?.id) {
+            sendInvoice.mutate(
+              {
+                id: existingInvoice.id,
+                ...emailOptions,
+              },
+              {
+                onSuccess: () => {
+                  setShowSendModal(false);
+                },
+              }
+            );
+          }
+        }}
+        isPending={sendInvoice.isPending}
+        clientEmail={selectedClient?.email || ''}
+        clientName={selectedClient?.name || selectedClient?.display_name || ''}
+        businessName={profile?.business_name || ''}
+        invoiceNumber={isEditing ? (existingInvoice as ExistingSalesInvoice | undefined)?.invoice_number || '' : invoiceNumber}
+        dueDate={dueDate ? new Date(dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
+        totalAmount={`${currencyConfig?.symbol || '₹'}${(calculations?.grandTotal ?? 0).toLocaleString()}`}
+        defaultSubject={(profile as ExtendedBusinessProfile & { invoice_email_subject?: string })?.invoice_email_subject || ''}
+        defaultBody={(profile as ExtendedBusinessProfile & { invoice_email_body?: string })?.invoice_email_body || ''}
+        defaultCc={(profile as ExtendedBusinessProfile & { invoice_email_cc?: string })?.invoice_email_cc || ''}
+        primaryColor={primaryColor}
       />
     </div>
   );

@@ -22,20 +22,39 @@ content = content.replace(
   "BASE: '/api',"
 );
 
-// Add CSRF token function and update HEADERS
-const csrfFunction = `
+// Add CSRF token function and Clerk token management
+const helperFunctions = `
 function getCsrfToken(): string {
   const meta = document.querySelector('meta[name="csrf-token"]');
   return meta?.getAttribute('content') || '';
+}
+
+// Clerk token management
+type ClerkTokenGetter = () => Promise<string | null>;
+let clerkTokenGetter: ClerkTokenGetter | null = null;
+
+export function setClerkTokenGetter(getter: ClerkTokenGetter): void {
+  clerkTokenGetter = getter;
+}
+
+export function clearClerkTokenGetter(): void {
+  clerkTokenGetter = null;
+}
+
+export async function getClerkToken(): Promise<string | null> {
+  if (clerkTokenGetter) {
+    return clerkTokenGetter();
+  }
+  return null;
 }
 `;
 
 // Check if the function already exists
 if (!content.includes('getCsrfToken')) {
-  // Add the function after the type declarations
+  // Add the functions after the type declarations
   content = content.replace(
     'export type OpenAPIConfig = {',
-    `${csrfFunction}
+    `${helperFunctions}
 export type OpenAPIConfig = {`
   );
 }
@@ -46,6 +65,15 @@ content = content.replace(
   `HEADERS: {
 		'X-CSRF-Token': getCsrfToken(),
 		'Content-Type': 'application/json',
+	},`
+);
+
+// Replace TOKEN config to use Clerk token
+content = content.replace(
+  /TOKEN: undefined,/,
+  `TOKEN: async () => {
+		const token = await getClerkToken();
+		return token || '';
 	},`
 );
 

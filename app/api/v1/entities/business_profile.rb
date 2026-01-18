@@ -40,6 +40,11 @@ module V1
       expose :default_notes
       expose :default_terms
 
+      # Email Template Settings
+      expose :invoice_email_subject
+      expose :invoice_email_body
+      expose :invoice_email_cc
+
       # Files
       expose :logo_url do |profile|
         profile.logo_url

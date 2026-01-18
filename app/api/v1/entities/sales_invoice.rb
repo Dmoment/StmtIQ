@@ -68,6 +68,12 @@ module V1
       expose :business_profile, using: V1::Entities::BusinessProfile, if: ->(_, options) { options[:full] }
       expose :line_items, using: V1::Entities::InvoiceLineItem
 
+      # Recurring invoice association
+      expose :recurring_invoice_id
+      expose :recurring_invoice, using: V1::Entities::RecurringInvoice, if: ->(invoice, options) {
+        options[:full] && invoice.recurring_invoice_id.present?
+      }
+
       # Simplified client info for list view
       expose :client_name do |invoice|
         invoice.client&.display_name

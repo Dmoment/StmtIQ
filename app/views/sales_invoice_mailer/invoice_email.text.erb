@@ -1,8 +1,6 @@
 Invoice from <%= @profile.business_name %>
 
-Dear <%= @client.display_name %>,
-
-Please find attached invoice <%= @invoice.invoice_number %> for your review.
+<%= @email_body %>
 
 INVOICE DETAILS
 ---------------
@@ -22,10 +20,6 @@ BANK DETAILS FOR PAYMENT
 <% end %>
 <% end %>
 
-If you have any questions about this invoice, please contact us.
-
-Thank you for your business!
-
-Best regards,
-<%= @profile.business_name %>
+---
+This invoice was sent by <%= @profile.business_name %>
 <% if @profile.gstin.present? %>GSTIN: <%= @profile.gstin %><% end %>

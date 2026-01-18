@@ -3,9 +3,8 @@
 </div>
 
 <div class="content">
-  <p>Dear <%= @client.display_name %>,</p>
-
-  <p>Please find attached invoice <strong><%= @invoice.invoice_number %></strong> for your review.</p>
+  <%# Use custom email body if provided, with proper line breaks %>
+  <div style="white-space: pre-wrap; margin-bottom: 20px;"><%= @email_body %></div>
 
   <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
     <p style="margin: 0; color: #666;">Amount Due</p>
@@ -40,11 +39,6 @@
   </div>
   <% end %>
 
-  <p>If you have any questions about this invoice, please contact us at <%= @profile.email || 'our office' %>.</p>
-
-  <p>Thank you for your business!</p>
-
-  <p>Best regards,<br><strong><%= @profile.business_name %></strong></p>
 </div>
 
 <div class="footer">
